@@ -7,7 +7,6 @@ import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -336,17 +335,3 @@ fun PreviewSettingsScreen() {
     SettingsScreen(rememberNavController())
 }
 
-
-/*val countries = listOf(
-        Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8"),
-        Pair("CAD", "\uD83C\uDDE8\uD83C\uDDE6"),
-        Pair("India", "\uD83C\uDDEE\uD83C\uDDF3"),
-        Pair("EUR", "\uD83C\uDDE9\uD83C\uDDEA"),
-        Pair("France", "\uD83C\uDDEB\uD83C\uDDF7"),
-        Pair("Japan Yen", "\uD83C\uDDEF\uD83C\uDDF5"),
-        Pair("China", "\uD83C\uDDE8\uD83C\uDDF3"),
-        Pair("Brazil", "\uD83C\uDDE7\uD83C\uDDF7"),
-        Pair("Australia", "\uD83C\uDDE6\uD83C\uDDFA"),
-        Pair("Russia", "\uD83C\uDDF7\uD83C\uDDFA"),
-        Pair("United Kingdom", "\uD83C\uDDEC\uD83C\uDDE7"),
-    )*/
