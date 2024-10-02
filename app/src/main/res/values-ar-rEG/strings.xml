@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="user_name">جلال أحمد</string>
+    <string name="email">Galal_3@protonmail.com</string>
+    <string name="my_orders">طلباتي</string>
+    <string name="my_wishlist">قائمة الرغبات</string>
+    <string name="delivery_address">عنوان التسليم</string>
+    <string name="settings">الإعدادات</string>
+    <string name="contact_us">اتصل بنا</string>
+    <string name="sign_out">تسجيل الخروج</string>
+    <string name="watch">ساعة</string>
+    <string name="rolex">رولكس</string>
+    <string name="description_order">وصف الطلب وصف الطلب</string>
+    <string name="price">40 دولار</string>
+    <string name="back">رجوع</string>
+    <string name="product_image">صورة المنتج</string>
+    <string name="remove">إزالة</string>
+    <string name="phone_number">رقم الهاتف: 0123456789</string>
+    <string name="country">مصر</string>
+    <string name="area">مصر الجديدة، القاهرة، ألماظة</string>
+    <string name="build_name_and_number">نادي وادي دجلة 12</string>
+    <string name="street_name">طريق النصر</string>
+    <string name="currency">العملة</string>
+    <string name="language">اللغة</string>
+    <string name="about_us">من نحن</string>
+    <string name="contact_number"> +02 123456789</string>
+    <string name="contact_number_text">رقم الاتصال: </string>
+    <string name="email_text">البريد الإلكتروني: </string>
+    <string name="email_contact"> john.c.calhoun@examplepetstore.com</string>
+
+</resources>
