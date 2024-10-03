@@ -71,4 +71,8 @@ dependencies {
 
     implementation("androidx.compose.material3:material3:1.2.0-alpha01")
 
+    // Slider
+    implementation ("com.google.accompanist:accompanist-pager:0.36.0")
+    implementation ("com.google.accompanist:accompanist-pager-indicators:0.32.0") // For indicators
+
 }
