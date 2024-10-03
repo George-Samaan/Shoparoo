@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.example.shoparoo.ui.theme.settingsUi
+package com.example.shoparoo.ui.theme.settings
 
 import android.content.Context
 import android.content.Intent
@@ -94,7 +94,7 @@ fun SettingsScreen(navController: NavController) {
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.ic_back),
+                            painter = painterResource(id = R.drawable.ic_arrow_back_2),
                             contentDescription = stringResource(R.string.back),
                             modifier = Modifier
                                 .size(24.dp)
