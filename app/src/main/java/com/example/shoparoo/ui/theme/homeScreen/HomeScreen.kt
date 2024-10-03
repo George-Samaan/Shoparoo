@@ -22,9 +22,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TextFieldDefaults.textFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,14 +39,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.R
+import com.example.shoparoo.nav.BottomNav
+import com.example.shoparoo.nav.BottomNavigationBar
 
 @Composable
 fun HeaderOfThePage(userName: String, onFavouriteClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 40.dp)
+            .padding(top = 10.dp)
             .padding(horizontal = 16.dp)
     ) {
         Row(
@@ -113,11 +119,11 @@ fun SearchBar(
         },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp)
+            .padding(vertical = 8.dp)
             .padding(horizontal = 15.dp)
             .height(56.dp),
         shape = RoundedCornerShape(28.dp),
-        colors = TextFieldDefaults.textFieldColors(
+        colors = textFieldColors(
             containerColor = Color(0xFFF2F2F2),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -272,6 +278,42 @@ fun ProductCard(productName: String, productPrice: String, productImage: Int) {
     }
 }
 
+@Composable
+fun MainScreen(
+    userName: String,
+    onFavouriteClick: () -> Unit,
+    query: TextFieldValue,
+    onQueryChange: (TextFieldValue) -> Unit
+) {
+    val navController = rememberNavController()
+
+    Scaffold(
+        bottomBar = { BottomNavigationBar(navController = navController) }
+    ) {
+        // Use NavHost to control screen navigation based on selected bottom nav item
+        NavHost(
+            navController = navController,
+            startDestination = BottomNav.Home.route, // Default start screen
+            modifier = Modifier.padding(it) // Ensure content is not covered by the BottomNav
+        ) {
+            // Define the different composable screens
+            composable(BottomNav.Home.route) {
+                HomeScreenDesign(
+                    userName = userName,
+                    onFavouriteClick = onFavouriteClick,
+                    query = query,
+                    onQueryChange = onQueryChange
+                )
+            }
+            composable(BottomNav.Categories.route) {
+            }
+            composable(BottomNav.Cart.route) {
+            }
+            composable(BottomNav.Profile.route) {
+            }
+        }
+    }
+}
 
 @Composable
 fun HomeScreenDesign(
