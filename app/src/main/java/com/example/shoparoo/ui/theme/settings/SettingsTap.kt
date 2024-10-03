@@ -51,6 +51,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.MainActivity
 import com.example.shoparoo.R
+import com.example.shoparoo.ui.theme.db.local.SharedPreferencesImpl
 import java.util.Locale
 
 
@@ -61,8 +62,11 @@ fun SettingsScreen(navController: NavController) {
     var showAboutUsSheet by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    // Use the SharedPreferencesRepository
+    val sharedPreferencesRepository = SharedPreferencesImpl(context)
+
     // Load saved language preference
-    val savedLanguage = getLanguagePreference(context)
+    val savedLanguage = sharedPreferencesRepository.getLanguagePreference()
     var selectedLanguage by remember { mutableStateOf(savedLanguage) } // Default to saved language
 
     val currencyIcon = if (showCurrencySheet) R.drawable.ic_arrow_down else R.drawable.ic_arrow
@@ -83,8 +87,7 @@ fun SettingsScreen(navController: NavController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
-                )
-                {
+                ) {
                     Box(
                         modifier = Modifier
                             .size(50.dp)
@@ -150,7 +153,7 @@ fun SettingsScreen(navController: NavController) {
                 onLanguageSelected = { language ->
                     selectedLanguage = language
                     changeLanguage(context, language)
-                    saveLanguagePreference(context, language)
+                    sharedPreferencesRepository.saveLanguagePreference(language) // Use repository to save
                 }
             )
         }
@@ -162,6 +165,7 @@ fun SettingsScreen(navController: NavController) {
         }
     }
 }
+
 //___________________________________________________________________
 
 @Composable
@@ -207,6 +211,7 @@ fun SettingsItem(title: String, icon: Int, arrowIcon: Int, onClick: () -> Unit) 
 @Composable
 fun Currency() {
     val countries = listOf(
+        Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC"),
         Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8"),
         Pair("CAD", "\uD83C\uDDE8\uD83C\uDDE6"),
         Pair("EUR", "\uD83C\uDDE9\uD83C\uDDEA"),
