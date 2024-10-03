@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,7 +45,7 @@ fun HeaderOfThePage(userName: String, onFavouriteClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top =30.dp)
+            .padding(top = 40.dp)
             .padding(horizontal = 16.dp)
     ) {
         Row(
@@ -68,11 +67,10 @@ fun HeaderOfThePage(userName: String, onFavouriteClick: () -> Unit) {
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
-
                 // Greeting Message right after the image
                 Column(
                     modifier = Modifier
-                        .padding(start = 10.dp) // Only 8dp space between the image and the text
+                        .padding(start = 10.dp)
                 ) {
                     Text("Hello!", fontSize = 16.sp)
                     Text(
@@ -82,7 +80,6 @@ fun HeaderOfThePage(userName: String, onFavouriteClick: () -> Unit) {
                     )
                 }
             }
-
             // Favourite Button on the far right
             IconButton(
                 onClick = onFavouriteClick,
@@ -118,8 +115,8 @@ fun SearchBar(
             .fillMaxWidth()
             .padding(vertical = 16.dp)
             .padding(horizontal = 15.dp)
-            .height(56.dp), // Adjust height if needed
-        shape = RoundedCornerShape(28.dp), // Rounded corners
+            .height(56.dp),
+        shape = RoundedCornerShape(28.dp),
         colors = TextFieldDefaults.textFieldColors(
             containerColor = Color(0xFFF2F2F2),
             focusedIndicatorColor = Color.Transparent,
@@ -131,7 +128,7 @@ fun SearchBar(
 @Composable
 fun BrandsSection(
     brandNames: List<String>,
-    brandImages: List<Int> // List of drawable resource IDs
+    brandImages: List<Int>
 ) {
     Column(
         modifier = Modifier
@@ -144,11 +141,9 @@ fun BrandsSection(
             fontSize = 20.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-
-        // LazyRow for displaying brand items
         LazyRow(
-            modifier = Modifier.height(150.dp), // Fill available height to maintain uniformity
-            horizontalArrangement = Arrangement.spacedBy(8.dp) // Space between cards horizontally
+            modifier = Modifier.height(150.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(brandNames.size) { index ->
                 CircularBrandCard(brandName = brandNames[index], brandImage = brandImages[index])
@@ -167,8 +162,8 @@ fun CircularBrandCard(brandName: String, brandImage: Int) {
         Card(
             modifier = Modifier
                 .size(110.dp), // Fixed size for the card
-            shape = CircleShape, // Circular shape for the card
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp), // Elevation for the card
+            shape = CircleShape,
+            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color.White // Background color for the card
             )
@@ -178,32 +173,34 @@ fun CircularBrandCard(brandName: String, brandImage: Int) {
                 painter = painterResource(id = brandImage),
                 contentDescription = brandName,
                 modifier = Modifier
-                    .fillMaxSize() // Fill the entire card with the image
-                    .clip(CircleShape), // Ensure the image is circular
+                    .fillMaxSize()
+                    .clip(CircleShape),
                 contentScale = ContentScale.Crop // Crop the image to fit nicely inside the circle
             )
         }
-
         // Brand name below the card
         Text(
             text = brandName,
             fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
+            fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Center, // Center the text
+            textAlign = TextAlign.Center,
             modifier = Modifier
-                .padding(top = 8.dp) // Padding above the text
+                .padding(top = 8.dp)
         )
     }
 }
 
-
 @Composable
-fun ForYouSection(productNames: List<String>, productPrices: List<String>, productImages: List<Int>) {
+fun ForYouSection(
+    productNames: List<String>,
+    productPrices: List<String>,
+    productImages: List<Int>
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, bottom = 16.dp,end=16.dp)
+            .padding(start = 16.dp, end = 16.dp)
     ) {
         Text(
             text = "For You",
@@ -214,8 +211,8 @@ fun ForYouSection(productNames: List<String>, productPrices: List<String>, produ
 
         // LazyRow for displaying product items
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp), // Space between cards horizontally
-            modifier = Modifier.fillMaxHeight() // Fill available height if needed
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxHeight()
         ) {
             items(productNames.size) { index ->
                 ProductCard(
@@ -232,8 +229,8 @@ fun ForYouSection(productNames: List<String>, productPrices: List<String>, produ
 fun ProductCard(productName: String, productPrice: String, productImage: Int) {
     Card(
         modifier = Modifier
-            .width(150.dp)
-            .height(200.dp)
+            .width(170.dp)
+            .height(240.dp)
             .padding(6.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -244,29 +241,23 @@ fun ProductCard(productName: String, productPrice: String, productImage: Int) {
         Column(
             modifier = Modifier
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.Top
         ) {
-
             Image(
                 painter = painterResource(id = productImage),
                 contentDescription = productName,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                    .height(160.dp),
                 contentScale = ContentScale.Crop
             )
-
             // Product name below the image
             Text(
                 text = productName,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center, // Center the text
-                modifier = Modifier
-                    .padding(vertical = 4.dp) // Padding around the text
-                    .align(Alignment.CenterHorizontally) // Center the text horizontally
+                modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp)
             )
 
             // Product price below the name
@@ -275,10 +266,7 @@ fun ProductCard(productName: String, productPrice: String, productImage: Int) {
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
                 color = Color.Gray,
-                textAlign = TextAlign.Center, // Center the text
-                modifier = Modifier
-                    .padding(vertical = 4.dp) // Padding around the price text
-                    .align(Alignment.CenterHorizontally) // Center the price text horizontally
+                modifier = Modifier.padding(top = 5.dp, start = 5.dp, end = 5.dp)
             )
         }
     }
@@ -296,14 +284,18 @@ fun HomeScreenDesign(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        // Header Section
         HeaderOfThePage(userName = userName, onFavouriteClick = onFavouriteClick)
-        // Search Bar Section
         SearchBar(
             query = query,
             onQueryChange = onQueryChange
         )
-        CouponsSliderWithIndicator()
+        CouponsSliderWithIndicator(
+            listOf(
+                R.drawable.fifty_off,
+                R.drawable.nike_discount,
+                R.drawable.twenty_discount,
+            )
+        )
         val brandNames = listOf(
             "Nike",
             "Adidas",
@@ -323,7 +315,11 @@ fun HomeScreenDesign(
             "Reebok Classic",
         )
         BrandsSection(brandNames = brandNames, brandImages = brandImages)
-        ForYouSection(productNames = productName, productPrices = productName, productImages = brandImages)
+        ForYouSection(
+            productNames = productName,
+            productPrices = productName,
+            productImages = brandImages
+        )
     }
 }
 

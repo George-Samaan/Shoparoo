@@ -12,8 +12,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-
-//            HeaderOfThePage("George",{})
             HomeScreenDesign("George", {}, query = TextFieldValue(""), onQueryChange = {})
         }
     }
