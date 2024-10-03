@@ -4,28 +4,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.shoparoo.ui.theme.ShoparooTheme
-import com.example.shoparoo.ui.theme.settingsUi.ProfileScreen
-import com.example.shoparoo.ui.theme.settingsUi.SettingsScreen
+import androidx.compose.ui.text.input.TextFieldValue
+import com.example.shoparoo.ui.theme.homeScreen.HeaderAndSearch
+import com.example.shoparoo.ui.theme.homeScreen.HeaderOfThePage
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ShoparooTheme {
+
+//            HeaderOfThePage("George",{})
+            HeaderAndSearch("George", {}, query = TextFieldValue(""), onQueryChange = {})
+/*            ShoparooTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     val navController = rememberNavController()
                     NavHost(navController, startDestination = "profile") {
@@ -40,7 +31,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-            }
+            }*/
         }
     }
 }
