@@ -72,7 +72,16 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.2.0-alpha01")
 
     // Slider
-    implementation ("com.google.accompanist:accompanist-pager:0.36.0")
-    implementation ("com.google.accompanist:accompanist-pager-indicators:0.32.0") // For indicators
+    implementation("com.google.accompanist:accompanist-pager:0.36.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.32.0") // For indicators
 
+    //retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    //coil for images
+    implementation("io.coil-kt:coil-compose:2.0.0")
+
+    //SwipeToRefresh
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0") // Check for the latest version
 }
