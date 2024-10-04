@@ -1,4 +1,4 @@
-package com.example.shoparoo.set3
+package com.example.shoparoo.ui.auth.view
 
 fun validateEmail(email: String): Boolean {
     val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"

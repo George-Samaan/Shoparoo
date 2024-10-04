@@ -64,8 +64,8 @@ import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.nav.BottomNav
 import com.example.shoparoo.ui.nav.BottomNavigationBar
-import com.example.shoparoo.ui.settingsUi.ProfileScreen
-import com.example.shoparoo.ui.settingsUi.SettingsScreen
+import com.example.shoparoo.ui.settingsScreen.ProfileScreen
+import com.example.shoparoo.ui.settingsScreen.SettingsScreen
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
@@ -383,7 +383,6 @@ fun ProductCard(productName: String, productPrice: String, productImage: String?
 
 @Composable
 fun MainScreen(
-    userName: String,
     onFavouriteClick: () -> Unit,
     query: TextFieldValue,
     onQueryChange: (TextFieldValue) -> Unit
@@ -398,6 +397,8 @@ fun MainScreen(
     )
     val smartCollectionsState by viewModel.smartCollections.collectAsState()
     val forYouProductsState by viewModel.forYouProducts.collectAsState()
+    val userName by viewModel.userName.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     // Call to fetch smart collections
     LaunchedEffect(Unit) {
@@ -415,7 +416,7 @@ fun MainScreen(
         ) {
             composable(BottomNav.Home.route) {
                 HomeScreenDesign(
-                    userName,
+                    if (isLoading) "" else userName ?: "Guest",
                     onFavouriteClick,
                     query,
                     onQueryChange,

@@ -1,4 +1,4 @@
-package com.example.shoparoo.set3
+package com.example.shoparoo.ui.auth.view
 
 
 import android.widget.Toast
@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -38,16 +37,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.shoparoo.R
+import com.example.shoparoo.ui.auth.viewModel.AuthState
+import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 
 
 @Composable
-
 fun LoginScreen(navController: NavHostController) {
     val context = LocalContext.current
     val viewModel = viewModel<AuthViewModel>()
@@ -59,6 +58,7 @@ fun LoginScreen(navController: NavHostController) {
         when (item.value) {
             is AuthState.Success -> {
                 Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
+                navController.navigate("home")
               //  navController.navigate("login")
             }
             is AuthState.Failed -> {
@@ -66,7 +66,7 @@ fun LoginScreen(navController: NavHostController) {
             }
 
             AuthState.Authenticated ->{
-                //navController.navigate("home")
+                navController.navigate("home")
                 Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
             }
             AuthState.Loading -> Unit
@@ -187,9 +187,12 @@ fun LoginScreen(navController: NavHostController) {
                 navController.navigate("signup")
             } )
             Text("or")
-        Text("Continue as a guest", fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 1.dp)
+        Text("Continue as a guest", fontWeight = FontWeight.Bold, modifier = Modifier
+            .padding(vertical = 1.dp)
             .clickable {
-               // navController.navigate("home")
+//                navController.navigate("home")
+//                MainScreen("George", {}, query = TextFieldValue(""), onQueryChange = {})
+
             } )
 
         //  Text("Or use another service", modifier = Modifier.fillMaxWidth().padding(start = 5.dp))

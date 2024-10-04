@@ -1,4 +1,4 @@
-package com.example.shoparoo.set3
+package com.example.shoparoo.ui.auth.view
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -42,13 +42,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.Navigation
+import com.example.shoparoo.ui.auth.viewModel.AuthState
+import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 
 @Composable
 fun Signup(navController: NavHostController) {
@@ -202,7 +201,9 @@ private fun nameFields(
             value = nameValue.value,
             onValueChange = { nameValue.value = it },
             shape = RoundedCornerShape(25.dp),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 25.dp, vertical = 10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 25.dp, vertical = 10.dp),
             isError = Validation
         )
     }
@@ -245,7 +246,9 @@ fun PasswordField(
         visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         shape = RoundedCornerShape(25.dp),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 25.dp, vertical = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 25.dp, vertical = 10.dp),
         isError = Validation
 
     )

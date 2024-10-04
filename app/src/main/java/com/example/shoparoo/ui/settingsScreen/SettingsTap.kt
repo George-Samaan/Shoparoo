@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.example.shoparoo.ui.settingsUi
+package com.example.shoparoo.ui.settingsScreen
 
 import android.content.Context
 import android.content.Intent

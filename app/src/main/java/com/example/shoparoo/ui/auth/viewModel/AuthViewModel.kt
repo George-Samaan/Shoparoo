@@ -1,4 +1,4 @@
-package com.example.shoparoo.set3
+package com.example.shoparoo.ui.auth.viewModel
 
 import android.content.ContentValues.TAG
 import android.util.Log
@@ -33,7 +33,7 @@ class AuthViewModel : ViewModel() {
             firebaseAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener {
                 if (it.isSuccessful) {
                     Log.d(TAG, "signUp: success")
-                    val user =firebaseAuth.currentUser
+                    val user = firebaseAuth.currentUser
 
                     saveUserDataFireBase(user!!.uid, name)
 
@@ -58,8 +58,8 @@ class AuthViewModel : ViewModel() {
             "name" to name,
             "email" to firebaseAuth.currentUser!!.email
         )
-      db.collection("users").document(uid).set(user)
-          }
+        db.collection("users").document(uid).set(user)
+    }
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
@@ -76,6 +76,7 @@ class AuthViewModel : ViewModel() {
     }
 
 }
+
 sealed class AuthState {
     object Loading : AuthState()
     object Success : AuthState()
