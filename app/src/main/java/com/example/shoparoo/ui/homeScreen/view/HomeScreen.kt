@@ -64,6 +64,8 @@ import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.nav.BottomNav
 import com.example.shoparoo.ui.nav.BottomNavigationBar
+import com.example.shoparoo.ui.settingsUi.ProfileScreen
+import com.example.shoparoo.ui.settingsUi.SettingsScreen
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
@@ -426,7 +428,12 @@ fun MainScreen(
             }
             composable(BottomNav.Categories.route) { }
             composable(BottomNav.Cart.route) { }
-            composable(BottomNav.Profile.route) { }
+            composable(BottomNav.Profile.route) {
+                ProfileScreen(navController)
+            }
+            composable("settings") {
+                SettingsScreen(navController)
+            }
         }
     }
 }
