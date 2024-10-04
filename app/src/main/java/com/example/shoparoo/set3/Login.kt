@@ -1,6 +1,7 @@
 package com.example.shoparoo.set3
 
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,9 +19,12 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,21 +32,46 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.shoparoo.R
 
 
-
 @Composable
-// @Preview
+
 fun LoginScreen(navController: NavHostController) {
+    val context = LocalContext.current
+    val viewModel = viewModel<AuthViewModel>()
+    var item = viewModel.authState.collectAsState()
+
+
+
+    LaunchedEffect(item.value) {
+        when (item.value) {
+            is AuthState.Success -> {
+                Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
+              //  navController.navigate("login")
+            }
+            is AuthState.Failed -> {
+                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+            }
+
+            AuthState.Authenticated ->{
+                //navController.navigate("home")
+                Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
+            }
+            AuthState.Loading -> Unit
+        }
+    }
     Column(
         Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -68,7 +97,9 @@ fun LoginScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             OutlinedTextField(
-                leadingIcon = { Icon(Icons.Filled.Email, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.Email, contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                    ) },
                 value = emailValue.value,
                 onValueChange = { emailValue.value = it },
                 label = { Text(stringResource(R.string.enter_your_email)) },
@@ -95,16 +126,19 @@ fun LoginScreen(navController: NavHostController) {
                 },
                 label = { Text(stringResource(R.string.enter_your_password)) },
 
-                leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+
+                ) },
                 trailingIcon = {
-                    val image =
-                        if (showPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
-                    IconButton(onClick = { showPassword = !showPassword }) {
-                        Icon(
-                            image,
-                            contentDescription = if (showPassword) "Hide password" else "Show password"
-                        )
-                    }
+                   Icon(
+                       if (showPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                       contentDescription = null,
+                       tint = MaterialTheme.colorScheme.primary,
+                       modifier = Modifier.clickable {
+                           showPassword = !showPassword
+                       }
+                   )
                 },
                 visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -132,7 +166,9 @@ fun LoginScreen(navController: NavHostController) {
                     emailValidation = true
                 } else
                     emailValidation = false
-
+            //    if (!passValidation && !emailValidation) {
+                    viewModel.login(emailValue.value, passwordValue.value)
+              //  }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -146,11 +182,15 @@ fun LoginScreen(navController: NavHostController) {
         }
         Text("Don't hava an account", Modifier.padding(top = 25.dp))
         Text("Register Now", fontWeight = FontWeight.Bold, modifier = Modifier
-            .padding(vertical = 10.dp)
+            .padding(top = 10.dp)
             .clickable {
                 navController.navigate("signup")
             } )
-
+            Text("or")
+        Text("Continue as a guest", fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 1.dp)
+            .clickable {
+               // navController.navigate("home")
+            } )
 
         //  Text("Or use another service", modifier = Modifier.fillMaxWidth().padding(start = 5.dp))
 
