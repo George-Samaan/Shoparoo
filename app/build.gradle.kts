@@ -82,4 +82,6 @@ dependencies {
     //coil for images
     implementation("io.coil-kt:coil-compose:2.0.0")
 
+    //SwipeToRefresh
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0") // Check for the latest version
 }

@@ -2,10 +2,14 @@
 
 package com.example.shoparoo.ui.homeScreen.view
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,6 +34,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +44,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,103 +52,103 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.shoparoo.R
 import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.db.repository.RepositoryImpl
 import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
+import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.nav.BottomNav
 import com.example.shoparoo.ui.nav.BottomNavigationBar
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
-/*@Composable
-fun HomeScreenDesign(
-    userName: String,
-    onFavouriteClick: () -> Unit,
-    query: TextFieldValue,
-    onQueryChange: (TextFieldValue) -> Unit,
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Header(userName, onFavouriteClick)
-        SearchBar(query, onQueryChange)
-        CouponsSliderWithIndicator(
-            imageList = listOf(
-                R.drawable.fifty_off,
-                R.drawable.nike_discount,
-                R.drawable.twenty_discount
-            )
-        )
-        val brandNames = listOf("Nike", "Adidas", "Puma", "Reebok")
-        val brandImages = listOf(
-            R.drawable.ic_watch,
-            R.drawable.ic_watch,
-            R.drawable.ic_watch,
-            R.drawable.ic_watch
-        )
-        val productNames =
-            listOf("Nike Air Max", "Adidas Superstar", "Puma Suede", "Reebok Classic")
-        val productPrices = listOf("$199", "$149", "$119", "$99")
-
-        BrandsSection(brandNames, brandImages)
-        ForYouSection(productNames, productPrices, brandImages)
-    }
-}*/
-
+@Suppress("UNCHECKED_CAST")
 @Composable
 fun HomeScreenDesign(
     userName: String,
     onFavouriteClick: () -> Unit,
     query: TextFieldValue,
     onQueryChange: (TextFieldValue) -> Unit,
-    smartCollectionsState: ApiState
+    smartCollectionsState: ApiState,
+    forYouProductsState: ApiState,
+    onRefresh: () -> Unit = {}
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
+    val isRefreshing = remember { mutableStateOf(false) }
+    isRefreshing.value =
+        smartCollectionsState is ApiState.Loading || forYouProductsState is ApiState.Loading
+
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing.value),
+        onRefresh = {
+            isRefreshing.value = true
+            onRefresh()
+        }
     ) {
-        Header(userName, onFavouriteClick)
-        SearchBar(query, onQueryChange)
-        CouponsSliderWithIndicator(
-            imageList = listOf(
-                R.drawable.fifty_off,
-                R.drawable.nike_discount,
-                R.drawable.twenty_discount
-            )
-        )
-
-        // Handle smart collections based on the state
-        when (smartCollectionsState) {
-            is ApiState.Loading -> {}
-            is ApiState.Failure -> {
-                // Handle the error state, e.g., show an error message
-                Text(text = "Error fetching brands", color = Color.Red)
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            item {
+                Header(userName, onFavouriteClick)
             }
+            item {
+                SearchBar(query, onQueryChange)
+            }
+            item {
+                CouponsSliderWithIndicator(
+                    imageList = listOf(
+                        R.drawable.fifty_off,
+                        R.drawable.nike_discount,
+                        R.drawable.twenty_discount
+                    )
+                )
+            }
+            when (smartCollectionsState) {
+                is ApiState.Loading -> {}
+                is ApiState.Failure -> {
+                    item {
+                        Text(
+                            text = "Error fetching brands",
+                            color = Color.Red,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
 
-            is ApiState.Success -> {
-                val smartCollections = (smartCollectionsState as ApiState.Success).data
-                BrandsSection(smartCollections as List<SmartCollectionsItem?>) // Pass smart collections to BrandsSection
+                is ApiState.Success -> {
+                    val smartCollections = (smartCollectionsState).data
+                    item {
+                        BrandsSection(smartCollections as List<SmartCollectionsItem?>)
+                    }
+                }
+            }
+            when (forYouProductsState) {
+                is ApiState.Loading -> {}
+                is ApiState.Failure -> {
+                    item {
+                        val errorMessage = (forYouProductsState)
+                        Text(
+                            text = "Error fetching products: $errorMessage",
+                            color = Color.Red,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+
+                is ApiState.Success -> {
+                    val forYouProducts = (forYouProductsState).data
+                    item {
+                        ForYouSection(forYouProducts as List<ProductsItem>)
+                    }
+                }
             }
         }
     }
 }
-
-/*@Composable
-fun Header(userName: String, onFavouriteClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        ProfileSection(userName)
-        FavouriteButton(onFavouriteClick)
-    }
-}*/
 
 @Composable
 fun Header(userName: String, onFavouriteClick: () -> Unit) {
@@ -216,6 +224,12 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
 
 @Composable
 fun BrandsSection(smartCollections: List<SmartCollectionsItem?>) {
+    val visible = remember { mutableStateOf(false) }
+    LaunchedEffect(smartCollections) {
+        if (smartCollections.isNotEmpty()) {
+            visible.value = true
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -224,17 +238,25 @@ fun BrandsSection(smartCollections: List<SmartCollectionsItem?>) {
         Text(
             text = "Brands",
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
+            fontSize = 22.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-        LazyRow(
-            modifier = Modifier.height(150.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        AnimatedVisibility(
+            visible = visible.value,
+            enter = slideInHorizontally(
+                initialOffsetX = { -it }, // Start from the left
+                animationSpec = tween(durationMillis = 600) // Duration of the animation
+            ),
         ) {
-            items(smartCollections.size) { index ->
-                val collection = smartCollections[index]
-                if (collection != null) {
-                    CircularBrandCard(collection.title ?: "Unknown", collection.image?.src!!)
+            LazyRow(
+                modifier = Modifier.height(150.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(smartCollections.size) { index ->
+                    val collection = smartCollections[index]
+                    if (collection != null) {
+                        CircularBrandCard(collection.title ?: "Unknown", collection.image?.src!!)
+                    }
                 }
             }
         }
@@ -254,29 +276,32 @@ fun CircularBrandCard(brandName: String, brandImage: String) {
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Image(
-                painter = rememberImagePainter(brandImage),
+                painter = rememberAsyncImagePainter(brandImage),
                 contentDescription = brandName,
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(CircleShape),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Fit
             )
         }
         Text(
             text = brandName,
             fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            modifier = Modifier.padding(top = 8.dp)
+            fontSize = 15.sp,
+            modifier = Modifier.padding(top = 12.dp)
         )
     }
 }
 
 @Composable
-fun ForYouSection(
-    productNames: List<String>,
-    productPrices: List<String>,
-    productImages: List<Int>
-) {
+fun ForYouSection(products: List<ProductsItem>) {
+    val randomProducts = products.shuffled().take(5)
+    val visible = remember { mutableStateOf(false) }
+    LaunchedEffect(randomProducts) {
+        if (randomProducts.isNotEmpty()) {
+            visible.value = true
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -285,26 +310,36 @@ fun ForYouSection(
         Text(
             text = "For You",
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
+            fontSize = 22.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxHeight()
+        AnimatedVisibility(
+            visible = visible.value,
+            enter = slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(durationMillis = 600) // Duration of the animation
+            ),
         ) {
-            items(productNames.size) { index ->
-                ProductCard(
-                    productNames[index],
-                    productPrices[index],
-                    productImages[index]
-                )
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                items(randomProducts.size) { index ->
+                    val product = randomProducts[index]
+                    ProductCard(
+                        productName = product.title.toString(),
+                        productPrice = product.variants?.get(0)?.price.toString(),
+                        productImage = product.images?.get(0)?.src
+                    )
+                }
             }
         }
     }
 }
 
+
 @Composable
-fun ProductCard(productName: String, productPrice: String, productImage: Int) {
+fun ProductCard(productName: String, productPrice: String, productImage: String?) {
     Card(
         modifier = Modifier
             .width(170.dp)
@@ -316,25 +351,28 @@ fun ProductCard(productName: String, productPrice: String, productImage: Int) {
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Image(
-                painter = painterResource(id = productImage),
+                painter = rememberAsyncImagePainter(model = productImage),
                 contentDescription = productName,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(160.dp),
+                    .height(140.dp),
                 contentScale = ContentScale.Crop
             )
             Text(
                 text = productName,
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp)
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
             )
+            Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = productPrice,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
                 color = Color.Gray,
-                modifier = Modifier.padding(top = 5.dp, start = 5.dp, end = 5.dp)
+                modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
             )
         }
     }
@@ -357,10 +395,12 @@ fun MainScreen(
         )
     )
     val smartCollectionsState by viewModel.smartCollections.collectAsState()
+    val forYouProductsState by viewModel.forYouProducts.collectAsState()
 
     // Call to fetch smart collections
     LaunchedEffect(Unit) {
         viewModel.getSmartCollections()
+        viewModel.getForYouProducts()
     }
 
     Scaffold(
@@ -377,7 +417,11 @@ fun MainScreen(
                     onFavouriteClick,
                     query,
                     onQueryChange,
-                    smartCollectionsState
+                    smartCollectionsState,
+                    forYouProductsState,
+                    onRefresh = {
+                        viewModel.refreshData()
+                    }
                 )
             }
             composable(BottomNav.Categories.route) { }
@@ -395,6 +439,7 @@ fun HomeScreenPreview() {
         {},
         query = TextFieldValue(""),
         onQueryChange = {},
-        smartCollectionsState = ApiState.Loading
+        smartCollectionsState = ApiState.Loading,
+        forYouProductsState = ApiState.Loading
     )
 }

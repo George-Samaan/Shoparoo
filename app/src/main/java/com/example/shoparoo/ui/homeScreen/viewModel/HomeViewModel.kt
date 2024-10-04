@@ -13,6 +13,9 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
     private val _smartCollections = MutableStateFlow<ApiState>(ApiState.Loading)
     val smartCollections: StateFlow<ApiState> get() = _smartCollections
 
+    private val _forYouProducts = MutableStateFlow<ApiState>(ApiState.Loading)
+    val forYouProducts: StateFlow<ApiState> get() = _forYouProducts
+
     fun getSmartCollections() {
         viewModelScope.launch {
             repository.getSmartCollections().catch {
@@ -21,5 +24,25 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
                 _smartCollections.value = ApiState.Success(brands.smartCollections!!)
             }
         }
+    }
+
+    fun getForYouProducts() {
+        viewModelScope.launch {
+            repository.getForYouProducts().catch { exception ->
+                _forYouProducts.value =
+                    ApiState.Failure(exception.message ?: "Error fetching products")
+            }.collect { products ->
+                _forYouProducts.value = ApiState.Success(products.products!!)
+            }
+        }
+    }
+
+    fun refreshData() {
+        _smartCollections.value = ApiState.Loading
+        _forYouProducts.value = ApiState.Loading
+
+        // Fetch data and update states
+        getSmartCollections()
+        getForYouProducts()
     }
 }
