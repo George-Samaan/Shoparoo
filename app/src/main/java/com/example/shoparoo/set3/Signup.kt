@@ -68,6 +68,7 @@ fun Signup(navController: NavHostController) {
 
             AuthState.Authenticated -> Unit
             AuthState.Loading -> Unit
+            else -> Unit
         }
 
 
