@@ -19,6 +19,7 @@ import com.example.shoparoo.ui.theme.ShoparooTheme
 import com.example.shoparoo.ui.theme.settingsUi.ProfileScreen
 import com.example.shoparoo.ui.theme.settingsUi.SettingsScreen
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +27,9 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             Navigation()
+
+
+       //     MainScreen("George", {}, query = TextFieldValue(""), onQueryChange = {})
 
         }
     }

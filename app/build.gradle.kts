@@ -80,4 +80,21 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
 
+    // Slider
+    implementation("com.google.accompanist:accompanist-pager:0.36.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.32.0") // For indicators
+
+    //retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    //coil for images
+    implementation("io.coil-kt:coil-compose:2.0.0")
+
+    //SwipeToRefresh
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0") // Check for the latest version
+
+    //google icons
+    implementation("androidx.compose.material:material-icons-extended-android:1.7.2")
+
 }
