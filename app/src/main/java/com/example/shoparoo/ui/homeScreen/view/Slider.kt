@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.theme.homeScreen
+package com.example.shoparoo.ui.homeScreen.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,21 +28,21 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@Suppress("DEPRECATION")
 @Composable
-fun CouponsSliderWithIndicator(imageList: List<Int>, slideDuration: Long = 3000L) {
+fun CouponsSliderWithIndicator(
+    imageList: List<Int>,  // List of image resources
+    slideDuration: Long = 3000L  // Time duration between automatic slides
+) {
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
 
+    // Automatically scrolls through pages with a delay
     LaunchedEffect(pagerState) {
-        // Create a coroutine to auto-scroll every few seconds
         coroutineScope.launch {
             while (true) {
                 delay(slideDuration)
-                if (pagerState.currentPage == pagerState.targetPage) {
-                    val nextPage = (pagerState.currentPage + 1) % imageList.size
-                    pagerState.animateScrollToPage(nextPage)
-                }
+                val nextPage = (pagerState.currentPage + 1) % imageList.size
+                pagerState.animateScrollToPage(nextPage)
             }
         }
     }
@@ -53,6 +53,7 @@ fun CouponsSliderWithIndicator(imageList: List<Int>, slideDuration: Long = 3000L
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Horizontal pager to display the images
         HorizontalPager(
             count = imageList.size,
             state = pagerState,
@@ -60,7 +61,6 @@ fun CouponsSliderWithIndicator(imageList: List<Int>, slideDuration: Long = 3000L
                 .fillMaxWidth()
                 .height(200.dp)
         ) { page ->
-            // Each image content
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -80,7 +80,8 @@ fun CouponsSliderWithIndicator(imageList: List<Int>, slideDuration: Long = 3000L
                 )
             }
         }
-        // Dots Indicator
+
+        // Horizontal pager indicator (dots)
         HorizontalPagerIndicator(
             pagerState = pagerState,
             modifier = Modifier
@@ -96,10 +97,12 @@ fun CouponsSliderWithIndicator(imageList: List<Int>, slideDuration: Long = 3000L
 
 @Preview(showBackground = true)
 @Composable
-fun ImageSliderWithIndicatorPreview() {
+fun CouponsSliderWithIndicatorPreview() {
     CouponsSliderWithIndicator(
         imageList = listOf(
             R.drawable.ic_watch,
+            R.drawable.fifty_off,
+            R.drawable.nike_discount
         )
     )
 }

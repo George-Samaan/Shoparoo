@@ -1,4 +1,4 @@
-package com.example.shoparoo.nav
+package com.example.shoparoo.ui.nav
 
 import androidx.compose.foundation.layout.height
 //noinspection UsingMaterialAndMaterial3Libraries
@@ -27,45 +27,35 @@ sealed class BottomNav(val route: String, val icon: Int, val label: String) {
 @Composable
 fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
-        BottomNav.Home,
-        BottomNav.Categories,
-        BottomNav.Cart,
-        BottomNav.Profile
+        BottomNav.Home, BottomNav.Categories, BottomNav.Cart, BottomNav.Profile
     )
 
     BottomNavigation(
-        modifier = Modifier.height(70.dp),
-        backgroundColor = Color(0xFFEFEEEE)
+        modifier = Modifier.height(60.dp), backgroundColor = Color(0xFFEFEEEE)
     ) {
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
         items.forEach { item ->
             val isSelected = currentRoute == item.route
-            BottomNavigationItem(
-                icon = {
-                    Icon(
-                        painter = painterResource(id = item.icon),
-                        contentDescription = item.label,
-                        tint = if (isSelected) Purple40 else Color.Gray
-                    )
-                },
-                label = {
-                    Text(
-                        text = item.label,
-                        color = if (isSelected) Purple40 else Color.Gray
-                    )
-                },
-                selected = isSelected,
-                onClick = {
-                    navController.navigate(item.route) {
-                        // Prevent reselecting the same item
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
+            BottomNavigationItem(icon = {
+                Icon(
+                    painter = painterResource(id = item.icon),
+                    contentDescription = item.label,
+                    tint = if (isSelected) Purple40 else Color.Gray
+                )
+            }, label = {
+                Text(
+                    text = item.label, color = if (isSelected) Purple40 else Color.Gray
+                )
+            }, selected = isSelected, onClick = {
+                navController.navigate(item.route) {
+                    // Prevent reselecting the same item
+                    popUpTo(navController.graph.startDestinationId) {
+                        saveState = true
                     }
+                    launchSingleTop = true
+                    restoreState = true
                 }
-            )
+            })
         }
     }
 }

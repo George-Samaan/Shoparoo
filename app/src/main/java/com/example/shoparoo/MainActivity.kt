@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.ui.text.input.TextFieldValue
-import com.example.shoparoo.ui.theme.homeScreen.MainScreen
+import com.example.shoparoo.ui.homeScreen.view.MainScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
