@@ -84,4 +84,8 @@ dependencies {
 
     //SwipeToRefresh
     implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0") // Check for the latest version
+
+    //google icons
+    implementation("androidx.compose.material:material-icons-extended-android:1.7.2")
+
 }
