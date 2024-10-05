@@ -24,7 +24,7 @@ fun Navigation() {
 
                 },
                 query = TextFieldValue(""),
-                onQueryChange = {},
+                onQueryChange = {},navController = navController
             )
         }
     }
