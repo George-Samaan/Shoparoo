@@ -1,7 +1,7 @@
 package com.example.shoparoo.data.db.repository
 
 import com.example.shoparoo.data.db.remote.RemoteDataSource
-import com.example.shoparoo.model.ForYou
+import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SmartCollections
 import kotlinx.coroutines.flow.Flow
 
@@ -11,7 +11,11 @@ class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repositor
         return remoteDataSource.getSmartCollections()
     }
 
-    override fun getForYouProducts(): Flow<ForYou> {
+    override fun getForYouProducts(): Flow<Product> {
         return remoteDataSource.getForYouProducts()
+    }
+
+    override fun getProductsFromBrandsId(collectionId: String): Flow<Product> {
+        return remoteDataSource.getProductsFromBrandsId(collectionId)
     }
 }
