@@ -35,7 +35,8 @@ fun BottomNavigationBar(navController: NavController) {
     ) {
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
         items.forEach { item ->
-            val isSelected = currentRoute == item.route
+            val isSelected = currentRoute == item.route ||
+                    (currentRoute?.startsWith("brand/") == true && item == BottomNav.Home) // Adjusted to handle brand navigation
             BottomNavigationItem(icon = {
                 Icon(
                     painter = painterResource(id = item.icon),
@@ -48,7 +49,6 @@ fun BottomNavigationBar(navController: NavController) {
                 )
             }, selected = isSelected, onClick = {
                 navController.navigate(item.route) {
-                    // Prevent reselecting the same item
                     popUpTo(navController.graph.startDestinationId) {
                         saveState = true
                     }

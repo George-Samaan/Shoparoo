@@ -4,8 +4,8 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.shoparoo.data.db.repository.Repository
 import com.example.shoparoo.data.network.ApiState
+import com.example.shoparoo.data.repository.Repository
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
@@ -24,13 +24,13 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
     private val _userName = MutableStateFlow<String?>(null)
     val userName: StateFlow<String?> get() = _userName
 
-    private val _isLoading = MutableStateFlow(true) // Add this line
+    private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> get() = _isLoading // Expose it
 
     init {
         val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
         val db = Firebase.firestore
-        db.collection("users").document(firebaseAuth.currentUser!!.uid)
+        db.collection("users").document(firebaseAuth.currentUser?.uid ?: "Guest")
             .get()
             .addOnSuccessListener { result ->
                 _userName.value = result.data?.get("name") as? String
@@ -43,6 +43,7 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
     }
 
     fun getSmartCollections() {
+        _smartCollections.value = ApiState.Loading
         viewModelScope.launch {
             repository.getSmartCollections().catch {
                 _smartCollections.value = ApiState.Failure(it.message ?: "Error fetching brands")
@@ -53,6 +54,7 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
     }
 
     fun getForYouProducts() {
+        _forYouProducts.value = ApiState.Loading
         viewModelScope.launch {
             repository.getForYouProducts().catch { exception ->
                 _forYouProducts.value =
