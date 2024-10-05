@@ -68,6 +68,8 @@ import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.nav.BottomNav
 import com.example.shoparoo.ui.nav.BottomNavigationBar
 import com.example.shoparoo.ui.productScreen.view.ProductsScreen
+import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModel
+import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModelFactory
 import com.example.shoparoo.ui.settingsScreen.ProfileScreen
 import com.example.shoparoo.ui.settingsScreen.SettingsScreen
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -277,7 +279,7 @@ fun BrandsSection(
                             onClick = {
                                 // Log the ID of the clicked brand
                                 Log.d("BrandsSection", "Clicked brand ID: ${collection.id}")
-                                navController.navigate("brand/${collection.id}")
+                                navController.navigate("brand/${collection.id}/${collection.title}")
                             }
                         )
                     }
@@ -321,7 +323,7 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
 
 @Composable
 fun ForYouSection(products: List<ProductsItem>) {
-    val randomProducts = products.shuffled().take(5)
+    val randomProducts = remember { products.shuffled().take(5) }
     val visible = remember { mutableStateOf(false) }
     LaunchedEffect(randomProducts) {
         if (randomProducts.isNotEmpty()) {
@@ -362,7 +364,6 @@ fun ForYouSection(products: List<ProductsItem>) {
         }
     }
 }
-
 
 @Composable
 fun ProductCard(productName: String, productPrice: String, productImage: String?) {
@@ -419,6 +420,15 @@ fun MainScreen(
             )
         )
     )
+
+    val productViewModel: ProductViewModel = viewModel(
+        factory = ProductViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+
     val smartCollectionsState by viewModel.smartCollections.collectAsState()
     val forYouProductsState by viewModel.forYouProducts.collectAsState()
     val userName by viewModel.userName.collectAsState()
@@ -460,9 +470,11 @@ fun MainScreen(
             composable("settings") {
                 SettingsScreen(navController)
             }
-            composable("brand/{brandId}") { backStackEntry ->
+            composable("brand/{brandId}/{brandTitle}") { backStackEntry ->
                 val brandId = backStackEntry.arguments?.getString("brandId") ?: return@composable
-                ProductsScreen(brandId)
+                val brandTitle =
+                    backStackEntry.arguments?.getString("brandTitle") ?: return@composable
+                ProductsScreen(brandId, brandTitle, navController, productViewModel)
             }
         }
     }

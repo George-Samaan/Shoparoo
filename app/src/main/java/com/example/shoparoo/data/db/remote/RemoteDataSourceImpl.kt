@@ -2,7 +2,7 @@ package com.example.shoparoo.data.db.remote
 
 import android.util.Log
 import com.example.shoparoo.data.network.ApiServices
-import com.example.shoparoo.model.ForYou
+import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SmartCollections
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -26,8 +26,22 @@ class RemoteDataSourceImpl(private val apiService: ApiServices) : RemoteDataSour
         }
     }
 
-    override fun getForYouProducts(): Flow<ForYou> = flow {
+    override fun getForYouProducts(): Flow<Product> = flow {
         val response = apiService.getForYouProducts()
+        if (response.isSuccessful && response.body() != null) {
+            Log.d("RemoteDataSourceImpl", "Products received: ${response.body()!!.products}")
+            emit(response.body()!!)
+        } else {
+            Log.e(
+                "RemoteDataSourceImpl",
+                "Error retrieving products: ${response.errorBody()?.string()}"
+            )
+            throw Throwable("Error retrieving products")
+        }
+    }
+
+    override fun getProductsFromBrandsId(collectionId: String): Flow<Product> = flow {
+        val response = apiService.getProductsFromBrandsId(collectionId)
         if (response.isSuccessful && response.body() != null) {
             Log.d("RemoteDataSourceImpl", "Products received: ${response.body()!!.products}")
             emit(response.body()!!)
