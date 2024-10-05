@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.theme.shoppingCart
+package com.example.shoparoo.ui.shoppingCart
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image

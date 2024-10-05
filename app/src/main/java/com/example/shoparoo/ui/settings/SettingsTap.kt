@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.example.shoparoo.ui.theme.settings
+package com.example.shoparoo.ui.settings
 
 import android.content.Context
 import android.content.Intent
@@ -51,7 +51,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.MainActivity
 import com.example.shoparoo.R
-import com.example.shoparoo.ui.theme.db.local.SharedPreferencesImpl
+import com.example.shoparoo.db.local.SharedPreferencesImpl
 import java.util.Locale
 
 
@@ -212,13 +212,7 @@ fun SettingsItem(title: String, icon: Int, arrowIcon: Int, onClick: () -> Unit) 
 fun Currency() {
     val countries = listOf(
         Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC"),
-        Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8"),
-        Pair("CAD", "\uD83C\uDDE8\uD83C\uDDE6"),
-        Pair("EUR", "\uD83C\uDDE9\uD83C\uDDEA"),
-        Pair("Japan Yen", "\uD83C\uDDEF\uD83C\uDDF5"),
-        Pair("Yuan", "\uD83C\uDDE8\uD83C\uDDF3"),
-        Pair("Brazil", "\uD83C\uDDE7\uD83C\uDDF7"),
-        Pair("RUB", "\uD83C\uDDF7\uD83C\uDDFA"),
+        Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8")
     )
 
     LazyColumn {

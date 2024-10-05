@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.theme.db.local
+package com.example.shoparoo.db.local
 
 import android.content.Context
 

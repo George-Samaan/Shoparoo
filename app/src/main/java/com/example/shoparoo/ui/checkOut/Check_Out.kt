@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.theme.checkOut
+package com.example.shoparoo.ui.checkOut
 
 import android.annotation.SuppressLint
 import android.widget.Toast
@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.shoparoo.R
-import com.example.shoparoo.ui.theme.shoppingCart.OrderSummary
+import com.example.shoparoo.ui.shoppingCart.OrderSummary
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue

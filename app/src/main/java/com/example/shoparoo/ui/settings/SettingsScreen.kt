@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.theme.settings
+package com.example.shoparoo.ui.settings
 
 import android.annotation.SuppressLint
 import android.content.ClipData
