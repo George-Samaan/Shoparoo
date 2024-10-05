@@ -47,16 +47,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.R
-import com.example.shoparoo.ui.auth.view.LoginScreen
-import com.example.shoparoo.ui.nav.Navigation
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 
 
 @Composable
-fun ProfileScreen(navController: NavController) {
+fun ProfileScreen(navControllergg: NavController, navController: NavController) {
     // State to control the visibility of the bottom sheet
     val showContactUsSheet = remember { mutableStateOf(false) }
     // State to control the visibility of the sign out confirmation dialog
@@ -70,7 +67,7 @@ fun ProfileScreen(navController: NavController) {
     ) {
         ProfileHeader()
         Spacer(modifier = Modifier.height(30.dp))
-        ProfileOptions(navController, showContactUsSheet.value) {
+        ProfileOptions(navControllergg, showContactUsSheet.value) {
             showContactUsSheet.value = !showContactUsSheet.value // Toggle bottom sheet
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -95,13 +92,19 @@ fun ProfileScreen(navController: NavController) {
                     authViewModel.signOut()
                     // Clear the back stack and navigate to the login screen
                     navController.navigate("login") {
-                        // Clear the back stack
                         popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true // Pop up to and remove the start destination
+                            inclusive = true
                         }
-                        launchSingleTop =
-                            true // Avoid creating multiple instances of the login screen
+                        launchSingleTop = true
                     }
+//                    navController.navigate("login") {
+//                        // Clear the back stack
+//                        popUpTo(navController.graph.startDestinationId) {
+//                            inclusive = true // Pop up to and remove the start destination
+//                        }
+//                        launchSingleTop =
+//                            true // Avoid creating multiple instances of the login screen
+//                    }
                 }
             )
         }
@@ -320,5 +323,5 @@ fun ContactUs() {
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
-    ProfileScreen(navController = rememberNavController())
+  //  ProfileScreen(navControllergg = rememberNavController(), navController = navController)
 }

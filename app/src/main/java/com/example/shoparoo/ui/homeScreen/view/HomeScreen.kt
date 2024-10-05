@@ -413,9 +413,10 @@ fun ProductCard(productName: String, productPrice: String, productImage: String?
 fun MainScreen(
     onFavouriteClick: () -> Unit,
     query: TextFieldValue,
-    onQueryChange: (TextFieldValue) -> Unit
+    onQueryChange: (TextFieldValue) -> Unit,
+    navController: NavController
 ) {
-    val navController = rememberNavController()
+    val navController1 = rememberNavController()
     val viewModel: HomeViewModel = viewModel(
         factory = HomeViewModelFactory(
             repository = RepositoryImpl(
@@ -444,10 +445,10 @@ fun MainScreen(
     }
 
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController = navController) }
+        bottomBar = { BottomNavigationBar(navController = navController1) }
     ) {
         NavHost(
-            navController = navController,
+            navController = navController1,
             startDestination = BottomNav.Home.route,
             modifier = Modifier.padding(it)
         ) {
@@ -462,31 +463,31 @@ fun MainScreen(
                     onRefresh = {
                         viewModel.refreshData()
                     },
-                    navController
+                    navController1
                 )
             }
             composable(BottomNav.Categories.route) { }
             composable(BottomNav.Cart.route) {
-                ShoppingCartScreen(navController)
+                ShoppingCartScreen(navController1)
             }
 
-            composable(BottomNav.Profile.route) { ProfileScreen(navController) }
-            composable("settings") { SettingsScreen(navController) }
-            composable("login") { LoginScreen(navController)}
+            composable(BottomNav.Profile.route) { ProfileScreen(navController1, navController) }
+            composable("settings") { SettingsScreen(navController1) }
+            composable("login") { LoginScreen(navController1)}
             composable(BottomNav.Profile.route) {
-                ProfileScreen(navController)
+                ProfileScreen(navController1,navController)
             }
             composable("settings") {
-                SettingsScreen(navController)
+                SettingsScreen(navController1)
             }
             composable("checkout") {
-                CheckoutScreen(navController)
+                CheckoutScreen(navController1)
             }
             composable("brand/{brandId}/{brandTitle}") { backStackEntry ->
                 val brandId = backStackEntry.arguments?.getString("brandId") ?: return@composable
                 val brandTitle =
                     backStackEntry.arguments?.getString("brandTitle") ?: return@composable
-                ProductsScreen(brandId, brandTitle, navController, productViewModel)
+                ProductsScreen(brandId, brandTitle, navController1, productViewModel)
             }
         }
     }
