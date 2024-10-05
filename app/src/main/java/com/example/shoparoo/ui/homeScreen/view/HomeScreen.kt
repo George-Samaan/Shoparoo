@@ -63,6 +63,7 @@ import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
+import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.nav.BottomNav
@@ -110,9 +111,9 @@ fun HomeScreenDesign(
             item {
                 CouponsSliderWithIndicator(
                     imageList = listOf(
-                        R.drawable.fifty_off,
-                        R.drawable.nike_discount,
-                        R.drawable.twenty_discount
+                        R.drawable.black_friday,
+                        R.drawable.nike_ads,
+                        R.drawable.discount
                     )
                 )
             }
@@ -464,6 +465,10 @@ fun MainScreen(
             }
             composable(BottomNav.Categories.route) { }
             composable(BottomNav.Cart.route) { }
+
+            composable(BottomNav.Profile.route) { ProfileScreen(navController) }
+            composable("settings") { SettingsScreen(navController) }
+            composable("login") { LoginScreen(navController)}
             composable(BottomNav.Profile.route) {
                 ProfileScreen(navController)
             }

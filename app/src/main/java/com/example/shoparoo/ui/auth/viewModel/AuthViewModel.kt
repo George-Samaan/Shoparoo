@@ -75,6 +75,10 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    fun signOut() {
+        firebaseAuth.signOut()
+        _authState.value = AuthState.Loading
+    }
 }
 
 sealed class AuthState {

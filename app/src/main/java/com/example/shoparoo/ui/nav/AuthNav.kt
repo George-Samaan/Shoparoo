@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.auth.view.Signup
 import com.example.shoparoo.ui.homeScreen.view.MainScreen
+import com.example.shoparoo.ui.settingsScreen.SettingsScreen
 
 @Composable
 @Preview
@@ -19,7 +20,9 @@ fun Navigation() {
         composable("signup") { Signup(navController = navController) }
         composable("home") {
             MainScreen(
-                {},
+                {
+
+                },
                 query = TextFieldValue(""),
                 onQueryChange = {},
             )
