@@ -75,7 +75,7 @@ fun CheckoutScreen(navController: NavController) {
                 showAddCreditCardScreen = showAddCreditCardScreen // Pass the visibility state
             )
             Spacer(modifier = Modifier.height(16.dp))
-            OrderSummary()
+            //OrderSummary()
             Spacer(modifier = Modifier.height(16.dp))
             CheckoutButtonCheck()
         }
