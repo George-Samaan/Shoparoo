@@ -114,7 +114,8 @@ fun HomeScreenDesign(
                         R.drawable.black_friday,
                         R.drawable.nike_ads,
                         R.drawable.discount
-                    )
+                    ),
+                    couponText = "20% Off All Products"
                 )
             }
             when (smartCollectionsState) {

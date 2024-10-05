@@ -2,8 +2,13 @@
 
 package com.example.shoparoo.ui.homeScreen.view
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,8 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.shoparoo.R
 import com.example.shoparoo.ui.theme.Purple40
@@ -33,10 +38,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun CouponsSliderWithIndicator(
     imageList: List<Int>,  // List of image resources
-    slideDuration: Long = 3000L  // Time duration between automatic slides
+    slideDuration: Long = 3000L,  // Time duration between automatic slides
+    couponText: String
 ) {
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val clipBoardManager: ClipboardManager = LocalContext.current.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     // Automatically scrolls through pages with a delay
     LaunchedEffect(pagerState) {
@@ -78,13 +86,19 @@ fun CouponsSliderWithIndicator(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.Transparent)
-                        .clip(RoundedCornerShape(28.dp)),
+                        .clip(RoundedCornerShape(28.dp))
+                        .clickable {
+                          if(imageList[page] == R.drawable.discount){
+                              val clip = ClipData.newPlainText("Coupon Code", couponText)
+                              clipBoardManager.setPrimaryClip(clip)
+                              Toast.makeText(context, "Coupon Code Copied", Toast.LENGTH_SHORT).show()
+                          }
+                        },
                     contentScale = ContentScale.Crop
                 )
             }
         }
 
-        // Horizontal pager indicator (dots)
         HorizontalPagerIndicator(
             pagerState = pagerState,
             modifier = Modifier
@@ -98,6 +112,7 @@ fun CouponsSliderWithIndicator(
     }
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun CouponsSliderWithIndicatorPreview() {
@@ -108,4 +123,4 @@ fun CouponsSliderWithIndicatorPreview() {
             R.drawable.nike_discount
         )
     )
-}
+}*/

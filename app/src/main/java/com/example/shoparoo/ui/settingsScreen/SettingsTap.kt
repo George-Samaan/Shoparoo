@@ -60,16 +60,17 @@ fun SettingsScreen(navController: NavController) {
     var showLanguageSheet by remember { mutableStateOf(false) }
     var showAboutUsSheet by remember { mutableStateOf(false) }
     val context = LocalContext.current
-
-    // Load saved language preference
     val savedLanguage = getLanguagePreference(context)
-    var selectedLanguage by remember { mutableStateOf(savedLanguage) } // Default to saved language
+    var selectedLanguage by remember { mutableStateOf(savedLanguage) }
+
+    // Load the saved currency preference
+    val savedCurrency = getCurrencyPreference(context)
+    var selectedCurrency by remember { mutableStateOf(savedCurrency) }
 
     val currencyIcon = if (showCurrencySheet) R.drawable.ic_arrow_down else R.drawable.ic_arrow
     val languageIcon = if (showLanguageSheet) R.drawable.ic_arrow_down else R.drawable.ic_arrow
     val aboutUsIcon = if (showAboutUsSheet) R.drawable.ic_arrow_down else R.drawable.ic_arrow
 
-    Modifier.background(Color.White)
     Scaffold(
         content = { innerPadding ->
             Column(
@@ -83,8 +84,7 @@ fun SettingsScreen(navController: NavController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
-                )
-                {
+                ) {
                     Box(
                         modifier = Modifier
                             .size(50.dp)
@@ -96,8 +96,7 @@ fun SettingsScreen(navController: NavController) {
                         Image(
                             painter = painterResource(id = R.drawable.ic_back),
                             contentDescription = stringResource(R.string.back),
-                            modifier = Modifier
-                                .size(24.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
 
@@ -116,19 +115,28 @@ fun SettingsScreen(navController: NavController) {
                         .padding(horizontal = 10.dp, vertical = 16.dp)
                 ) {
                     item {
-                        SettingsItem(stringResource(R.string.currency), R.drawable.currency, currencyIcon, onClick = {
-                            showCurrencySheet = !showCurrencySheet
-                        })
+                        SettingsItem(
+                            stringResource(R.string.currency),
+                            R.drawable.currency,
+                            currencyIcon,
+                            onClick = { showCurrencySheet = !showCurrencySheet }
+                        )
                         Spacer(modifier = Modifier.height(18.dp))
 
-                        SettingsItem(stringResource(R.string.language), R.drawable.language, languageIcon, onClick = {
-                            showLanguageSheet = !showLanguageSheet
-                        })
+                        SettingsItem(
+                            stringResource(R.string.language),
+                            R.drawable.language,
+                            languageIcon,
+                            onClick = { showLanguageSheet = !showLanguageSheet }
+                        )
                         Spacer(modifier = Modifier.height(18.dp))
 
-                        SettingsItem(stringResource(R.string.about_us), R.drawable.info, aboutUsIcon, onClick = {
-                            showAboutUsSheet = !showAboutUsSheet
-                        })
+                        SettingsItem(
+                            stringResource(R.string.about_us),
+                            R.drawable.info,
+                            aboutUsIcon,
+                            onClick = { showAboutUsSheet = !showAboutUsSheet }
+                        )
                         Spacer(modifier = Modifier.height(18.dp))
                     }
                 }
@@ -136,10 +144,16 @@ fun SettingsScreen(navController: NavController) {
         }
     )
 
-    // BottomSheet display logic
     if (showCurrencySheet) {
         BottomSheet(onDismiss = { showCurrencySheet = false }) {
-            Currency()
+            Currency(
+                selectedCurrency = selectedCurrency,
+                onCurrencySelected = { currency ->
+                    selectedCurrency = currency
+                    saveCurrencyPreference(context, currency)
+                    // Optionally refresh product prices
+                }
+            )
         }
     }
 
@@ -162,7 +176,8 @@ fun SettingsScreen(navController: NavController) {
         }
     }
 }
-//___________________________________________________________________
+
+
 
 @Composable
 fun SettingsItem(title: String, icon: Int, arrowIcon: Int, onClick: () -> Unit) {
@@ -203,17 +218,11 @@ fun SettingsItem(title: String, icon: Int, arrowIcon: Int, onClick: () -> Unit) 
     }
 }
 
-//___________________________________________________________________
 @Composable
-fun Currency() {
+fun Currency(selectedCurrency: String, onCurrencySelected: (String) -> Unit) {
     val countries = listOf(
         Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8"),
-        Pair("CAD", "\uD83C\uDDE8\uD83C\uDDE6"),
-        Pair("EUR", "\uD83C\uDDE9\uD83C\uDDEA"),
-        Pair("Japan Yen", "\uD83C\uDDEF\uD83C\uDDF5"),
-        Pair("Yuan", "\uD83C\uDDE8\uD83C\uDDF3"),
-        Pair("Brazil", "\uD83C\uDDE7\uD83C\uDDF7"),
-        Pair("RUB", "\uD83C\uDDF7\uD83C\uDDFA"),
+        Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC"),
     )
 
     LazyColumn {
@@ -232,6 +241,17 @@ fun Currency() {
         }
     }
 }
+
+fun saveCurrencyPreference(context: Context, currency: String) {
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    sharedPreferences.edit().putString("currency", currency).apply()
+}
+
+fun getCurrencyPreference(context: Context): String {
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    return sharedPreferences.getString("currency", "USD") ?: "USD"  // Default to USD
+}
+
 
 @Composable
 fun Language(selectedLanguage: String, onLanguageSelected: (String) -> Unit) {

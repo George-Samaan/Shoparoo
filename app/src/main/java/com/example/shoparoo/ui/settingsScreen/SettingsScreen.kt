@@ -51,6 +51,7 @@ import androidx.navigation.Navigation.findNavController
 import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.R
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
+import com.example.shoparoo.ui.nav.BottomNav
 import com.example.shoparoo.ui.nav.Navigation
 
 
@@ -264,8 +265,9 @@ fun SignOutButton(authViewModel: AuthViewModel, navController: NavController) {
             .padding(50.dp)
             .clickable {
                 authViewModel.signOut()
-                navController.popBackStack()
-                navController.navigate("login")
+                navController.navigate("login") {
+                    popUpTo(BottomNav.Home.route) { inclusive = true } // Clear back stack including Home
+                }
 
             },
         textAlign = TextAlign.Center,
