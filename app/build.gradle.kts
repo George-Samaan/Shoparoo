@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -59,8 +60,12 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.runtime.ktx)
-    implementation(libs.androidx.navigation.compose)
+
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -68,7 +73,29 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation("androidx.compose.material:material-icons-extended-android:1.7.2")
+    implementation("androidx.navigation:navigation-compose:2.8.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
+//ViewModel
+    implementation("androidx.lifecycle:lifecycle-runtime-compose-android:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
 
-    implementation("androidx.compose.material3:material3:1.2.0-alpha01")
+    // Slider
+    implementation("com.google.accompanist:accompanist-pager:0.36.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.32.0") // For indicators
+
+    //retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    //coil for images
+    implementation("io.coil-kt:coil-compose:2.0.0")
+
+    //SwipeToRefresh
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0") // Check for the latest version
+
+    //google icons
+    implementation("androidx.compose.material:material-icons-extended-android:1.7.2")
 
 }

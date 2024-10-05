@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "749799438384",
+    "project_id": "able-veld-435818-g3",
+    "storage_bucket": "able-veld-435818-g3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:749799438384:android:fb7e70310234d1461455f5",
+        "android_client_info": {
+          "package_name": "com.example.shoparoo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcQ4cOCZDl6GHjkor-Leyu8-uNfxyiVUY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
