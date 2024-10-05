@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Shoparoo</string>
+    <string name="app_name" translatable="false">Shoparoo</string>
         <string name="user_name">Galal Ahmed</string>
         <string name="email">Galal_3@protonmail.com</string>
         <string name="my_orders">My Orders</string>
@@ -26,8 +26,10 @@
         <string name="contact_number">  +02 123456789</string>
         <string name="contact_number_text">Contact number : </string>
         <string name="email_text">Email :</string>
+    <string name="check_out">Check out</string>
         <string name="email_contact"> john.c.calhoun@examplepetstore.com</string>
     <string name="enter_your_email">Enter your E-mail</string>
     <string name="enter_your_password">Enter you password</string>
+    <string name="cart">Cart</string>
 
 </resources>

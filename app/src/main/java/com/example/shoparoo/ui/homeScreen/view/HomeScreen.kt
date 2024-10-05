@@ -103,9 +103,9 @@ fun HomeScreenDesign(
             item {
                 CouponsSliderWithIndicator(
                     imageList = listOf(
-                        R.drawable.fifty_off,
-                        R.drawable.nike_discount,
-                        R.drawable.twenty_discount
+                        R.drawable.black_friday,
+                        R.drawable.nike_ads,
+                        R.drawable.discount
                     )
                 )
             }

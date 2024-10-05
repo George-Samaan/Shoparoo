@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.shoparoo.ui.homeScreen.view
 
 import androidx.compose.foundation.Image
@@ -75,6 +77,7 @@ fun CouponsSliderWithIndicator(
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(Color.Transparent)
                         .clip(RoundedCornerShape(28.dp)),
                     contentScale = ContentScale.Crop
                 )
