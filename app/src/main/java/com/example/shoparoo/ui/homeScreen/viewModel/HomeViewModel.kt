@@ -30,7 +30,7 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
     init {
         val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
         val db = Firebase.firestore
-        db.collection("users").document(firebaseAuth.currentUser!!.uid)
+        db.collection("users").document(firebaseAuth.currentUser?.uid ?: "Guest")
             .get()
             .addOnSuccessListener { result ->
                 _userName.value = result.data?.get("name") as? String
@@ -43,6 +43,7 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
     }
 
     fun getSmartCollections() {
+        _smartCollections.value = ApiState.Loading
         viewModelScope.launch {
             repository.getSmartCollections().catch {
                 _smartCollections.value = ApiState.Failure(it.message ?: "Error fetching brands")
@@ -53,6 +54,7 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
     }
 
     fun getForYouProducts() {
+        _forYouProducts.value = ApiState.Loading
         viewModelScope.launch {
             repository.getForYouProducts().catch { exception ->
                 _forYouProducts.value =

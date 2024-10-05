@@ -2,10 +2,12 @@
 
 package com.example.shoparoo.ui.homeScreen.view
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,6 +51,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -64,6 +67,9 @@ import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.nav.BottomNav
 import com.example.shoparoo.ui.nav.BottomNavigationBar
+import com.example.shoparoo.ui.productScreen.view.ProductsScreen
+import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModel
+import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModelFactory
 import com.example.shoparoo.ui.settingsScreen.ProfileScreen
 import com.example.shoparoo.ui.settingsScreen.SettingsScreen
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -78,7 +84,8 @@ fun HomeScreenDesign(
     onQueryChange: (TextFieldValue) -> Unit,
     smartCollectionsState: ApiState,
     forYouProductsState: ApiState,
-    onRefresh: () -> Unit = {}
+    onRefresh: () -> Unit = {},
+    navController: NavController
 ) {
     val isRefreshing = remember { mutableStateOf(false) }
     isRefreshing.value =
@@ -124,7 +131,10 @@ fun HomeScreenDesign(
                 is ApiState.Success -> {
                     val smartCollections = (smartCollectionsState).data
                     item {
-                        BrandsSection(smartCollections as List<SmartCollectionsItem?>)
+                        BrandsSection(
+                            navController = navController,
+                            smartCollections as List<SmartCollectionsItem?>
+                        ) // Pass navController here
                     }
                 }
             }
@@ -225,13 +235,18 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
 }
 
 @Composable
-fun BrandsSection(smartCollections: List<SmartCollectionsItem?>) {
+fun BrandsSection(
+    navController: NavController,
+    smartCollections: List<SmartCollectionsItem?>
+) {
     val visible = remember { mutableStateOf(false) }
+
     LaunchedEffect(smartCollections) {
         if (smartCollections.isNotEmpty()) {
             visible.value = true
         }
     }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -243,6 +258,7 @@ fun BrandsSection(smartCollections: List<SmartCollectionsItem?>) {
             fontSize = 22.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
+
         AnimatedVisibility(
             visible = visible.value,
             enter = slideInHorizontally(
@@ -257,7 +273,15 @@ fun BrandsSection(smartCollections: List<SmartCollectionsItem?>) {
                 items(smartCollections.size) { index ->
                     val collection = smartCollections[index]
                     if (collection != null) {
-                        CircularBrandCard(collection.title ?: "Unknown", collection.image?.src!!)
+                        CircularBrandCard(
+                            brandName = collection.title ?: "Unknown",
+                            brandImage = collection.image?.src!!,
+                            onClick = {
+                                // Log the ID of the clicked brand
+                                Log.d("BrandsSection", "Clicked brand ID: ${collection.id}")
+                                navController.navigate("brand/${collection.id}/${collection.title}")
+                            }
+                        )
                     }
                 }
             }
@@ -266,10 +290,12 @@ fun BrandsSection(smartCollections: List<SmartCollectionsItem?>) {
 }
 
 @Composable
-fun CircularBrandCard(brandName: String, brandImage: String) {
+fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(6.dp)
+        modifier = Modifier
+            .padding(6.dp)
+            .clickable { onClick() }
     ) {
         Card(
             modifier = Modifier.size(110.dp),
@@ -297,7 +323,7 @@ fun CircularBrandCard(brandName: String, brandImage: String) {
 
 @Composable
 fun ForYouSection(products: List<ProductsItem>) {
-    val randomProducts = products.shuffled().take(5)
+    val randomProducts = remember { products.shuffled().take(5) }
     val visible = remember { mutableStateOf(false) }
     LaunchedEffect(randomProducts) {
         if (randomProducts.isNotEmpty()) {
@@ -338,7 +364,6 @@ fun ForYouSection(products: List<ProductsItem>) {
         }
     }
 }
-
 
 @Composable
 fun ProductCard(productName: String, productPrice: String, productImage: String?) {
@@ -395,6 +420,15 @@ fun MainScreen(
             )
         )
     )
+
+    val productViewModel: ProductViewModel = viewModel(
+        factory = ProductViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+
     val smartCollectionsState by viewModel.smartCollections.collectAsState()
     val forYouProductsState by viewModel.forYouProducts.collectAsState()
     val userName by viewModel.userName.collectAsState()
@@ -424,7 +458,8 @@ fun MainScreen(
                     forYouProductsState,
                     onRefresh = {
                         viewModel.refreshData()
-                    }
+                    },
+                    navController
                 )
             }
             composable(BottomNav.Categories.route) { }
@@ -434,6 +469,12 @@ fun MainScreen(
             }
             composable("settings") {
                 SettingsScreen(navController)
+            }
+            composable("brand/{brandId}/{brandTitle}") { backStackEntry ->
+                val brandId = backStackEntry.arguments?.getString("brandId") ?: return@composable
+                val brandTitle =
+                    backStackEntry.arguments?.getString("brandTitle") ?: return@composable
+                ProductsScreen(brandId, brandTitle, navController, productViewModel)
             }
         }
     }
@@ -448,6 +489,7 @@ fun HomeScreenPreview() {
         query = TextFieldValue(""),
         onQueryChange = {},
         smartCollectionsState = ApiState.Loading,
-        forYouProductsState = ApiState.Loading
+        forYouProductsState = ApiState.Loading,
+        navController = rememberNavController()
     )
 }
