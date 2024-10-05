@@ -1,6 +1,5 @@
 package com.example.shoparoo.ui.settingsScreen
 
-import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -19,13 +18,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -50,13 +52,15 @@ import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.R
 import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.nav.Navigation
+import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 
 
-@SuppressLint("RememberReturnType")
 @Composable
 fun ProfileScreen(navController: NavController) {
     // State to control the visibility of the bottom sheet
     val showContactUsSheet = remember { mutableStateOf(false) }
+    // State to control the visibility of the sign out confirmation dialog
+    val showSignOutDialog = remember { mutableStateOf(false) }
 
     Modifier.background(Color.White)
     Column(
@@ -70,7 +74,8 @@ fun ProfileScreen(navController: NavController) {
             showContactUsSheet.value = !showContactUsSheet.value // Toggle bottom sheet
         }
         Spacer(modifier = Modifier.weight(1f))
-        SignOutButton()
+        // Update the SignOutButton to pass the dialog state
+        SignOutButton(showSignOutDialog)
 
         // Show the contact us bottom sheet if clicked
         if (showContactUsSheet.value) {
@@ -78,7 +83,66 @@ fun ProfileScreen(navController: NavController) {
                 ContactUs() // Contact details
             }
         }
+        val authViewModel = AuthViewModel()
+
+        // Show confirmation dialog for sign out
+        if (showSignOutDialog.value) {
+            SignOutConfirmationDialog(
+                onDismiss = { showSignOutDialog.value = false },
+                onConfirm = {
+                    showSignOutDialog.value = false
+                    // Handle sign out confirmation
+                    authViewModel.signOut()
+                    // Clear the back stack and navigate to the login screen
+                    navController.navigate("login") {
+                        // Clear the back stack
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true // Pop up to and remove the start destination
+                        }
+                        launchSingleTop =
+                            true // Avoid creating multiple instances of the login screen
+                    }
+                }
+            )
+        }
     }
+}
+
+@Composable
+fun SignOutButton(showSignOutDialog: MutableState<Boolean>) {
+    Text(
+        text = stringResource(R.string.sign_out),
+        color = Color(0xFFFF6D00),
+        fontSize = 18.sp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(50.dp)
+            .clickable {
+                // Show the confirmation dialog
+                showSignOutDialog.value = true
+            },
+        textAlign = TextAlign.Center,
+        fontWeight = FontWeight.Bold
+    )
+}
+
+@Composable
+fun SignOutConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = ("Sign Out")) },
+        text = { Text(text = ("Are you sure you want to sign out?")) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(text = ("Sign Out"))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = ("Cancel"))
+            }
+        }
+    )
 }
 
 @Composable
@@ -251,22 +315,6 @@ fun ContactUs() {
     }
 }
 
-
-@Composable
-fun SignOutButton() {
-    Text(
-        text = stringResource(R.string.sign_out),
-        color = Color(0xFFFF6D00),
-        fontSize = 18.sp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(50.dp)
-            .clickable {
-            },
-        textAlign = TextAlign.Center,
-        fontWeight = FontWeight.Bold
-    )
-}
 
 
 @Preview(showBackground = true)

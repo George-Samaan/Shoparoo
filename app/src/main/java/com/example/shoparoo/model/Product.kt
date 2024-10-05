@@ -2,7 +2,7 @@ package com.example.shoparoo.model
 
 import com.google.gson.annotations.SerializedName
 
-data class ForYou(
+data class Product(
 
     @field:SerializedName("products")
     val products: List<ProductsItem?>? = null
