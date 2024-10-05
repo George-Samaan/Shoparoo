@@ -47,8 +47,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.R
+import com.example.shoparoo.ui.auth.view.LoginScreen
+import com.example.shoparoo.ui.nav.Navigation
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 
 
@@ -312,26 +315,6 @@ fun ContactUs() {
     }
 }
 
-
-/*@Composable
-fun SignOutButton(authViewModel: AuthViewModel, navController: NavController) {
-    Text(
-        text = stringResource(R.string.sign_out),
-        color = Color(0xFFFF6D00),
-        fontSize = 18.sp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(50.dp)
-            .clickable {
-                authViewModel.signOut()
-                navController.popBackStack()
-                navController.navigate("login")
-
-            },
-        textAlign = TextAlign.Center,
-        fontWeight = FontWeight.Bold
-    )
-}*/
 
 
 @Preview(showBackground = true)
