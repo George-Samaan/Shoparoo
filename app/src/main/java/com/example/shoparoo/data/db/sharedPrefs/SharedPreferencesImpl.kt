@@ -1,4 +1,4 @@
-package com.example.shoparoo.db.local
+package com.example.shoparoo.data.db.sharedPrefs
 
 import android.content.Context
 

@@ -2,8 +2,8 @@ package com.example.shoparoo.ui.productScreen.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.shoparoo.data.db.repository.Repository
 import com.example.shoparoo.data.network.ApiState
+import com.example.shoparoo.data.repository.Repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch

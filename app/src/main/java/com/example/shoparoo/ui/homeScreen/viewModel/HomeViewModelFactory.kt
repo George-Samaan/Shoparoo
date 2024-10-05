@@ -2,7 +2,7 @@ package com.example.shoparoo.ui.homeScreen.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.shoparoo.data.db.repository.Repository
+import com.example.shoparoo.data.repository.Repository
 
 @Suppress("UNCHECKED_CAST")
 class HomeViewModelFactory(private val repository: Repository) : ViewModelProvider.Factory {

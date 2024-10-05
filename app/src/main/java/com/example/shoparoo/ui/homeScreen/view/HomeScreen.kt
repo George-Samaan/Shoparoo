@@ -58,9 +58,9 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.shoparoo.R
 import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
-import com.example.shoparoo.data.db.repository.RepositoryImpl
 import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
+import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel

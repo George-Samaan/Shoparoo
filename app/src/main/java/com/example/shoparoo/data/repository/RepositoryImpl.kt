@@ -1,4 +1,4 @@
-package com.example.shoparoo.data.db.repository
+package com.example.shoparoo.data.repository
 
 import com.example.shoparoo.data.db.remote.RemoteDataSource
 import com.example.shoparoo.model.Product

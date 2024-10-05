@@ -1,4 +1,4 @@
-package com.example.shoparoo.data.db.repository
+package com.example.shoparoo.data.repository
 
 import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SmartCollections

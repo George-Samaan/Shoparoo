@@ -4,8 +4,8 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.shoparoo.data.db.repository.Repository
 import com.example.shoparoo.data.network.ApiState
+import com.example.shoparoo.data.repository.Repository
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
@@ -24,7 +24,7 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
     private val _userName = MutableStateFlow<String?>(null)
     val userName: StateFlow<String?> get() = _userName
 
-    private val _isLoading = MutableStateFlow(true) // Add this line
+    private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> get() = _isLoading // Expose it
 
     init {
