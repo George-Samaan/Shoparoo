@@ -45,8 +45,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.R
+import com.example.shoparoo.ui.auth.view.LoginScreen
+import com.example.shoparoo.ui.nav.Navigation
 
 
 @SuppressLint("RememberReturnType")
@@ -258,7 +261,8 @@ fun SignOutButton() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(50.dp)
-            .clickable { },
+            .clickable {
+            },
         textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold
     )

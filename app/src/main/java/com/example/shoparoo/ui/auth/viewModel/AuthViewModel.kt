@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 
 class AuthViewModel : ViewModel() {
-    private var _authState: MutableStateFlow<AuthState> = MutableStateFlow(AuthState.Loading)
+    private var _authState: MutableStateFlow<AuthState> = MutableStateFlow(AuthState.UnAuthenticated)
     val authState: MutableStateFlow<AuthState> = _authState
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     val db = Firebase.firestore
@@ -29,14 +29,13 @@ class AuthViewModel : ViewModel() {
 
 
     fun signUp(email: String, pass: String, name: String) {
+        _authState.value = AuthState.Loading
         viewModelScope.launch {
             firebaseAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener {
                 if (it.isSuccessful) {
                     Log.d(TAG, "signUp: success")
                     val user = firebaseAuth.currentUser
-
                     saveUserDataFireBase(user!!.uid, name)
-
                     user!!.sendEmailVerification()
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
@@ -62,6 +61,7 @@ class AuthViewModel : ViewModel() {
     }
 
     fun login(email: String, password: String) {
+        _authState.value = AuthState.Loading
         viewModelScope.launch {
             firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
                 if (it.isSuccessful) {
@@ -82,4 +82,5 @@ sealed class AuthState {
     object Success : AuthState()
     object Failed : AuthState()
     object Authenticated : AuthState()
+    object UnAuthenticated : AuthState()
 }
