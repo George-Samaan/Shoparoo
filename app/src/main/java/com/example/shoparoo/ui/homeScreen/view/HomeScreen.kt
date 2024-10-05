@@ -60,6 +60,7 @@ import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
+import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.nav.BottomNav
@@ -429,12 +430,9 @@ fun MainScreen(
             }
             composable(BottomNav.Categories.route) { }
             composable(BottomNav.Cart.route) { }
-            composable(BottomNav.Profile.route) {
-                ProfileScreen(navController)
-            }
-            composable("settings") {
-                SettingsScreen(navController)
-            }
+            composable(BottomNav.Profile.route) { ProfileScreen(navController) }
+            composable("settings") { SettingsScreen(navController) }
+            composable("login") { LoginScreen(navController)}
         }
     }
 }

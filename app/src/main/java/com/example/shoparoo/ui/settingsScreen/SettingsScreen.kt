@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.webkit.WebView.FindListener
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -45,11 +46,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
+import androidx.navigation.Navigation
+import androidx.navigation.Navigation.findNavController
 import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.R
+import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
+import com.example.shoparoo.ui.nav.Navigation
 
 
-@SuppressLint("RememberReturnType")
 @Composable
 fun ProfileScreen(navController: NavController) {
     // State to control the visibility of the bottom sheet
@@ -67,7 +71,7 @@ fun ProfileScreen(navController: NavController) {
             showContactUsSheet.value = !showContactUsSheet.value // Toggle bottom sheet
         }
         Spacer(modifier = Modifier.weight(1f))
-        SignOutButton()
+        SignOutButton(authViewModel = AuthViewModel(), navController = navController)
 
         // Show the contact us bottom sheet if clicked
         if (showContactUsSheet.value) {
@@ -250,7 +254,7 @@ fun ContactUs() {
 
 
 @Composable
-fun SignOutButton() {
+fun SignOutButton(authViewModel: AuthViewModel, navController: NavController) {
     Text(
         text = stringResource(R.string.sign_out),
         color = Color(0xFFFF6D00),
@@ -258,7 +262,12 @@ fun SignOutButton() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(50.dp)
-            .clickable { },
+            .clickable {
+                authViewModel.signOut()
+                navController.popBackStack()
+                navController.navigate("login")
+
+            },
         textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold
     )
