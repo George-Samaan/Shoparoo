@@ -64,6 +64,7 @@ import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
 import com.example.shoparoo.ui.auth.view.LoginScreen
+import com.example.shoparoo.ui.checkOut.CheckoutScreen
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.nav.BottomNav
@@ -73,6 +74,7 @@ import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModel
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModelFactory
 import com.example.shoparoo.ui.settingsScreen.ProfileScreen
 import com.example.shoparoo.ui.settingsScreen.SettingsScreen
+import com.example.shoparoo.ui.shoppingCart.ShoppingCartScreen
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
@@ -464,7 +466,9 @@ fun MainScreen(
                 )
             }
             composable(BottomNav.Categories.route) { }
-            composable(BottomNav.Cart.route) { }
+            composable(BottomNav.Cart.route) {
+                ShoppingCartScreen(navController)
+            }
 
             composable(BottomNav.Profile.route) { ProfileScreen(navController) }
             composable("settings") { SettingsScreen(navController) }
@@ -474,6 +478,9 @@ fun MainScreen(
             }
             composable("settings") {
                 SettingsScreen(navController)
+            }
+            composable("checkout") {
+                CheckoutScreen(navController)
             }
             composable("brand/{brandId}/{brandTitle}") { backStackEntry ->
                 val brandId = backStackEntry.arguments?.getString("brandId") ?: return@composable
