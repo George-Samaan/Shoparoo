@@ -150,7 +150,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel) {
                     enter = scaleIn(animationSpec = tween(durationMillis = 600)),
                     exit = scaleOut(animationSpec = tween(durationMillis = 600))
                 ) {
-                    ProductGrid(filteredProducts)
+                    ProductGrid(filteredProducts, navController = null)
                 }
             }
         }

@@ -366,13 +366,15 @@ fun ForYouSection(products: List<ProductsItem>) {
 
                     ProductCard(
                         productName = product.title.toString(),
-
-                    //    productPrice = product.variants?.get(0)?.price.toString(),
-                    //    productImage = product.images?.get(0)?.src,
-                        onClick = { }
-
                         productPrice = "$price",
-                        productImage = product.images?.get(0)?.src
+                        productImage = product.images?.get(0)?.src,
+
+//                        productPrice = product.variants?.get(0)?.price.toString(),
+//                        productImage = product.images?.get(0)?.src,
+                        onClick = {
+
+                        }
+
 
                     )
                 }

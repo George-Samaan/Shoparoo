@@ -23,6 +23,7 @@ class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repositor
 
     override fun getSingleProductFromId(id: String): Flow<SingleProduct> {
         return remoteDataSource.getSingleProductFromId(id)
+    }
         
     override fun getWomenProducts(): Flow<Product> {
         return remoteDataSource.getWomenProducts()

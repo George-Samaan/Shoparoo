@@ -160,7 +160,7 @@ fun ProductsScreen(
 }
 
 @Composable
-fun ProductGrid(filteredProducts: List<ProductsItem>, navController: NavController) {
+fun ProductGrid(filteredProducts: List<ProductsItem>, navController: NavController?) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(16.dp),
@@ -175,15 +175,11 @@ fun ProductGrid(filteredProducts: List<ProductsItem>, navController: NavControll
             val price = product.variants?.firstOrNull()?.price?.toDoubleOrNull()?.toInt() ?: 0
             ProductCard(
                 productName = productName,
-
-              //  productPrice = product.variants?.firstOrNull()?.price ?: "No Price",
-               // productImage = product.images?.firstOrNull()?.src ?: "",
-                onClick = {
-                   navController.navigate("productDetails")
-                }
-
                 productPrice = "$price",
-                productImage = product.images?.firstOrNull()?.src ?: ""
+                productImage = product.images?.firstOrNull()?.src ?: "",
+                onClick = {
+                   navController!!.navigate("productDetails")
+                }
 
             )
         }

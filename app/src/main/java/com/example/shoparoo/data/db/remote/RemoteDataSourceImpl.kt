@@ -60,6 +60,15 @@ class RemoteDataSourceImpl(private val apiService: ApiServices) : RemoteDataSour
         val response = apiService.getSingleProduct(id)
         if (response.isSuccessful && response.body() != null) {
             Log.d("RemoteDataSourceImpl", "Product received: ${response.body()!!.product}")
+            emit(response.body()!!)
+        } else {
+            Log.e(
+                "RemoteDataSourceImpl",
+                "Error retrieving product: ${response.errorBody()?.string()}"
+            )
+            throw Throwable("Error retrieving product")
+        }
+    }
 
     override fun getWomenProducts(): Flow<Product> = flow {
         val response = apiService.getWomenProducts()
@@ -75,9 +84,7 @@ class RemoteDataSourceImpl(private val apiService: ApiServices) : RemoteDataSour
             )
             throw Throwable("Error retrieving product")
 
-                "Error retrieving products: ${response.errorBody()?.string()}"
-            )
-            throw Throwable("Error retrieving products")
+
         }
     }
 
