@@ -24,5 +24,21 @@ interface ApiServices {
     suspend fun getSingleProduct(
         @Path("id") id: String
     ): Response<SingleProduct>
+  
+    //women's products
+    @GET("products.json?collection_id=281653805155")
+    suspend fun getWomenProducts(): Response<Product>
+
+    //sales products
+    @GET("products.json?collection_id=281653870691")
+    suspend fun getSalesProducts(): Response<Product>
+
+    //mens products
+    @GET("products.json?collection_id=281653772387")
+    suspend fun getMensProducts(): Response<Product>
+
+    // kids products
+    @GET("products.json?collection_id=281653837923")
+    suspend fun getKidsProducts(): Response<Product>
 
 }

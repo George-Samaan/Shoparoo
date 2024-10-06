@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.shoparoo.R
-import com.example.shoparoo.ui.shoppingCart.OrderSummary
 import java.util.Calendar
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -369,7 +368,7 @@ fun CreditCardItem(onCardAdded: () -> Unit) {
                 .fillMaxWidth()
                 .height(50.dp),
             shape = RoundedCornerShape(25.dp),
-            colors = ButtonDefaults.buttonColors(Color(0xFF673AB7))
+            colors = ButtonDefaults.buttonColors(Color.Black)
         ) {
             Text(text = "Add Card", fontWeight = FontWeight.Bold, color = Color.White)
         }
@@ -385,7 +384,7 @@ fun CheckoutButtonCheck() {
             .padding(16.dp)
             .height(50.dp),
         shape = RoundedCornerShape(25.dp),
-        colors = ButtonDefaults.buttonColors(Color(0xFF673AB7))
+        colors = ButtonDefaults.buttonColors(Color.Black)
     ) {
         Text(text = "Place Order", fontWeight = FontWeight.Bold, color = Color.White)
     }

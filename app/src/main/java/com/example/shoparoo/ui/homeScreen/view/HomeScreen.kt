@@ -64,6 +64,9 @@ import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
 import com.example.shoparoo.ui.auth.view.LoginScreen
+import com.example.shoparoo.ui.categoriesScreen.view.CategoriesScreen
+import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModel
+import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModelFactory
 import com.example.shoparoo.ui.checkOut.CheckoutScreen
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
@@ -358,11 +361,19 @@ fun ForYouSection(products: List<ProductsItem>) {
             ) {
                 items(randomProducts.size) { index ->
                     val product = randomProducts[index]
+                    val price = product.variants?.get(0)?.price?.toDoubleOrNull()?.toInt()
+                        ?: 0 // Convert to int
+
                     ProductCard(
                         productName = product.title.toString(),
-                        productPrice = product.variants?.get(0)?.price.toString(),
-                        productImage = product.images?.get(0)?.src,
+
+                    //    productPrice = product.variants?.get(0)?.price.toString(),
+                    //    productImage = product.images?.get(0)?.src,
                         onClick = { }
+
+                        productPrice = "$price",
+                        productImage = product.images?.get(0)?.src
+
                     )
                 }
             }
@@ -401,7 +412,8 @@ fun ProductCard(productName: String, productPrice: String, productImage: String?
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = productPrice,
+                // this USD if changed will change in all the app till now
+                text = "$productPrice USD",
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
                 color = Color.Gray,
@@ -435,13 +447,20 @@ fun MainScreen(
             )
         )
     )
+    val categoryViewModel: CategoriesViewModel = viewModel(
+        factory = CategoriesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
 
     val smartCollectionsState by viewModel.smartCollections.collectAsState()
     val forYouProductsState by viewModel.forYouProducts.collectAsState()
     val userName by viewModel.userName.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    // Call to fetch smart collections
+// Call to fetch smart collections
     LaunchedEffect(Unit) {
         viewModel.getSmartCollections()
         viewModel.getForYouProducts()
@@ -469,7 +488,9 @@ fun MainScreen(
                     navControllerBottom
                 )
             }
-            composable(BottomNav.Categories.route) { }
+            composable(BottomNav.Categories.route) {
+                CategoriesScreen(categoryViewModel)
+            }
             composable(BottomNav.Cart.route) {
                 ShoppingCartScreen(navControllerBottom)
             }
@@ -479,6 +500,11 @@ fun MainScreen(
             composable("login") { LoginScreen(navControllerBottom)}
             composable(BottomNav.Profile.route) {
                 ProfileScreen(navControllerBottom,navController)
+//             composable(BottomNav.Profile.route) { ProfileScreen(navController1, navController) }
+//             composable("settings") { SettingsScreen(navController1) }
+//             composable("login") { LoginScreen(navController1) }
+//             composable(BottomNav.Profile.route) {
+//                 ProfileScreen(navController1, navController)
             }
             composable("settings") {
                 SettingsScreen(navControllerBottom)
