@@ -424,15 +424,16 @@ fun ProductCard(
                 contentDescription = productName,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp),
+                    .height(155.dp),
                 contentScale = ContentScale.Crop
             )
             Text(
-                text = productName,
+                text = productName.capitalizeWords(),
+                color = primary,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
-                maxLines = 3,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.weight(1f))
