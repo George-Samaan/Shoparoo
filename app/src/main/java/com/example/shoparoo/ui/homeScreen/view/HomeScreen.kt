@@ -148,6 +148,7 @@ fun HomeScreenDesign(
                         )
                     }
                 }
+
                 is ApiState.Success -> {
                     val smartCollections = (smartCollectionsState).data
                     item {
@@ -170,6 +171,7 @@ fun HomeScreenDesign(
                         )
                     }
                 }
+
                 is ApiState.Success -> {
                     val forYouProducts = (forYouProductsState).data
                     item {
@@ -187,7 +189,12 @@ fun HomeScreenDesign(
 }
 
 @Composable
-fun ForYouSection(products: List<ProductsItem>, selectedCurrency: String, conversionRate: Float, currencySymbols: Map<String, String>) {
+fun ForYouSection(
+    products: List<ProductsItem>,
+    selectedCurrency: String,
+    conversionRate: Float,
+    currencySymbols: Map<String, String>
+) {
     val randomProducts = remember { products.shuffled().take(5) }
     val visible = remember { mutableStateOf(false) }
     LaunchedEffect(randomProducts) {
@@ -244,7 +251,7 @@ fun ProductCard(
     productImage: String?,
     currencySymbol: String,
 
-) {
+    ) {
     Card(
         modifier = Modifier
             .width(170.dp)
@@ -283,7 +290,6 @@ fun ProductCard(
         }
     }
 }
-
 
 
 @Composable
@@ -445,21 +451,6 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
 }
 
 
-
-                    ProductCard(
-                        productName = product.title.toString(),
-                        productPrice = "$price",
-                        productImage = product.images?.get(0)?.src,
-                        onClick = {
-
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
 fun String.capitalizeWords(): String {
     return this.split(" ")
         .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
@@ -512,7 +503,6 @@ fun ProductCard(
         }
     }
 }
-
 
 
 @Composable
@@ -609,17 +599,10 @@ fun MainScreen(
                 val brandTitle =
                     backStackEntry.arguments?.getString("brandTitle") ?: return@composable
 
-                ProductsScreen(brandId, brandTitle, navControllerBottom, productViewModel,
-                    navController)
-
                 ProductsScreen(
-                    brandId,
-                    brandTitle,
-                    navControllerBottom,
-                    productViewModel,
+                    brandId, brandTitle, navControllerBottom, productViewModel,
                     navController
                 )
-
             }
         }
     }
@@ -638,185 +621,3 @@ fun HomeScreenPreview() {
         navController = rememberNavController()
     )
 }
-
-
-
-/*@Suppress("UNCHECKED_CAST")
-@Composable
-fun HomeScreenDesign(
-    userName: String,
-    onFavouriteClick: () -> Unit,
-    query: TextFieldValue,
-    onQueryChange: (TextFieldValue) -> Unit,
-    smartCollectionsState: ApiState,
-    forYouProductsState: ApiState,
-    onRefresh: () -> Unit = {},
-    navController: NavController
-) {
-    // Currency state
-    val selectedCurrency = remember { mutableStateOf("EGP") }
-    val conversionRates = remember { mutableStateOf<Map<String, Double>>(emptyMap()) }
-
-    // Fetch currency rates using LaunchedEffect
-    LaunchedEffect(Unit) {
-        val response = currencyApi.getRates("db5f5601837148c482888a4cdf945326") // Replace with your actual API key
-        if (response.isSuccessful) {
-            conversionRates.value = response.body()?.rates ?: emptyMap()
-        }
-    }
-
-    val isRefreshing = remember { mutableStateOf(false) }
-    isRefreshing.value =
-        smartCollectionsState is ApiState.Loading || forYouProductsState is ApiState.Loading
-
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(isRefreshing.value),
-        onRefresh = {
-            isRefreshing.value = true
-            onRefresh()
-        }
-    ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            item {
-                Header(userName, onFavouriteClick)
-            }
-            item {
-                SearchBar(query, onQueryChange)
-            }
-            item {
-                // Currency Switch
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Currency:")
-                    Button(onClick = { selectedCurrency.value = "EGP" }) {
-                        Text("EGP")
-                    }
-                    Button(onClick = { selectedCurrency.value = "USD" }) {
-                        Text("USD")
-                    }
-                }
-            }
-            item {
-                CouponsSliderWithIndicator(
-                    imageList = listOf(
-                        R.drawable.black_friday,
-                        R.drawable.nike_ads,
-                        R.drawable.discount
-                    ),
-                    couponText = "20% Off All Products"
-                )
-            }
-            when (smartCollectionsState) {
-                is ApiState.Loading -> {}
-                is ApiState.Failure -> {
-                    item {
-                        Text(
-                            text = "Error fetching brands",
-                            color = Color.Red,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
-
-                is ApiState.Success -> {
-                    val smartCollections = (smartCollectionsState).data
-                    item {
-                        BrandsSection(
-                            navController = navController,
-                            smartCollections as List<SmartCollectionsItem?>
-                        )
-                    }
-                }
-            }
-            when (forYouProductsState) {
-                is ApiState.Loading -> {}
-                is ApiState.Failure -> {
-                    item {
-                        val errorMessage = (forYouProductsState)
-                        Text(
-                            text = "Error fetching products: $errorMessage",
-                            color = Color.Red,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
-
-                is ApiState.Success -> {
-                    val forYouProducts = (forYouProductsState).data
-                    item {
-                        ForYouSection(
-                            products = forYouProducts as List<ProductsItem>,
-                            selectedCurrency = selectedCurrency.value,
-                            conversionRates = conversionRates.value
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ForYouSection(
-    products: List<ProductsItem>,
-    selectedCurrency: String,
-    conversionRates: Map<String, Double>
-) {
-    val randomProducts = remember { products.shuffled().take(5) }
-    val visible = remember { mutableStateOf(false) }
-
-    LaunchedEffect(randomProducts) {
-        if (randomProducts.isNotEmpty()) {
-            visible.value = true
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp)
-    ) {
-        Text(
-            text = "For You",
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        AnimatedVisibility(
-            visible = visible.value,
-            enter = slideInHorizontally(
-                initialOffsetX = { it },
-                animationSpec = tween(durationMillis = 600) // Duration of the animation
-            ),
-        ) {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                items(randomProducts.size) { index ->
-                    val product = randomProducts[index]
-                    val price = product.variants?.get(0)?.price?.toDoubleOrNull()?.toInt() ?: 0
-
-                    // Convert price based on selected currency
-                    val conversionRate = conversionRates[selectedCurrency] ?: 1.0
-                    val convertedPrice = (price * conversionRate).toInt()
-
-                    ProductCard(
-                        productName = product.title.toString(),
-                        productPrice = "$convertedPrice $selectedCurrency",
-                        productImage = product.images?.get(0)?.src,
-                        onClick = {
-
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-*/

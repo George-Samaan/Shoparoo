@@ -71,12 +71,9 @@ fun ProductsScreen(
     navControllerBottom: NavController,
     viewModel: ProductViewModel,
 
-     navController: NavController,
+    navController: NavController,
 
-
-    navController: NavController
-
-) {
+    ) {
     var searchQuery by remember { mutableStateOf("") }
     var products by remember { mutableStateOf(emptyList<ProductsItem>()) }
     var filteredProducts by remember { mutableStateOf(emptyList<ProductsItem>()) }
@@ -177,10 +174,13 @@ fun ProductsScreen(
                 exit = scaleOut(animationSpec = tween(durationMillis = 600))
             ) {
 
-                ProductGrid(filteredProducts,navController, selectedCurrency, conversionRate, currencySymbols)
-
-                ProductGrid(filteredProducts, navController)
-
+                ProductGrid(
+                    filteredProducts,
+                    navController,
+                    selectedCurrency,
+                    conversionRate,
+                    currencySymbols
+                )
             }
         }
     }
@@ -213,13 +213,7 @@ fun ProductGrid(
                 productName = productName,
                 productPrice = "$formattedPrice",
                 productImage = product.images?.firstOrNull()?.src ?: "",
-
                 currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$")
-
-                onClick = {
-                    navController!!.navigate("productDetails")
-                }
-
             )
         }
     }

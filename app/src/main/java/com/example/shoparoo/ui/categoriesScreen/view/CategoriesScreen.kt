@@ -125,7 +125,13 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                 sliderValue = maxPrice
                 isReady = true
                 filteredProducts =
-                    filterProductsByType(products, selectedProductType, searchQuery, sliderValue, conversionRate)
+                    filterProductsByType(
+                        products,
+                        selectedProductType,
+                        searchQuery,
+                        sliderValue,
+                        conversionRate
+                    )
                 isFilteringComplete = true
             }
 
@@ -146,7 +152,13 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
         isFilteringComplete = false
         delay(300)
         filteredProducts =
-            filterProductsByType(products, selectedProductType, searchQuery, sliderValue, conversionRate)
+            filterProductsByType(
+                products,
+                selectedProductType,
+                searchQuery,
+                sliderValue,
+                conversionRate
+            )
         isFilteringComplete = true
     }
 
@@ -175,12 +187,10 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                     enter = scaleIn(animationSpec = tween(durationMillis = 600)),
                     exit = scaleOut(animationSpec = tween(durationMillis = 600))
                 ) {
-
-                    ProductGrid(filteredProducts, navController = null , selectedCurrency,
-                        conversionRate, currencySymbols)
-
-
-                    ProductGrid(filteredProducts, navController = navController)
+                    ProductGrid(
+                        filteredProducts, navController = null, selectedCurrency,
+                        conversionRate, currencySymbols
+                    )
                 }
             }
         }
@@ -222,7 +232,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
         }
     }
 }
-
 
 
 @Composable
@@ -277,7 +286,8 @@ fun filterProductsByType(
     conversionRate: Float // New parameter for conversion rate
 ): List<ProductsItem> {
     return products.filter { product ->
-        val productPrice = (product.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
+        val productPrice =
+            (product.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
         val matchesSearch = searchQuery.isEmpty() || product.title?.contains(
             searchQuery,
             ignoreCase = true
