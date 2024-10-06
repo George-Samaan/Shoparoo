@@ -18,4 +18,8 @@ interface Repository {
     fun getSalesProducts(): Flow<Product>
     fun getMensProducts(): Flow<Product>
     fun getKidsProducts(): Flow<Product>
+
+
+    fun saveCurrencyPreference(currency: String)
+    fun getCurrencyPreference(): String
 }

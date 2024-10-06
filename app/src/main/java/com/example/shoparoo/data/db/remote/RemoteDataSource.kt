@@ -17,4 +17,6 @@ interface RemoteDataSource {
     fun getMensProducts(): Flow<Product>
     fun getKidsProducts(): Flow<Product>
 
+
+
 }
