@@ -58,15 +58,17 @@ import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.ui.homeScreen.view.ProductCard
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModel
+import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
+
 @Composable
 fun ProductsScreen(
     brandId: String,
     brandTitle: String,
     navControllerBottom: NavController,
     viewModel: ProductViewModel,
-     navController: NavController
+    navController: NavController
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var products by remember { mutableStateOf(emptyList<ProductsItem>()) }
@@ -153,7 +155,7 @@ fun ProductsScreen(
                 enter = scaleIn(animationSpec = tween(durationMillis = 600)),
                 exit = scaleOut(animationSpec = tween(durationMillis = 600))
             ) {
-                ProductGrid(filteredProducts,navController)
+                ProductGrid(filteredProducts, navController)
             }
         }
     }
@@ -178,7 +180,7 @@ fun ProductGrid(filteredProducts: List<ProductsItem>, navController: NavControll
                 productPrice = "$price",
                 productImage = product.images?.firstOrNull()?.src ?: "",
                 onClick = {
-                   navController!!.navigate("productDetails")
+                    navController!!.navigate("productDetails")
                 }
 
             )
@@ -191,11 +193,12 @@ fun SearchBar(searchQuery: String, onSearchQueryChange: (String) -> Unit) {
     TextField(
         value = searchQuery,
         onValueChange = onSearchQueryChange,
-        placeholder = { Text(text = "Search") },
+        placeholder = { Text(text = "Search", color = primary) },
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_search),
-                contentDescription = null
+                contentDescription = null,
+                tint = primary
             )
         },
         modifier = Modifier
@@ -205,7 +208,7 @@ fun SearchBar(searchQuery: String, onSearchQueryChange: (String) -> Unit) {
             .height(56.dp),
         shape = RoundedCornerShape(28.dp),
         colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFF2F2F2),
+            containerColor = Color(0xFFE0E0E0),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         )
@@ -219,7 +222,7 @@ fun LoadingIndicator() {
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
-            color = Color.Black
+            color = primary, strokeWidth = 4.dp,
         )
     }
 }
@@ -230,7 +233,7 @@ fun TopBar(navController: NavController, title: String) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(top = 30.dp, start = 5.dp)
     ) {
         Box(
             modifier = Modifier
@@ -251,8 +254,11 @@ fun TopBar(navController: NavController, title: String) {
             text = title,
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
+            color = primary,
             textAlign = TextAlign.Center,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 50.dp)
         )
     }
 }
@@ -274,8 +280,8 @@ fun PriceSlider(sliderValue: Int, maxPrice: Int, onSliderValueChange: (Int) -> U
             steps = maxPrice - 1,
             modifier = Modifier.padding(horizontal = 30.dp),
             colors = SliderDefaults.colors(
-                thumbColor = Color.Black,
-                activeTrackColor = Color.Black,
+                thumbColor = primary,
+                activeTrackColor = primary,
                 inactiveTrackColor = Color.LightGray
             )
         )
@@ -293,8 +299,7 @@ fun ProductInfoMessage(isEmpty: Boolean, sliderValue: Int) {
     Text(
         message,
         modifier = Modifier
-            .padding(horizontal = 20.dp)
-            .background(MaterialTheme.colors.surface, shape = MaterialTheme.shapes.medium),
+            .padding(horizontal = 20.dp),
         style = MaterialTheme.typography.body2,
         color = MaterialTheme.colors.onSurface
     )
