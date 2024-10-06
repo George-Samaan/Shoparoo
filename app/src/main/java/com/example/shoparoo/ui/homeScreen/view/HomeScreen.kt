@@ -11,6 +11,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -67,6 +68,7 @@ import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
 import com.example.shoparoo.ui.auth.view.LoginScreen
+import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.categoriesScreen.view.CategoriesScreen
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModel
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModelFactory
@@ -84,6 +86,7 @@ import com.example.shoparoo.ui.shoppingCart.ShoppingCartScreen
 import com.example.shoparoo.ui.theme.primary
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import networkListener
 
 @Composable
 fun HomeScreenDesign(
@@ -94,100 +97,110 @@ fun HomeScreenDesign(
     smartCollectionsState: ApiState,
     forYouProductsState: ApiState,
     onRefresh: () -> Unit = {},
-    navController: NavController
+    navController: NavController,
 ) {
-    val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
-    val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
-
-    val currencySymbols = mapOf(
-        "USD" to "$",
-        "EGP" to "EGP "
-    )
-
-    val isRefreshing = remember { mutableStateOf(false) }
-    isRefreshing.value =
-        smartCollectionsState is ApiState.Loading || forYouProductsState is ApiState.Loading
-
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(isRefreshing.value),
-        onRefresh = {
-            isRefreshing.value = true
-            onRefresh()
-        }
-    ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth()
+    val isNetworkAvailable = networkListener()
+    if (!isNetworkAvailable.value) {
+        // Show No Internet connection message
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            item {
-                Header(userName, onFavouriteClick)
-            }
-            item {
-                SearchBar(query, onQueryChange)
-            }
-            item {
-                CouponsSliderWithIndicator(
-                    imageList = listOf(
-                        R.drawable.black_friday,
-                        R.drawable.nike_ads,
-                        R.drawable.discount
-                    ),
-                    couponText = "Shoparoo20"
-                )
-            }
-            when (smartCollectionsState) {
-                is ApiState.Loading -> {}
-                is ApiState.Failure -> {
-                    item {
-                        Text(
-                            text = "Error fetching brands",
-                            color = Color.Red,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
+            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp)
+        }
+    } else {
+        val context = LocalContext.current
+        val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
-                is ApiState.Success -> {
-                    val smartCollections = (smartCollectionsState).data
-                    item {
-                        BrandsSection(
-                            navController = navController,
-                            smartCollections as List<SmartCollectionsItem?>
-                        )
-                    }
-                }
-            }
-            when (forYouProductsState) {
-                is ApiState.Loading -> {}
-                is ApiState.Failure -> {
-                    item {
-                        val errorMessage = (forYouProductsState)
-                        Text(
-                            text = "Error fetching products: $errorMessage",
-                            color = Color.Red,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
+        val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+        val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
-                is ApiState.Success -> {
-                    val forYouProducts = (forYouProductsState).data
-                    item {
-                        ForYouSection(
-                            products = forYouProducts as List<ProductsItem>,
-                            selectedCurrency = selectedCurrency,
-                            conversionRate = conversionRate,
-                            currencySymbols = currencySymbols
-                        )
+        val currencySymbols = mapOf(
+            "USD" to "$",
+            "EGP" to "EGP "
+        )
+
+        val isRefreshing = remember { mutableStateOf(false) }
+        isRefreshing.value =
+            smartCollectionsState is ApiState.Loading || forYouProductsState is ApiState.Loading
+
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(isRefreshing.value),
+            onRefresh = {
+                isRefreshing.value = true
+                onRefresh()
+            }
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                item {
+                    Header(userName, onFavouriteClick)
+                }
+                item {
+                    SearchBar(query, onQueryChange)
+                }
+                item {
+                    CouponsSliderWithIndicator(
+                        imageList = listOf(
+                            R.drawable.black_friday,
+                            R.drawable.nike_ads,
+                            R.drawable.discount
+                        ),
+                        couponText = "Shoparoo20"
+                    )
+                }
+                when (smartCollectionsState) {
+                    is ApiState.Loading -> {}
+                    is ApiState.Failure -> {
+                        item {
+                            Text(
+                                text = "Error fetching brands",
+                                color = Color.Red,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+
+                    is ApiState.Success -> {
+                        val smartCollections = (smartCollectionsState).data
+                        item {
+                            BrandsSection(
+                                navController = navController,
+                                smartCollections as List<SmartCollectionsItem?>
+                            )
+                        }
+                    }
+                }
+                when (forYouProductsState) {
+                    is ApiState.Loading -> {}
+                    is ApiState.Failure -> {
+                        item {
+                            val errorMessage = (forYouProductsState)
+                            Text(
+                                text = "Error fetching products: $errorMessage",
+                                color = Color.Red,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+
+                    is ApiState.Success -> {
+                        val forYouProducts = (forYouProductsState).data
+                        item {
+                            ForYouSection(
+                                products = forYouProducts as List<ProductsItem>,
+                                selectedCurrency = selectedCurrency,
+                                conversionRate = conversionRate,
+                                currencySymbols = currencySymbols
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
-
 @Composable
 fun Header(userName: String, onFavouriteClick: () -> Unit) {
     Row(

@@ -58,10 +58,12 @@ import androidx.navigation.NavController
 import com.example.shoparoo.R
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.ProductsItem
+import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.homeScreen.view.ProductCard
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModel
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
+import networkListener
 import kotlin.math.roundToInt
 
 @Composable
@@ -70,7 +72,6 @@ fun ProductsScreen(
     brandTitle: String,
     navControllerBottom: NavController,
     viewModel: ProductViewModel,
-
     navController: NavController,
 
     ) {
@@ -95,92 +96,102 @@ fun ProductsScreen(
         "USD" to "$",
         "EGP" to "EGP "
     )
-
-
-    // Reset isGridVisible and loading state on initial load
-    LaunchedEffect(Unit) {
-        if (isInitialLoad) {
-            isGridVisible = false
-            isInitialLoad = false
+    val isNetworkAvailable = networkListener()
+    if (!isNetworkAvailable.value) {
+        // Show No Internet connection message
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp)
         }
-    }
-
-    LaunchedEffect(brandId) {
-        isReady = false
-        viewModel.getProductsFromBrandsId(brandId)
-    }
-
-    val productsState = viewModel.productsFromBrands.collectAsState()
-
-    LaunchedEffect(productsState.value) {
-        when (val state = productsState.value) {
-            is ApiState.Success -> {
-                products = (state.data as? List<ProductsItem>) ?: emptyList()
-                filteredProducts = products
-                maxPrice = products.map {
-                    it.variants?.firstOrNull()?.price?.toFloatOrNull()?.toInt() ?: 0
-                }.maxOrNull() ?: 2500
-                sliderValue = maxPrice
-                isReady = true
-                isFilteringComplete = true
-            }
-
-            is ApiState.Loading -> {
-                isReady = false
-                isFilteringComplete = false
-            }
-
-            is ApiState.Failure -> {
-                isReady = true
+    } else {
+        // Reset isGridVisible and loading state on initial load
+        LaunchedEffect(Unit) {
+            if (isInitialLoad) {
+                isGridVisible = false
+                isInitialLoad = false
             }
         }
-    }
 
-    LaunchedEffect(searchQuery, sliderValue) {
-        isFilteringComplete = false
-        delay(300)
-        filteredProducts = products.filter { product ->
-            val productPrice = product.variants?.firstOrNull()?.price?.toFloatOrNull()?.toInt() ?: 0
-            val matchesSearch = searchQuery.isEmpty() || product.title?.contains(
-                searchQuery,
-                ignoreCase = true
-            ) == true
-            val withinPriceRange = productPrice <= sliderValue
-            matchesSearch && withinPriceRange
+        LaunchedEffect(brandId) {
+            isReady = false
+            viewModel.getProductsFromBrandsId(brandId)
         }
-        isFilteringComplete = true
-    }
 
-    LaunchedEffect(isReady, isFilteringComplete) {
-        isGridVisible = isReady && isFilteringComplete
-    }
+        val productsState = viewModel.productsFromBrands.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(navControllerBottom, brandTitle)
-        SearchBar(searchQuery) { query -> searchQuery = query }
+        LaunchedEffect(productsState.value) {
+            when (val state = productsState.value) {
+                is ApiState.Success -> {
+                    products = (state.data as? List<ProductsItem>) ?: emptyList()
+                    filteredProducts = products
+                    maxPrice = products.map {
+                        it.variants?.firstOrNull()?.price?.toFloatOrNull()?.toInt() ?: 0
+                    }.maxOrNull() ?: 2500
+                    sliderValue = maxPrice
+                    isReady = true
+                    isFilteringComplete = true
+                }
 
-        if (!isReady) {
-            LoadingIndicator()
-        } else {
-            PriceSlider(sliderValue, maxPrice) { newValue -> sliderValue = newValue }
+                is ApiState.Loading -> {
+                    isReady = false
+                    isFilteringComplete = false
+                }
 
-            AnimatedContent(targetState = filteredProducts.isEmpty()) { isEmpty ->
-                ProductInfoMessage(isEmpty = isEmpty, sliderValue = sliderValue)
+                is ApiState.Failure -> {
+                    isReady = true
+                }
             }
+        }
 
-            AnimatedVisibility(
-                visible = isGridVisible,
-                enter = scaleIn(animationSpec = tween(durationMillis = 600)),
-                exit = scaleOut(animationSpec = tween(durationMillis = 600))
-            ) {
+        LaunchedEffect(searchQuery, sliderValue) {
+            isFilteringComplete = false
+            delay(300)
+            filteredProducts = products.filter { product ->
+                val productPrice =
+                    product.variants?.firstOrNull()?.price?.toFloatOrNull()?.toInt() ?: 0
+                val matchesSearch = searchQuery.isEmpty() || product.title?.contains(
+                    searchQuery,
+                    ignoreCase = true
+                ) == true
+                val withinPriceRange = productPrice <= sliderValue
+                matchesSearch && withinPriceRange
+            }
+            isFilteringComplete = true
+        }
 
-                ProductGrid(
-                    filteredProducts,
-                    navController,
-                    selectedCurrency,
-                    conversionRate,
-                    currencySymbols
-                )
+        LaunchedEffect(isReady, isFilteringComplete) {
+            isGridVisible = isReady && isFilteringComplete
+        }
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopBar(navControllerBottom, brandTitle)
+            SearchBar(searchQuery) { query -> searchQuery = query }
+
+            if (!isReady) {
+                LoadingIndicator()
+            } else {
+                PriceSlider(sliderValue, maxPrice) { newValue -> sliderValue = newValue }
+
+                AnimatedContent(targetState = filteredProducts.isEmpty()) { isEmpty ->
+                    ProductInfoMessage(isEmpty = isEmpty, sliderValue = sliderValue)
+                }
+
+                AnimatedVisibility(
+                    visible = isGridVisible,
+                    enter = scaleIn(animationSpec = tween(durationMillis = 600)),
+                    exit = scaleOut(animationSpec = tween(durationMillis = 600))
+                ) {
+
+                    ProductGrid(
+                        filteredProducts,
+                        navController,
+                        selectedCurrency,
+                        conversionRate,
+                        currencySymbols
+                    )
+                }
             }
         }
     }

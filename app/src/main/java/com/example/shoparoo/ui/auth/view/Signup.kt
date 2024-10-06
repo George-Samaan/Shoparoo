@@ -163,7 +163,7 @@ fun Signup(navController: NavHostController) {
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
-            YourLottieAnimation()
+            ReusableLottie(R.raw.login_anim, R.drawable.ic_bg, 200.dp)
         }
 
 

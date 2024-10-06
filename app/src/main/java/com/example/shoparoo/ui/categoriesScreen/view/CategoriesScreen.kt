@@ -44,6 +44,7 @@ import androidx.navigation.NavController
 import com.example.shoparoo.R
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.ProductsItem
+import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModel
 import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.productScreen.view.PriceSlider
@@ -53,6 +54,7 @@ import com.example.shoparoo.ui.theme.Purple40
 import com.example.shoparoo.ui.theme.bg
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
+import networkListener
 
 @Composable
 fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavController) {
@@ -90,147 +92,157 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
         // Add more currency symbols as needed
     )
 
-
-    LaunchedEffect(Unit) {
-        viewModel.getWomenProducts()
-        viewModel.getMensProducts()
-        viewModel.getSalesProducts()
-        viewModel.getKidsProducts()
-    }
-
-    LaunchedEffect(
-        selectedFilter,
-        selectedProductType,
-        menProductsState.value,
-        womenProductsState.value,
-        salesProductsState.value,
-        kidsProductsState.value
-    ) {
-        val allProducts = when (selectedFilter) {
-            "Men" -> menProductsState.value
-            "Women" -> womenProductsState.value
-            "Kids" -> kidsProductsState.value
-            "Sale" -> salesProductsState.value
-            else -> null
-        }
-
-        when (val state = allProducts) {
-            is ApiState.Success -> {
-                products = (state.data as? List<ProductsItem>) ?: emptyList()
-                maxPrice = products.map {
-                    // Apply conversion rate to price
-                    (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
-                }.maxOrNull()?.toInt() ?: 2500
-
-                sliderValue = maxPrice
-                isReady = true
-                filteredProducts =
-                    filterProductsByType(
-                        products,
-                        selectedProductType,
-                        searchQuery,
-                        sliderValue,
-                        conversionRate
-                    )
-                isFilteringComplete = true
-            }
-
-            is ApiState.Loading -> {
-                isReady = false
-                isFilteringComplete = false
-            }
-
-            is ApiState.Failure -> {
-                isReady = true
-            }
-
-            else -> {}
-        }
-    }
-
-    LaunchedEffect(searchQuery, sliderValue, selectedProductType) {
-        isFilteringComplete = false
-        delay(300)
-        filteredProducts =
-            filterProductsByType(
-                products,
-                selectedProductType,
-                searchQuery,
-                sliderValue,
-                conversionRate
-            )
-        isFilteringComplete = true
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            com.example.shoparoo.ui.productScreen.view.SearchBar(
-                searchQuery = searchQuery,
-                onSearchQueryChange = { query -> searchQuery = query },
-            )
-
-            FilterBar(selectedFilter) { filter ->
-                selectedFilter = filter
-            }
-
-            PriceSlider(sliderValue, maxPrice) { newValue -> sliderValue = newValue }
-
-            if (!isReady) {
-                LoadingIndicator()
-            } else {
-                AnimatedContent(targetState = filteredProducts.isEmpty()) { isEmpty ->
-                    ProductInfoMessage(isEmpty = isEmpty, sliderValue = sliderValue)
-                }
-
-                AnimatedVisibility(
-                    visible = isReady && isFilteringComplete,
-                    enter = scaleIn(animationSpec = tween(durationMillis = 600)),
-                    exit = scaleOut(animationSpec = tween(durationMillis = 600))
-                ) {
-                    ProductGrid(
-                        filteredProducts, navController = null, selectedCurrency,
-                        conversionRate, currencySymbols
-                    )
-                }
-            }
-        }
-
-        // Main Floating Action Button
-        val fabModifier = Modifier
-            .align(Alignment.TopEnd)
-            .padding(top = 8.dp, end = 16.dp)
-
-        FloatingActionButton(
-            onClick = { showProductTypeMenu = !showProductTypeMenu },
-            containerColor = primary,
-            contentColor = Color.White,
-            modifier = fabModifier
+    val isNetworkAvailable = networkListener()
+    if (!isNetworkAvailable.value) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            if (showProductTypeMenu) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_close),
-                    contentDescription = "Show Filters"
-                )
-            } else {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_filter),
-                    contentDescription = "Filter Products"
-                )
+            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp)
+        }
+    } else {
+        LaunchedEffect(Unit) {
+            viewModel.getWomenProducts()
+            viewModel.getMensProducts()
+            viewModel.getSalesProducts()
+            viewModel.getKidsProducts()
+        }
+
+        LaunchedEffect(
+            selectedFilter,
+            selectedProductType,
+            menProductsState.value,
+            womenProductsState.value,
+            salesProductsState.value,
+            kidsProductsState.value
+        ) {
+            val allProducts = when (selectedFilter) {
+                "Men" -> menProductsState.value
+                "Women" -> womenProductsState.value
+                "Kids" -> kidsProductsState.value
+                "Sale" -> salesProductsState.value
+                else -> null
+            }
+
+            when (val state = allProducts) {
+                is ApiState.Success -> {
+                    products = (state.data as? List<ProductsItem>) ?: emptyList()
+                    maxPrice = products.map {
+                        // Apply conversion rate to price
+                        (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
+                    }.maxOrNull()?.toInt() ?: 2500
+
+                    sliderValue = maxPrice
+                    isReady = true
+                    filteredProducts =
+                        filterProductsByType(
+                            products,
+                            selectedProductType,
+                            searchQuery,
+                            sliderValue,
+                            conversionRate
+                        )
+                    isFilteringComplete = true
+                }
+
+                is ApiState.Loading -> {
+                    isReady = false
+                    isFilteringComplete = false
+                }
+
+                is ApiState.Failure -> {
+                    isReady = true
+                }
+
+                else -> {}
             }
         }
 
-        // FABs appearing under the main FAB
-        if (showProductTypeMenu) {
-            FilterTypeFABs(
-                selectedProductType = selectedProductType,
-                onProductTypeSelected = { type ->
-                    selectedProductType = type
-                    showProductTypeMenu = false // Close menu after selection
-                },
-                modifier = Modifier.align(Alignment.TopEnd) // Aligning to the right
-            )
+        LaunchedEffect(searchQuery, sliderValue, selectedProductType) {
+            isFilteringComplete = false
+            delay(300)
+            filteredProducts =
+                filterProductsByType(
+                    products,
+                    selectedProductType,
+                    searchQuery,
+                    sliderValue,
+                    conversionRate
+                )
+            isFilteringComplete = true
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                com.example.shoparoo.ui.productScreen.view.SearchBar(
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { query -> searchQuery = query },
+                )
+
+                FilterBar(selectedFilter) { filter ->
+                    selectedFilter = filter
+                }
+
+                PriceSlider(sliderValue, maxPrice) { newValue -> sliderValue = newValue }
+
+                if (!isReady) {
+                    LoadingIndicator()
+                } else {
+                    AnimatedContent(targetState = filteredProducts.isEmpty()) { isEmpty ->
+                        ProductInfoMessage(isEmpty = isEmpty, sliderValue = sliderValue)
+                    }
+
+                    AnimatedVisibility(
+                        visible = isReady && isFilteringComplete,
+                        enter = scaleIn(animationSpec = tween(durationMillis = 600)),
+                        exit = scaleOut(animationSpec = tween(durationMillis = 600))
+                    ) {
+                        ProductGrid(
+                            filteredProducts, navController = null, selectedCurrency,
+                            conversionRate, currencySymbols
+                        )
+                    }
+                }
+            }
+
+            // Main Floating Action Button
+            val fabModifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 8.dp, end = 16.dp)
+
+            FloatingActionButton(
+                onClick = { showProductTypeMenu = !showProductTypeMenu },
+                containerColor = primary,
+                contentColor = Color.White,
+                modifier = fabModifier
+            ) {
+                if (showProductTypeMenu) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_close),
+                        contentDescription = "Show Filters"
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_filter),
+                        contentDescription = "Filter Products"
+                    )
+                }
+            }
+
+            // FABs appearing under the main FAB
+            if (showProductTypeMenu) {
+                FilterTypeFABs(
+                    selectedProductType = selectedProductType,
+                    onProductTypeSelected = { type ->
+                        selectedProductType = type
+                        showProductTypeMenu = false // Close menu after selection
+                    },
+                    modifier = Modifier.align(Alignment.TopEnd) // Aligning to the right
+                )
+            }
         }
     }
+
 }
 
 
