@@ -38,11 +38,9 @@ fun BottomNavigationBar(navController: NavController) {
     ) {
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
         items.forEach { item ->
-            // Determine if the item should be selected
-            // Determine if the item should be selected
             val isSelected = currentRoute == item.route ||
                     (item == BottomNav.Cart && (currentRoute == "cart" || currentRoute == "checkout")) ||
-                    (item == BottomNav.Profile && (currentRoute == "profile" || currentRoute == "settings")) || // Check for profile and settings
+                    (item == BottomNav.Profile && (currentRoute == "profile" || currentRoute == "settings")) ||
                     (currentRoute?.startsWith("brand/") == true && item == BottomNav.Home)
 
 

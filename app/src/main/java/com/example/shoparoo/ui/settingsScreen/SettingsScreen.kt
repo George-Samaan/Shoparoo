@@ -47,11 +47,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.R
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.nav.BottomNav
-import com.example.shoparoo.ui.nav.Navigation
 
 
 @Composable
@@ -99,14 +97,6 @@ fun ProfileScreen(navControllergg: NavController, navController: NavController) 
                         }
                         launchSingleTop = true
                     }
-//                    navController.navigate("login") {
-//                        // Clear the back stack
-//                        popUpTo(navController.graph.startDestinationId) {
-//                            inclusive = true // Pop up to and remove the start destination
-//                        }
-//                        launchSingleTop =
-//                            true // Avoid creating multiple instances of the login screen
-//                    }
                 }
             )
         }
@@ -181,7 +171,11 @@ fun ProfileHeader() {
 }
 
 @Composable
-fun ProfileOptions(navController: NavController, isContactUsSheetOpen: Boolean, onContactUsClick: () -> Unit) {
+fun ProfileOptions(
+    navController: NavController,
+    isContactUsSheetOpen: Boolean,
+    onContactUsClick: () -> Unit
+) {
     Column {
         /*ProfileOptionItem(
             icon = painterResource(id = R.drawable.shopping),
@@ -195,11 +189,11 @@ fun ProfileOptions(navController: NavController, isContactUsSheetOpen: Boolean, 
             onClick = { navController.navigate("wishlist") }
         )*/
 
-       /* ProfileOptionItem(
-            icon = painterResource(id = R.drawable.location),
-            label = stringResource(R.string.delivery_address),
-            onClick = { navController.navigate("deliveryAddress") }
-        )*/
+        /* ProfileOptionItem(
+             icon = painterResource(id = R.drawable.location),
+             label = stringResource(R.string.delivery_address),
+             onClick = { navController.navigate("deliveryAddress") }
+         )*/
 
         ProfileOptionItem(
             icon = painterResource(id = R.drawable.settings),
@@ -217,7 +211,12 @@ fun ProfileOptions(navController: NavController, isContactUsSheetOpen: Boolean, 
 
 
 @Composable
-fun ProfileOptionItem(icon: Painter, label: String, onClick: () -> Unit = {}, isSheetOpen: Boolean = false) {
+fun ProfileOptionItem(
+    icon: Painter,
+    label: String,
+    onClick: () -> Unit = {},
+    isSheetOpen: Boolean = false
+) {
     // Select the correct icon based on whether the bottom sheet is open or not
     val arrowIcon = if (isSheetOpen) R.drawable.ic_arrow_down else R.drawable.ic_arrow
 
@@ -269,7 +268,8 @@ fun BottomSheetSetting(onDismiss: () -> Unit, content: @Composable () -> Unit) {
 @Composable
 fun ContactUs() {
     val context = LocalContext.current
-    val clipboardManager = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+    val clipboardManager =
+        remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
 
     Column(modifier = Modifier.padding(10.dp)) {
 
@@ -321,7 +321,6 @@ fun ContactUs() {
 }
 
 
-
 @Composable
 fun SignOutButton(authViewModel: AuthViewModel, navController: NavController) {
     Text(
@@ -334,7 +333,9 @@ fun SignOutButton(authViewModel: AuthViewModel, navController: NavController) {
             .clickable {
                 authViewModel.signOut()
                 navController.navigate("login") {
-                    popUpTo(BottomNav.Home.route) { inclusive = true } // Clear back stack including Home
+                    popUpTo(BottomNav.Home.route) {
+                        inclusive = true
+                    } // Clear back stack including Home
                 }
 
             },
@@ -347,5 +348,5 @@ fun SignOutButton(authViewModel: AuthViewModel, navController: NavController) {
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
-  //  ProfileScreen(navControllergg = rememberNavController(), navController = navController)
+    //  ProfileScreen(navControllergg = rememberNavController(), navController = navController)
 }

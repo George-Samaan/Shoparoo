@@ -368,14 +368,9 @@ fun ForYouSection(products: List<ProductsItem>) {
                         productName = product.title.toString(),
                         productPrice = "$price",
                         productImage = product.images?.get(0)?.src,
-
-//                        productPrice = product.variants?.get(0)?.price.toString(),
-//                        productImage = product.images?.get(0)?.src,
                         onClick = {
 
                         }
-
-
                     )
                 }
             }
@@ -502,11 +497,6 @@ fun MainScreen(
             composable("login") { LoginScreen(navControllerBottom)}
             composable(BottomNav.Profile.route) {
                 ProfileScreen(navControllerBottom,navController)
-//             composable(BottomNav.Profile.route) { ProfileScreen(navController1, navController) }
-//             composable("settings") { SettingsScreen(navController1) }
-//             composable("login") { LoginScreen(navController1) }
-//             composable(BottomNav.Profile.route) {
-//                 ProfileScreen(navController1, navController)
             }
             composable("settings") {
                 SettingsScreen(navControllerBottom)
