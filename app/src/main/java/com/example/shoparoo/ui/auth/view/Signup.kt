@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -32,9 +31,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,6 +60,7 @@ import androidx.navigation.NavHostController
 import com.example.shoparoo.R
 import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
+import com.example.shoparoo.ui.theme.primary
 
 @Composable
 fun Signup(navController: NavHostController) {
@@ -127,7 +125,11 @@ fun Signup(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
-        Row(modifier = Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 15.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 35.dp, start = 15.dp, top = 25.dp)
+        ) {
             Box(
                 modifier = Modifier
                     .size(50.dp)
@@ -145,19 +147,31 @@ fun Signup(navController: NavHostController) {
             }
         }
 
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 25.dp)
+        ) {
+            Box(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    "Sign up to Shoparoo",
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = primary,
+                    modifier = Modifier.padding(top = 30.dp, start = 8.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            YourLottieAnimation()
+        }
 
 
-        Text(
-            "Sign up to Shoparoo",
-            fontSize = 40.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 100.dp),
-        )
-        nameFields(nameValue, "Name", nameValidation)
-        nameFields(emailValue, "Email", mailValidation)
+        NameFields(nameValue, "Name", nameValidation)
+        NameFields(emailValue, "Email", mailValidation)
         PasswordField(passValue, "password", passValidation)
         PasswordField(confirmpassValue, "confirmPassword", cPassValidation)
-        Spacer(modifier = Modifier.padding(top = 111.dp))
+        Spacer(modifier = Modifier.padding(top = 30.dp))
         Button(
             onClick = {
                 nameValidation = nameValue.value.isEmpty()
@@ -225,14 +239,12 @@ fun Signup(navController: NavHostController) {
                 )
             }
         }
-
-
     }
 
 }
 
 @Composable
-private fun nameFields(
+private fun NameFields(
     nameValue: MutableState<String>,
     name: String,
     Validation: Boolean,
@@ -240,17 +252,17 @@ private fun nameFields(
     ) {
     Column {
         OutlinedTextField(
-            label = { Text("Enter your $name") },
+            label = { Text("Enter $name") },
             leadingIcon = {
                 if (name == "Name") {
                     Icon(
                         Icons.Filled.Person, contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = primary
                     )
                 } else
                     Icon(
                         Icons.Filled.Email, contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = primary
                     )
 
             },
@@ -260,12 +272,12 @@ private fun nameFields(
             shape = RoundedCornerShape(25.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 25.dp, vertical = 10.dp),
+                .padding(horizontal = 45.dp, vertical = 15.dp),
             isError = Validation
         )
     }
     if (nameValue.value.isEmpty() && Validation)
-        Text("Don't leave this field empty", color = Color.Red)
+        Row("Don't leave this field empty")
     else if (Validation && name == "Email")
         Text("Enter correct $name", color = Color.Red)
 }
@@ -287,14 +299,14 @@ fun PasswordField(
         leadingIcon = {
             Icon(
                 Icons.Filled.Lock, contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = primary
             )
         },
         trailingIcon = {
             Icon(
                 if (showPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = primary,
                 modifier = Modifier.clickable {
                     showPassword = !showPassword
                 }
@@ -305,14 +317,25 @@ fun PasswordField(
         shape = RoundedCornerShape(25.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 25.dp, vertical = 10.dp),
+            .padding(horizontal = 45.dp, vertical = 15.dp),
         isError = Validation
 
     )
     if (textValue.value.isEmpty() && Validation)
-        Text("Don't leave this field empty", color = Color.Red)
+        Row("Don't leave this field empty")
     else if (Validation && title == "password")
         Text("enter valid password", color = Color.Red)
-    else if (Validation && title == "confirmPassword")
+    else if (Validation && title == "Confirm Password")
         Text("passwords don't match", color = Color.Red)
+}
+
+@Composable
+fun Row(mssg: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 60.dp)
+    ) {
+        Text(mssg, color = Color.Red)
+    }
 }

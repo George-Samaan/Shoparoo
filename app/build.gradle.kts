@@ -96,4 +96,8 @@ dependencies {
     //google icons
     implementation("androidx.compose.material:material-icons-extended-android:1.7.2")
 
+    //Animation
+    implementation("com.airbnb.android:lottie-compose:6.0.0")
+
+
 }
