@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.shoparoo.R
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.ProductsItem
@@ -49,7 +50,7 @@ import com.example.shoparoo.ui.theme.Purple40
 import kotlinx.coroutines.delay
 
 @Composable
-fun CategoriesScreen(viewModel: CategoriesViewModel) {
+fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("Men") } // Default filter
     var sliderValue by remember { mutableIntStateOf(0) }
@@ -150,7 +151,8 @@ fun CategoriesScreen(viewModel: CategoriesViewModel) {
                     enter = scaleIn(animationSpec = tween(durationMillis = 600)),
                     exit = scaleOut(animationSpec = tween(durationMillis = 600))
                 ) {
-                    ProductGrid(filteredProducts, navController = null)
+
+                    ProductGrid(filteredProducts, navController = navController)
                 }
             }
         }

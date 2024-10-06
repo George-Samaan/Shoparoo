@@ -486,7 +486,7 @@ fun MainScreen(
                 )
             }
             composable(BottomNav.Categories.route) {
-                CategoriesScreen(categoryViewModel)
+                CategoriesScreen(categoryViewModel, navController)
             }
             composable(BottomNav.Cart.route) {
                 ShoppingCartScreen(navControllerBottom)
