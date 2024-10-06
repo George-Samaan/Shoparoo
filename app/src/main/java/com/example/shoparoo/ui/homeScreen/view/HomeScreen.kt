@@ -505,7 +505,9 @@ fun MainScreen(
             composable(BottomNav.Cart.route) {
                 ShoppingCartScreen(navControllerBottom)
             }
-
+            composable(BottomNav.orders.route) {
+                Text(text = "Orders Screen")
+            }
             composable(BottomNav.Profile.route) {
                 ProfileScreen(
                     navControllerBottom,
