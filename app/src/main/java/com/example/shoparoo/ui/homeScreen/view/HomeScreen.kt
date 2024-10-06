@@ -325,7 +325,7 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
             text = brandName.capitalizeWords(),
             color = primary,
             fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
+            fontSize = 17.sp,
             modifier = Modifier.padding(top = 12.dp)
         )
     }
@@ -416,7 +416,7 @@ fun ProductCard(
                 text = productName.capitalizeWords(),
                 color = primary,
                 fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
+                fontSize = 16.sp,
                 modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
                 maxLines = 2, // Set to 2 lines
                 overflow = TextOverflow.Ellipsis
