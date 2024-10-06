@@ -39,6 +39,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.shoparoo.R
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.ProductsItem
@@ -48,10 +50,12 @@ import com.example.shoparoo.ui.productScreen.view.PriceSlider
 import com.example.shoparoo.ui.productScreen.view.ProductGrid
 import com.example.shoparoo.ui.productScreen.view.ProductInfoMessage
 import com.example.shoparoo.ui.theme.Purple40
+import com.example.shoparoo.ui.theme.bg
+import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
 
 @Composable
-fun CategoriesScreen(viewModel: CategoriesViewModel) {
+fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("Men") } // Default filter
     var sliderValue by remember { mutableIntStateOf(0) }
@@ -171,8 +175,12 @@ fun CategoriesScreen(viewModel: CategoriesViewModel) {
                     enter = scaleIn(animationSpec = tween(durationMillis = 600)),
                     exit = scaleOut(animationSpec = tween(durationMillis = 600))
                 ) {
+
                     ProductGrid(filteredProducts, navController = null , selectedCurrency,
                         conversionRate, currencySymbols)
+
+
+                    ProductGrid(filteredProducts, navController = navController)
                 }
             }
         }
@@ -184,7 +192,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel) {
 
         FloatingActionButton(
             onClick = { showProductTypeMenu = !showProductTypeMenu },
-            containerColor = Color.Black,
+            containerColor = primary,
             contentColor = Color.White,
             modifier = fabModifier
         ) {
@@ -298,11 +306,12 @@ fun FilterBar(
         filters.forEach { filter ->
             Text(
                 text = filter,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = if (filter == selectedFilter) Purple40 else Color.Black,
+                color = if (filter == selectedFilter) primary else Color.Black,
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
-                    .background(if (filter == selectedFilter) Color.LightGray else Color.Transparent)
+                    .background(if (filter == selectedFilter) bg else Color.Transparent)
                     .clickable { onFilterSelected(filter) }
                     .padding(8.dp)
             )

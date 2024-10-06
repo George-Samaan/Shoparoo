@@ -81,6 +81,7 @@ import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModelFactory
 import com.example.shoparoo.ui.settingsScreen.ProfileScreen
 import com.example.shoparoo.ui.settingsScreen.SettingsScreen
 import com.example.shoparoo.ui.shoppingCart.ShoppingCartScreen
+import com.example.shoparoo.ui.theme.primary
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
@@ -311,7 +312,7 @@ fun ProfileSection(userName: String) {
             contentScale = ContentScale.Crop
         )
         Column(modifier = Modifier.padding(start = 10.dp)) {
-            Text("Hello!", fontSize = 16.sp)
+            Text("Hello!", fontSize = 18.sp)
             Text(userName, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
     }
@@ -336,11 +337,12 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
     TextField(
         value = query,
         onValueChange = onQueryChange,
-        placeholder = { Text(text = "Search") },
+        placeholder = { Text(text = "Search", color = primary) },
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_search),
-                contentDescription = null
+                contentDescription = null,
+                tint = primary
             )
         },
         modifier = Modifier
@@ -350,7 +352,7 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
             .height(56.dp),
         shape = RoundedCornerShape(28.dp),
         colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFF2F2F2),
+            containerColor = Color(0xFFE0E0E0),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         )
@@ -433,14 +435,83 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
             )
         }
         Text(
-            text = brandName,
+            text = brandName.capitalizeWords(),
+            color = primary,
             fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
+            fontSize = 17.sp,
             modifier = Modifier.padding(top = 12.dp)
         )
     }
 }
 
+
+
+                    ProductCard(
+                        productName = product.title.toString(),
+                        productPrice = "$price",
+                        productImage = product.images?.get(0)?.src,
+                        onClick = {
+
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+fun String.capitalizeWords(): String {
+    return this.split(" ")
+        .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
+}
+
+@Composable
+fun ProductCard(
+    productName: String,
+    productPrice: String,
+    productImage: String?,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .width(170.dp)
+            .height(240.dp)
+            .padding(6.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF2F2F2)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+        onClick = onClick
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = rememberAsyncImagePainter(model = productImage),
+                contentDescription = productName,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(155.dp),
+                contentScale = ContentScale.Crop
+            )
+            Text(
+                text = productName.capitalizeWords(),
+                color = primary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
+                maxLines = 2, // Set to 2 lines
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.weight(1f))
+            Text(
+                // this USD if changed will change in all the app till now
+                text = "$productPrice USD",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
+            )
+        }
+    }
+}
 
 
 
@@ -508,17 +579,24 @@ fun MainScreen(
                 )
             }
             composable(BottomNav.Categories.route) {
-                CategoriesScreen(categoryViewModel)
+                CategoriesScreen(categoryViewModel, navController)
             }
             composable(BottomNav.Cart.route) {
                 ShoppingCartScreen(navControllerBottom)
             }
-
-            composable(BottomNav.Profile.route) { ProfileScreen(navControllerBottom, navController) }
-            composable("settings") { SettingsScreen(navControllerBottom) }
-            composable("login") { LoginScreen(navControllerBottom)}
+            composable(BottomNav.orders.route) {
+                Text(text = "Orders Screen")
+            }
             composable(BottomNav.Profile.route) {
-                ProfileScreen(navControllerBottom,navController)
+                ProfileScreen(
+                    navControllerBottom,
+                    navController
+                )
+            }
+            composable("settings") { SettingsScreen(navControllerBottom) }
+            composable("login") { LoginScreen(navControllerBottom) }
+            composable(BottomNav.Profile.route) {
+                ProfileScreen(navControllerBottom, navController)
             }
             composable("settings") {
                 SettingsScreen(navControllerBottom)
@@ -530,8 +608,18 @@ fun MainScreen(
                 val brandId = backStackEntry.arguments?.getString("brandId") ?: return@composable
                 val brandTitle =
                     backStackEntry.arguments?.getString("brandTitle") ?: return@composable
+
                 ProductsScreen(brandId, brandTitle, navControllerBottom, productViewModel,
                     navController)
+
+                ProductsScreen(
+                    brandId,
+                    brandTitle,
+                    navControllerBottom,
+                    productViewModel,
+                    navController
+                )
+
             }
         }
     }
