@@ -114,15 +114,3 @@ fun CouponsSliderWithIndicator(
     }
 }
 
-/*
-@Preview(showBackground = true)
-@Composable
-fun CouponsSliderWithIndicatorPreview() {
-    CouponsSliderWithIndicator(
-        imageList = listOf(
-            R.drawable.ic_watch,
-            R.drawable.fifty_off,
-            R.drawable.nike_discount
-        )
-    )
-}*/

@@ -189,110 +189,6 @@ fun HomeScreenDesign(
 }
 
 @Composable
-fun ForYouSection(
-    products: List<ProductsItem>,
-    selectedCurrency: String,
-    conversionRate: Float,
-    currencySymbols: Map<String, String>
-) {
-    val randomProducts = remember { products.shuffled().take(5) }
-    val visible = remember { mutableStateOf(false) }
-    LaunchedEffect(randomProducts) {
-        if (randomProducts.isNotEmpty()) {
-            visible.value = true
-        }
-    }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp)
-    ) {
-        Text(
-            text = "For You",
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        AnimatedVisibility(
-            visible = visible.value,
-            enter = slideInHorizontally(
-                initialOffsetX = { it },
-                animationSpec = tween(durationMillis = 600)
-            ),
-        ) {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                items(randomProducts.size) { index ->
-                    val product = products[index]
-                    val priceInUSD = product.variants?.get(0)?.price?.toDoubleOrNull() ?: 0.0
-                    val convertedPrice = priceInUSD * conversionRate
-
-                    val formattedPrice = String.format("%.2f", convertedPrice)
-
-                    ProductCard(
-                        productName = product.title.toString(),
-                        productPrice = formattedPrice,
-                        productImage = product.images?.get(0)?.src,
-                        currencySymbol = currencySymbols[selectedCurrency] ?: "$"
-                    )
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun ProductCard(
-    productName: String,
-    productPrice: String,
-    productImage: String?,
-    currencySymbol: String,
-
-    ) {
-    Card(
-        modifier = Modifier
-            .width(170.dp)
-            .height(240.dp)
-            .padding(6.dp)
-            .clickable {},
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEEEE)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Image(
-                painter = rememberAsyncImagePainter(model = productImage),
-                contentDescription = productName,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp),
-                contentScale = ContentScale.Crop
-            )
-            Text(
-                text = productName,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = "$currencySymbol$productPrice",
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
-            )
-        }
-    }
-}
-
-
-@Composable
 fun Header(userName: String, onFavouriteClick: () -> Unit) {
     Row(
         modifier = Modifier
@@ -450,10 +346,59 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
     }
 }
 
+@Composable
+fun ForYouSection(
+    products: List<ProductsItem>,
+    selectedCurrency: String,
+    conversionRate: Float,
+    currencySymbols: Map<String, String>
+) {
+    val randomProducts = remember { products.shuffled().take(5) }
+    val visible = remember { mutableStateOf(false) }
+    LaunchedEffect(randomProducts) {
+        if (randomProducts.isNotEmpty()) {
+            visible.value = true
+        }
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp)
+    ) {
+        Text(
+            text = "For You",
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        AnimatedVisibility(
+            visible = visible.value,
+            enter = slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(durationMillis = 600)
+            ),
+        ) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                items(randomProducts.size) { index ->
+                    val product = products[index]
+                    val priceInUSD = product.variants?.get(0)?.price?.toDoubleOrNull() ?: 0.0
+                    val convertedPrice = priceInUSD * conversionRate
 
-fun String.capitalizeWords(): String {
-    return this.split(" ")
-        .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
+                    val formattedPrice = String.format("%.2f", convertedPrice)
+
+                    ProductCard(
+                        productName = product.title.toString(),
+                        productPrice = formattedPrice,
+                        productImage = product.images?.get(0)?.src,
+                        currencySymbol = currencySymbols[selectedCurrency] ?: "$"
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -461,17 +406,17 @@ fun ProductCard(
     productName: String,
     productPrice: String,
     productImage: String?,
-    onClick: () -> Unit
+    currencySymbol: String,
 ) {
     Card(
         modifier = Modifier
             .width(170.dp)
             .height(240.dp)
-            .padding(6.dp),
+            .padding(6.dp)
+            .clickable {},
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF2F2F2)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-        onClick = onClick
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEEEE)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Image(
@@ -479,24 +424,22 @@ fun ProductCard(
                 contentDescription = productName,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(155.dp),
+                    .height(140.dp),
                 contentScale = ContentScale.Crop
             )
             Text(
-                text = productName.capitalizeWords(),
-                color = primary,
+                text = productName,
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
+                fontSize = 14.sp,
                 modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
-                maxLines = 2, // Set to 2 lines
+                maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
             Text(
-                // this USD if changed will change in all the app till now
-                text = "$productPrice USD",
+                text = "$currencySymbol$productPrice",
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
+                fontSize = 14.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
             )
@@ -504,6 +447,10 @@ fun ProductCard(
     }
 }
 
+fun String.capitalizeWords(): String {
+    return this.split(" ")
+        .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
+}
 
 @Composable
 fun MainScreen(
