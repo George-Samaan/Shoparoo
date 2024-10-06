@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.shoparoo.R
+import com.example.shoparoo.ui.theme.primary
 import java.util.Calendar
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -55,7 +56,7 @@ fun CheckoutScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 50.dp)
+                .padding(top = 20.dp)
         ) {
             HeaderCheck(navController)
             Spacer(modifier = Modifier.height(16.dp))
@@ -166,7 +167,7 @@ fun HeaderCheck(navController: NavController) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(top = 15.dp, start = 5.dp)
     ) {
         Box(
             modifier = Modifier
@@ -177,7 +178,7 @@ fun HeaderCheck(navController: NavController) {
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_arrow_back_2),
+                painter = painterResource(id = R.drawable.ic_back),
                 contentDescription = stringResource(R.string.back),
                 modifier = Modifier.size(24.dp)
             )
@@ -187,6 +188,7 @@ fun HeaderCheck(navController: NavController) {
             text = stringResource(R.string.check_out),
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
+            color = primary,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .weight(1f)
@@ -241,7 +243,8 @@ fun CreditCardItem(onCardAdded: () -> Unit) {
     var isExpirationMonthValid by remember { mutableStateOf(true) }
     var isExpirationYearValid by remember { mutableStateOf(true) }
 
-    val currentYear = Calendar.getInstance().get(Calendar.YEAR) % 100 // get last two digits of the year
+    val currentYear =
+        Calendar.getInstance().get(Calendar.YEAR) % 100 // get last two digits of the year
 
     Column(
         modifier = Modifier
@@ -256,6 +259,7 @@ fun CreditCardItem(onCardAdded: () -> Unit) {
                 isCardHolderNameValid = cardHolderName.isNotBlank()
             },
             label = { Text("Name on card") },
+            shape = RoundedCornerShape(25.dp),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             isError = !isCardHolderNameValid
@@ -279,6 +283,7 @@ fun CreditCardItem(onCardAdded: () -> Unit) {
                 isCardNumberValid = it.length == 16 && it.all { char -> char.isDigit() }
             },
             label = { Text("Card number") },
+            shape = RoundedCornerShape(25.dp),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             isError = !isCardNumberValid,
@@ -307,6 +312,7 @@ fun CreditCardItem(onCardAdded: () -> Unit) {
                     isExpirationMonthValid = it.length == 2 && it.toIntOrNull() in 1..12
                 },
                 label = { Text("MM") },
+                shape = RoundedCornerShape(25.dp),
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp),
@@ -319,9 +325,11 @@ fun CreditCardItem(onCardAdded: () -> Unit) {
                 value = expirationYear,
                 onValueChange = {
                     expirationYear = it
-                    isExpirationYearValid = it.length == 2 && it.toIntOrNull()?.let { year -> year >= currentYear } ?: false
+                    isExpirationYearValid = it.length == 2 && it.toIntOrNull()
+                        ?.let { year -> year >= currentYear } ?: false
                 },
                 label = { Text("YY") },
+                shape = RoundedCornerShape(25.dp),
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 8.dp),
@@ -353,22 +361,29 @@ fun CreditCardItem(onCardAdded: () -> Unit) {
         Button(
             onClick = {
                 isCardHolderNameValid = cardHolderName.isNotBlank()
-                isCardNumberValid = cardNumber.length == 16 && cardNumber.all { char -> char.isDigit() }
-                isExpirationMonthValid = expirationMonth.length == 2 && expirationMonth.toIntOrNull() in 1..12
-                isExpirationYearValid = expirationYear.length == 2 && expirationYear.toIntOrNull()?.let { it >= currentYear } ?: false
+                isCardNumberValid =
+                    cardNumber.length == 16 && cardNumber.all { char -> char.isDigit() }
+                isExpirationMonthValid =
+                    expirationMonth.length == 2 && expirationMonth.toIntOrNull() in 1..12
+                isExpirationYearValid = expirationYear.length == 2 && expirationYear.toIntOrNull()
+                    ?.let { it >= currentYear } ?: false
 
                 if (isCardHolderNameValid && isCardNumberValid && isExpirationMonthValid && isExpirationYearValid) {
                     Toast.makeText(context, "Card Added", Toast.LENGTH_SHORT).show()
                     onCardAdded()
                 } else {
-                    Toast.makeText(context, "Please fill in all fields correctly", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Please fill in all fields correctly",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
             shape = RoundedCornerShape(25.dp),
-            colors = ButtonDefaults.buttonColors(Color.Black)
+            colors = ButtonDefaults.buttonColors(primary)
         ) {
             Text(text = "Add Card", fontWeight = FontWeight.Bold, color = Color.White)
         }
@@ -384,7 +399,7 @@ fun CheckoutButtonCheck() {
             .padding(16.dp)
             .height(50.dp),
         shape = RoundedCornerShape(25.dp),
-        colors = ButtonDefaults.buttonColors(Color.Black)
+        colors = ButtonDefaults.buttonColors(primary)
     ) {
         Text(text = "Place Order", fontWeight = FontWeight.Bold, color = Color.White)
     }

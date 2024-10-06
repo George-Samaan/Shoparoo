@@ -78,6 +78,7 @@ import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModelFactory
 import com.example.shoparoo.ui.settingsScreen.ProfileScreen
 import com.example.shoparoo.ui.settingsScreen.SettingsScreen
 import com.example.shoparoo.ui.shoppingCart.ShoppingCartScreen
+import com.example.shoparoo.ui.theme.primary
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
@@ -195,7 +196,7 @@ fun ProfileSection(userName: String) {
             contentScale = ContentScale.Crop
         )
         Column(modifier = Modifier.padding(start = 10.dp)) {
-            Text("Hello!", fontSize = 16.sp)
+            Text("Hello!", fontSize = 18.sp)
             Text(userName, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
     }
@@ -220,11 +221,12 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
     TextField(
         value = query,
         onValueChange = onQueryChange,
-        placeholder = { Text(text = "Search") },
+        placeholder = { Text(text = "Search", color = primary) },
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_search),
-                contentDescription = null
+                contentDescription = null,
+                tint = primary
             )
         },
         modifier = Modifier
@@ -234,7 +236,7 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
             .height(56.dp),
         shape = RoundedCornerShape(28.dp),
         colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFF2F2F2),
+            containerColor = Color(0xFFE0E0E0),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         )
@@ -320,7 +322,7 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
             )
         }
         Text(
-            text = brandName,
+            text = brandName, color = primary,
             fontWeight = FontWeight.Bold,
             fontSize = 15.sp,
             modifier = Modifier.padding(top = 12.dp)
@@ -386,7 +388,7 @@ fun ProductCard(productName: String, productPrice: String, productImage: String?
             .height(240.dp)
             .padding(6.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEEEE)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF2F2F2)),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         onClick = onClick
     ) {
@@ -396,23 +398,24 @@ fun ProductCard(productName: String, productPrice: String, productImage: String?
                 contentDescription = productName,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp),
+                    .height(155.dp),
                 contentScale = ContentScale.Crop
             )
             Text(
                 text = productName,
+                color = primary,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                fontSize = 15.sp,
                 modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
-                maxLines = 3,
+                maxLines = 2, // Set to 2 lines
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(Modifier.weight(1f))
             Text(
                 // this USD if changed will change in all the app till now
                 text = "$productPrice USD",
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
             )

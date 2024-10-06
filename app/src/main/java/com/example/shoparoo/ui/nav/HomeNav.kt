@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.shoparoo.R
+import com.example.shoparoo.ui.theme.primary
 
 sealed class BottomNav(val route: String, val icon: Int, val label: String) {
     object Home : BottomNav("home", R.drawable.ic_home, "Home")
@@ -34,7 +35,7 @@ fun BottomNavigationBar(navController: NavController) {
 
     BottomNavigation(
         modifier = Modifier.height(70.dp),
-        backgroundColor = Color(0xFFEFEEEE)
+        backgroundColor = Color(0xFFE0E0E0)
     ) {
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
         items.forEach { item ->
@@ -49,13 +50,13 @@ fun BottomNavigationBar(navController: NavController) {
                     Icon(
                         painter = painterResource(id = item.icon),
                         contentDescription = item.label,
-                        tint = if (isSelected) Color.Black else Color.Gray
+                        tint = if (isSelected) primary else Color.Gray
                     )
                 },
                 label = {
                     Text(
                         text = item.label,
-                        color = if (isSelected) Color.Black else Color.Gray
+                        color = if (isSelected) primary else Color.Gray
                     )
                 },
                 selected = isSelected,
