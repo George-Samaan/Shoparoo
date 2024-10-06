@@ -10,4 +10,9 @@ interface Repository {
 
     fun getProductsFromBrandsId(collectionId: String): Flow<Product>
 
+    // categories section
+    fun getWomenProducts(): Flow<Product>
+    fun getSalesProducts(): Flow<Product>
+    fun getMensProducts(): Flow<Product>
+    fun getKidsProducts(): Flow<Product>
 }

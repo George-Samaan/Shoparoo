@@ -18,4 +18,20 @@ class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repositor
     override fun getProductsFromBrandsId(collectionId: String): Flow<Product> {
         return remoteDataSource.getProductsFromBrandsId(collectionId)
     }
+
+    override fun getWomenProducts(): Flow<Product> {
+        return remoteDataSource.getWomenProducts()
+    }
+
+    override fun getSalesProducts(): Flow<Product> {
+        return remoteDataSource.getSalesProducts()
+    }
+
+    override fun getMensProducts(): Flow<Product> {
+        return remoteDataSource.getMensProducts()
+    }
+
+    override fun getKidsProducts(): Flow<Product> {
+        return remoteDataSource.getKidsProducts()
+    }
 }

@@ -30,6 +30,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -172,9 +173,10 @@ fun ProductGrid(filteredProducts: List<ProductsItem>) {
             val product = filteredProducts[index]
             val fullTitle = product.title ?: "Unknown"
             val productName = fullTitle.split("|").getOrNull(1)?.trim() ?: fullTitle
+            val price = product.variants?.firstOrNull()?.price?.toDoubleOrNull()?.toInt() ?: 0
             ProductCard(
                 productName = productName,
-                productPrice = product.variants?.firstOrNull()?.price ?: "No Price",
+                productPrice = "$price",
                 productImage = product.images?.firstOrNull()?.src ?: ""
             )
         }
@@ -213,7 +215,9 @@ fun LoadingIndicator() {
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(
+            color = Color.Black
+        )
     }
 }
 
@@ -265,7 +269,12 @@ fun PriceSlider(sliderValue: Int, maxPrice: Int, onSliderValueChange: (Int) -> U
             onValueChange = { newValue -> onSliderValueChange(newValue.roundToInt()) },
             valueRange = 0f..maxPrice.toFloat(),
             steps = maxPrice - 1,
-            modifier = Modifier.padding(horizontal = 30.dp)
+            modifier = Modifier.padding(horizontal = 30.dp),
+            colors = SliderDefaults.colors(
+                thumbColor = Color.Black,
+                activeTrackColor = Color.Black,
+                inactiveTrackColor = Color.LightGray
+            )
         )
     }
 }

@@ -53,4 +53,60 @@ class RemoteDataSourceImpl(private val apiService: ApiServices) : RemoteDataSour
             throw Throwable("Error retrieving products")
         }
     }
+
+    override fun getWomenProducts(): Flow<Product> = flow {
+        val response = apiService.getWomenProducts()
+        if (response.isSuccessful && response.body() != null) {
+            Log.d("RemoteDataSourceImpl", "Products received Women: ${response.body()!!.products}")
+            emit(response.body()!!)
+        } else {
+            Log.e(
+                "RemoteDataSourceImpl",
+                "Error retrieving products: ${response.errorBody()?.string()}"
+            )
+            throw Throwable("Error retrieving products")
+        }
+    }
+
+    override fun getSalesProducts(): Flow<Product> = flow {
+        val response = apiService.getSalesProducts()
+        if (response.isSuccessful && response.body() != null) {
+            Log.d("RemoteDataSourceImpl", "Products received Sales: ${response.body()!!.products}")
+            emit(response.body()!!)
+        } else {
+            Log.e(
+                "RemoteDataSourceImpl",
+                "Error retrieving products: ${response.errorBody()?.string()}"
+            )
+            throw Throwable("Error retrieving products")
+        }
+    }
+
+    override fun getMensProducts(): Flow<Product> = flow {
+        val response = apiService.getMensProducts()
+        if (response.isSuccessful && response.body() != null) {
+            Log.d("RemoteDataSourceImpl", "Products received Mens: ${response.body()!!.products}")
+            emit(response.body()!!)
+        } else {
+            Log.e(
+                "RemoteDataSourceImpl",
+                "Error retrieving products: ${response.errorBody()?.string()}"
+            )
+            throw Throwable("Error retrieving products")
+        }
+    }
+
+    override fun getKidsProducts(): Flow<Product> = flow {
+        val response = apiService.getKidsProducts()
+        if (response.isSuccessful && response.body() != null) {
+            Log.d("RemoteDataSourceImpl", "Products received Kids: ${response.body()!!.products}")
+            emit(response.body()!!)
+        } else {
+            Log.e(
+                "RemoteDataSourceImpl",
+                "Error retrieving products: ${response.errorBody()?.string()}"
+            )
+            throw Throwable("Error retrieving products")
+        }
+    }
 }

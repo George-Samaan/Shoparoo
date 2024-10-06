@@ -385,7 +385,7 @@ fun CheckoutButtonCheck() {
             .padding(16.dp)
             .height(50.dp),
         shape = RoundedCornerShape(25.dp),
-        colors = ButtonDefaults.buttonColors(Color(0xFF673AB7))
+        colors = ButtonDefaults.buttonColors(Color.Black)
     ) {
         Text(text = "Place Order", fontWeight = FontWeight.Bold, color = Color.White)
     }
