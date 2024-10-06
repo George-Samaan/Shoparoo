@@ -118,7 +118,7 @@ fun LoginScreen(navController: NavHostController) {
                     fontSize = 40.sp,
                     fontWeight = FontWeight.Bold,
                     color = primary,
-                    modifier = Modifier.padding(top = 40.dp, start = 10.dp)
+                    modifier = Modifier.padding(top = 20.dp, start = 10.dp)
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
@@ -144,7 +144,7 @@ fun LoginScreen(navController: NavHostController) {
                 shape = RoundedCornerShape(25.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 45.dp, vertical = 15.dp),
+                    .padding(horizontal = 45.dp, vertical = 10.dp),
                 isError = emailValidation,
             )
             if (emailValidation)
@@ -280,7 +280,7 @@ fun YourLottieAnimation() {
     Box(
         modifier = Modifier
             .size(200.dp)
-            .padding(top = 15.dp)
+            .padding(top = 10.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(Color.Transparent)
     ) {

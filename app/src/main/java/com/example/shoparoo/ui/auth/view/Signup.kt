@@ -128,7 +128,7 @@ fun Signup(navController: NavHostController) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 35.dp, start = 15.dp, top = 25.dp)
+                .padding(bottom = 25.dp, start = 15.dp, top = 5.dp)
         ) {
             Box(
                 modifier = Modifier
@@ -159,7 +159,7 @@ fun Signup(navController: NavHostController) {
                     fontSize = 40.sp,
                     fontWeight = FontWeight.Bold,
                     color = primary,
-                    modifier = Modifier.padding(top = 30.dp, start = 8.dp)
+                    modifier = Modifier.padding(top = 20.dp, start = 8.dp)
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
@@ -272,7 +272,7 @@ private fun NameFields(
             shape = RoundedCornerShape(25.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 45.dp, vertical = 15.dp),
+                .padding(horizontal = 45.dp, vertical = 10.dp),
             isError = Validation
         )
     }
@@ -317,7 +317,7 @@ fun PasswordField(
         shape = RoundedCornerShape(25.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 45.dp, vertical = 15.dp),
+            .padding(horizontal = 45.dp, vertical = 10.dp),
         isError = Validation
 
     )

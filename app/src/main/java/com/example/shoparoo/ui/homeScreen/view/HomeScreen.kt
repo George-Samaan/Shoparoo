@@ -322,7 +322,8 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
             )
         }
         Text(
-            text = brandName, color = primary,
+            text = brandName.capitalizeWords(),
+            color = primary,
             fontWeight = FontWeight.Bold,
             fontSize = 15.sp,
             modifier = Modifier.padding(top = 12.dp)
@@ -380,8 +381,18 @@ fun ForYouSection(products: List<ProductsItem>) {
     }
 }
 
+fun String.capitalizeWords(): String {
+    return this.split(" ")
+        .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
+}
+
 @Composable
-fun ProductCard(productName: String, productPrice: String, productImage: String?,onClick: () -> Unit) {
+fun ProductCard(
+    productName: String,
+    productPrice: String,
+    productImage: String?,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .width(170.dp)
@@ -402,7 +413,7 @@ fun ProductCard(productName: String, productPrice: String, productImage: String?
                 contentScale = ContentScale.Crop
             )
             Text(
-                text = productName,
+                text = productName.capitalizeWords(),
                 color = primary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
@@ -495,11 +506,16 @@ fun MainScreen(
                 ShoppingCartScreen(navControllerBottom)
             }
 
-            composable(BottomNav.Profile.route) { ProfileScreen(navControllerBottom, navController) }
-            composable("settings") { SettingsScreen(navControllerBottom) }
-            composable("login") { LoginScreen(navControllerBottom)}
             composable(BottomNav.Profile.route) {
-                ProfileScreen(navControllerBottom,navController)
+                ProfileScreen(
+                    navControllerBottom,
+                    navController
+                )
+            }
+            composable("settings") { SettingsScreen(navControllerBottom) }
+            composable("login") { LoginScreen(navControllerBottom) }
+            composable(BottomNav.Profile.route) {
+                ProfileScreen(navControllerBottom, navController)
             }
             composable("settings") {
                 SettingsScreen(navControllerBottom)
@@ -511,7 +527,13 @@ fun MainScreen(
                 val brandId = backStackEntry.arguments?.getString("brandId") ?: return@composable
                 val brandTitle =
                     backStackEntry.arguments?.getString("brandTitle") ?: return@composable
-                ProductsScreen(brandId, brandTitle, navControllerBottom, productViewModel,navController)
+                ProductsScreen(
+                    brandId,
+                    brandTitle,
+                    navControllerBottom,
+                    productViewModel,
+                    navController
+                )
             }
         }
     }

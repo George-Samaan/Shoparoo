@@ -299,8 +299,7 @@ fun ProductInfoMessage(isEmpty: Boolean, sliderValue: Int) {
     Text(
         message,
         modifier = Modifier
-            .padding(horizontal = 20.dp)
-            .background(MaterialTheme.colors.surface, shape = MaterialTheme.shapes.medium),
+            .padding(horizontal = 20.dp),
         style = MaterialTheme.typography.body2,
         color = MaterialTheme.colors.onSurface
     )
