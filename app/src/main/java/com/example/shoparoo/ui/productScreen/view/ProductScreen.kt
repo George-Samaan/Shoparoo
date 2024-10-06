@@ -59,13 +59,13 @@ import com.example.shoparoo.ui.homeScreen.view.ProductCard
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
-
 @Composable
 fun ProductsScreen(
     brandId: String,
     brandTitle: String,
-    navController: NavController,
-    viewModel: ProductViewModel
+    navControllerBottom: NavController,
+    viewModel: ProductViewModel,
+     navController: NavController
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var products by remember { mutableStateOf(emptyList<ProductsItem>()) }
@@ -76,7 +76,6 @@ fun ProductsScreen(
     var isInitialLoad by remember { mutableStateOf(true) }
     var isReady by remember { mutableStateOf(false) }
     var isFilteringComplete by remember { mutableStateOf(false) }
-
     // Reset isGridVisible and loading state on initial load
     LaunchedEffect(Unit) {
         if (isInitialLoad) {
@@ -136,7 +135,7 @@ fun ProductsScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(navController, brandTitle)
+        TopBar(navControllerBottom, brandTitle)
         SearchBar(searchQuery) { query -> searchQuery = query }
 
         if (!isReady) {
@@ -153,14 +152,14 @@ fun ProductsScreen(
                 enter = scaleIn(animationSpec = tween(durationMillis = 600)),
                 exit = scaleOut(animationSpec = tween(durationMillis = 600))
             ) {
-                ProductGrid(filteredProducts)
+                ProductGrid(filteredProducts,navController)
             }
         }
     }
 }
 
 @Composable
-fun ProductGrid(filteredProducts: List<ProductsItem>) {
+fun ProductGrid(filteredProducts: List<ProductsItem>, navController: NavController) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(16.dp),
@@ -175,7 +174,10 @@ fun ProductGrid(filteredProducts: List<ProductsItem>) {
             ProductCard(
                 productName = productName,
                 productPrice = product.variants?.firstOrNull()?.price ?: "No Price",
-                productImage = product.images?.firstOrNull()?.src ?: ""
+                productImage = product.images?.firstOrNull()?.src ?: "",
+                onClick = {
+                   navController.navigate("productDetails")
+                }
             )
         }
     }

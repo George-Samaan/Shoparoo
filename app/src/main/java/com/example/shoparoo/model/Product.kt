@@ -8,6 +8,11 @@ data class Product(
     val products: List<ProductsItem?>? = null
 )
 
+data class SingleProduct(
+    @field:SerializedName("product")
+    val product: ProductsItem? = null
+)
+
 data class ProductsItem(
 
     @field:SerializedName("image")
