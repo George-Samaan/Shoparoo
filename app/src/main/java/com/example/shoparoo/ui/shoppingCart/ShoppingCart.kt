@@ -1,6 +1,7 @@
 package com.example.shoparoo.ui.shoppingCart
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,23 +44,46 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.R
+
+// Data class to represent products in the cart
+data class Product(
+    val imageRes: Int,
+    val productName: String,
+    val productBrand: String,
+    val price: Double,
+    var quantity: Int
+)
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ShoppingCartScreen(navController: NavController) {
+    // Sample product list
+    val productList = remember {
+        mutableStateListOf(
+            Product(imageRes = R.drawable.ic_watch, productName = "Watch", productBrand = "Rolex", price = 40.0, quantity = 1),
+            Product(imageRes = R.drawable.ic_watch, productName = "Airpods", productBrand = "Apple", price = 333.0, quantity = 1),
+            Product(imageRes = R.drawable.ic_watch, productName = "Hoodie", productBrand = "Puma", price = 50.0, quantity = 1)
+        )
+    }
+
+
+    var totalDiscount by remember { mutableStateOf(0.0) }
+
     Scaffold {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(5.dp)
+                .padding(3.dp)
         ) {
             Header(navController)
             Spacer(modifier = Modifier.height(16.dp))
-            ProductList()
-            Spacer(modifier = Modifier.height(16.dp))
-            OrderSummary()
-            Spacer(modifier = Modifier.height(16.dp))
+            ProductList(productList = productList)
+            ApplyCoupons(productList = productList) { discount ->
+                totalDiscount = discount
+            }
+            OrderSummary(productList = productList, totalDiscount = totalDiscount)
             CheckoutButton(navController)
         }
     }
@@ -71,7 +95,7 @@ fun Header(navController: NavController) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 50.dp)
+            .padding(top = 30.dp, start = 10.dp)
     ) {
         Box(
             modifier = Modifier
@@ -101,29 +125,17 @@ fun Header(navController: NavController) {
 }
 
 @Composable
-fun ProductList() {
+fun ProductList(productList: List<Product>) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        ProductItem(
-            imageRes = R.drawable.ic_watch,
-            productName = "Watch",
-            productBrand = "Rolex",
-            price = "$40",
-            quantity = 2
-        )
-        ProductItem(
-            imageRes = R.drawable.ic_watch,
-            productName = "Airpods",
-            productBrand = "Apple",
-            price = "$333",
-            quantity = 2
-        )
-        ProductItem(
-            imageRes = R.drawable.ic_watch,
-            productName = "Hoodie",
-            productBrand = "Puma",
-            price = "$50",
-            quantity = 2
-        )
+        productList.forEach { product ->
+            ProductItem(
+                imageRes = product.imageRes,
+                productName = product.productName,
+                productBrand = product.productBrand,
+                price = "$${product.price}",
+                quantity = product.quantity
+            )
+        }
     }
 }
 
@@ -134,7 +146,7 @@ fun ProductItem(imageRes: Int, productName: String, productBrand: String, price:
             .fillMaxWidth()
             .padding(10.dp)
             .background(Color(0xFFF5F5F5), RoundedCornerShape(10.dp))
-            .padding(15.dp),
+            .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
@@ -183,7 +195,64 @@ fun QuantitySelector(quantity: Int) {
 }
 
 @Composable
-fun OrderSummary() {
+fun ApplyCoupons(productList: List<Product>, onApplyCoupon: (Double) -> Unit) {
+    val couponText = remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 5.dp, bottom = 5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // EditText for Coupon Code
+        OutlinedTextField(
+            value = couponText.value,
+            onValueChange = { couponText.value = it },
+            label = { Text(text = "Enter Coupon Code") },
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp), // Add space between EditText and button
+            singleLine = true
+        )
+
+        // Apply Button
+        Button(
+            onClick = {
+                // Check if the coupon code is valid and apply discount
+                val discount = if (couponText.value.isNotEmpty()) {
+                    0.20 // 20% discount
+                } else {
+                    0.0
+                }
+
+                val totalDiscount = discount * calculateSubtotal(productList)
+                onApplyCoupon(totalDiscount)
+
+                Toast.makeText(context, "Coupon Applied: ${couponText.value}", Toast.LENGTH_SHORT).show()
+            },
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .height(56.dp), // Adjust height to match EditText
+            colors = ButtonDefaults.buttonColors(Color(0xFF673AB7))
+        ) {
+            Text(text = "Apply", color = Color.White)
+        }
+    }
+}
+// Helper function to calculate subtotal
+fun calculateSubtotal(productList: List<Product>): Double {
+    return productList.sumOf { it.price * it.quantity }
+}
+
+
+@Composable
+fun OrderSummary(productList: List<Product>, totalDiscount: Double) {
+    val totalItems = productList.sumOf { it.quantity }
+    val subtotal = calculateSubtotal(productList)
+    val deliveryCharges = 50.0
+    val total = subtotal - totalDiscount + deliveryCharges
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -196,23 +265,25 @@ fun OrderSummary() {
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = "Items", color = Color.Gray)
-            Text(text = "3")
+            Text(text = totalItems.toString())
         }
         Spacer(modifier = Modifier.height(5.dp))
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = "Subtotal", color = Color.Gray)
-            Text(text = "$423")
+            Text(text = "$${"%.2f".format(subtotal)}")
         }
         Spacer(modifier = Modifier.height(5.dp))
+
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = "Discount", color = Color.Gray)
-            Text(text = "$4")
+            Text(text = "-$${"%.2f".format(totalDiscount)}")  // Format totalDiscount correctly
         }
         Spacer(modifier = Modifier.height(5.dp))
+
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = "Delivery Charges", color = Color.Gray)
-            Text(text = "$2")
+            Text(text = "$deliveryCharges")
         }
         Spacer(modifier = Modifier.height(5.dp))
 
@@ -220,7 +291,7 @@ fun OrderSummary() {
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = "Total", fontWeight = FontWeight.Bold)
-            Text(text = "$423", fontWeight = FontWeight.Bold)
+            Text(text = "$${"%.2f".format(total)}")
         }
     }
 }
@@ -228,22 +299,21 @@ fun OrderSummary() {
 @Composable
 fun CheckoutButton(navController: NavController) {
     Button(
-        onClick = {
-            navController.navigate("checkout")
-        },
+        onClick = { navController.navigate("checkout") },
         modifier = Modifier
             .fillMaxWidth()
+
             .padding(16.dp)
             .height(50.dp),
         shape = RoundedCornerShape(25.dp),
         colors = ButtonDefaults.buttonColors(Color.Black)
     ) {
-        Text(text = "Check Out", fontWeight = FontWeight.Bold, color = Color.White)
+        Text(text = "Proceed to Checkout", color = Color.White)
     }
 }
 
-@Preview(showSystemUi = true, device = "id:pixel_8_pro")
+@Preview(showBackground = true)
 @Composable
-fun PreviewShoppingCartScreen() {
-    ShoppingCartScreen(navController = NavController(LocalContext.current))
+fun ShoppingCartScreenPreview() {
+    ShoppingCartScreen(navController = rememberNavController())
 }
