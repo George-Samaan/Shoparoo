@@ -177,24 +177,6 @@ fun ProfileOptions(
     onContactUsClick: () -> Unit
 ) {
     Column {
-        /*ProfileOptionItem(
-            icon = painterResource(id = R.drawable.shopping),
-            label = stringResource(R.string.my_orders),
-            onClick = { navController.navigate("myOrders") }
-        )*/
-
-        /*ProfileOptionItem(
-            icon = painterResource(id = R.drawable.heart),
-            label = stringResource(R.string.my_wishlist),
-            onClick = { navController.navigate("wishlist") }
-        )*/
-
-        /* ProfileOptionItem(
-             icon = painterResource(id = R.drawable.location),
-             label = stringResource(R.string.delivery_address),
-             onClick = { navController.navigate("deliveryAddress") }
-         )*/
-
         ProfileOptionItem(
             icon = painterResource(id = R.drawable.settings),
             label = stringResource(R.string.settings),
@@ -321,6 +303,7 @@ fun ContactUs() {
 }
 
 
+/*
 @Composable
 fun SignOutButton(authViewModel: AuthViewModel, navController: NavController) {
     Text(
@@ -343,6 +326,7 @@ fun SignOutButton(authViewModel: AuthViewModel, navController: NavController) {
         fontWeight = FontWeight.Bold
     )
 }
+*/
 
 
 @Preview(showBackground = true)

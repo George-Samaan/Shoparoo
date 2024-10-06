@@ -1,7 +1,9 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
+@file:Suppress("DEPRECATION")
 
 package com.example.shoparoo.ui.homeScreen.view
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -43,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -82,7 +85,6 @@ import com.example.shoparoo.ui.theme.primary
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
-@Suppress("UNCHECKED_CAST")
 @Composable
 fun HomeScreenDesign(
     userName: String,
@@ -94,6 +96,17 @@ fun HomeScreenDesign(
     onRefresh: () -> Unit = {},
     navController: NavController
 ) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
+
+    val currencySymbols = mapOf(
+        "USD" to "$",
+        "EGP" to "EGP "
+    )
+
     val isRefreshing = remember { mutableStateOf(false) }
     isRefreshing.value =
         smartCollectionsState is ApiState.Loading || forYouProductsState is ApiState.Loading
@@ -121,7 +134,7 @@ fun HomeScreenDesign(
                         R.drawable.nike_ads,
                         R.drawable.discount
                     ),
-                    couponText = "20% Off All Products"
+                    couponText = "Shoparoo20"
                 )
             }
             when (smartCollectionsState) {
@@ -135,14 +148,13 @@ fun HomeScreenDesign(
                         )
                     }
                 }
-
                 is ApiState.Success -> {
                     val smartCollections = (smartCollectionsState).data
                     item {
                         BrandsSection(
                             navController = navController,
                             smartCollections as List<SmartCollectionsItem?>
-                        ) // Pass navController here
+                        )
                     }
                 }
             }
@@ -158,17 +170,121 @@ fun HomeScreenDesign(
                         )
                     }
                 }
-
                 is ApiState.Success -> {
                     val forYouProducts = (forYouProductsState).data
                     item {
-                        ForYouSection(forYouProducts as List<ProductsItem>)
+                        ForYouSection(
+                            products = forYouProducts as List<ProductsItem>,
+                            selectedCurrency = selectedCurrency,
+                            conversionRate = conversionRate,
+                            currencySymbols = currencySymbols
+                        )
                     }
                 }
             }
         }
     }
 }
+
+@Composable
+fun ForYouSection(products: List<ProductsItem>, selectedCurrency: String, conversionRate: Float, currencySymbols: Map<String, String>) {
+    val randomProducts = remember { products.shuffled().take(5) }
+    val visible = remember { mutableStateOf(false) }
+    LaunchedEffect(randomProducts) {
+        if (randomProducts.isNotEmpty()) {
+            visible.value = true
+        }
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp)
+    ) {
+        Text(
+            text = "For You",
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        AnimatedVisibility(
+            visible = visible.value,
+            enter = slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(durationMillis = 600)
+            ),
+        ) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                items(randomProducts.size) { index ->
+                    val product = products[index]
+                    val priceInUSD = product.variants?.get(0)?.price?.toDoubleOrNull() ?: 0.0
+                    val convertedPrice = priceInUSD * conversionRate
+
+                    val formattedPrice = String.format("%.2f", convertedPrice)
+
+                    ProductCard(
+                        productName = product.title.toString(),
+                        productPrice = formattedPrice,
+                        productImage = product.images?.get(0)?.src,
+                        currencySymbol = currencySymbols[selectedCurrency] ?: "$"
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ProductCard(
+    productName: String,
+    productPrice: String,
+    productImage: String?,
+    currencySymbol: String,
+
+) {
+    Card(
+        modifier = Modifier
+            .width(170.dp)
+            .height(240.dp)
+            .padding(6.dp)
+            .clickable {},
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEEEE)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = rememberAsyncImagePainter(model = productImage),
+                contentDescription = productName,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp),
+                contentScale = ContentScale.Crop
+            )
+            Text(
+                text = productName,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "$currencySymbol$productPrice",
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
+            )
+        }
+    }
+}
+
+
 
 @Composable
 fun Header(userName: String, onFavouriteClick: () -> Unit) {
@@ -244,10 +360,7 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
 }
 
 @Composable
-fun BrandsSection(
-    navController: NavController,
-    smartCollections: List<SmartCollectionsItem?>
-) {
+fun BrandsSection(navController: NavController, smartCollections: List<SmartCollectionsItem?>) {
     val visible = remember { mutableStateOf(false) }
 
     LaunchedEffect(smartCollections) {
@@ -331,41 +444,7 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
     }
 }
 
-@Composable
-fun ForYouSection(products: List<ProductsItem>) {
-    val randomProducts = remember { products.shuffled().take(5) }
-    val visible = remember { mutableStateOf(false) }
-    LaunchedEffect(randomProducts) {
-        if (randomProducts.isNotEmpty()) {
-            visible.value = true
-        }
-    }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp)
-    ) {
-        Text(
-            text = "For You",
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        AnimatedVisibility(
-            visible = visible.value,
-            enter = slideInHorizontally(
-                initialOffsetX = { it },
-                animationSpec = tween(durationMillis = 600) // Duration of the animation
-            ),
-        ) {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                items(randomProducts.size) { index ->
-                    val product = randomProducts[index]
-                    val price = product.variants?.get(0)?.price?.toDoubleOrNull()?.toInt()
-                        ?: 0 // Convert to int
+
 
                     ProductCard(
                         productName = product.title.toString(),
@@ -435,6 +514,7 @@ fun ProductCard(
 }
 
 
+
 @Composable
 fun MainScreen(
     onFavouriteClick: () -> Unit,
@@ -471,7 +551,6 @@ fun MainScreen(
     val userName by viewModel.userName.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-// Call to fetch smart collections
     LaunchedEffect(Unit) {
         viewModel.getSmartCollections()
         viewModel.getForYouProducts()
@@ -529,6 +608,10 @@ fun MainScreen(
                 val brandId = backStackEntry.arguments?.getString("brandId") ?: return@composable
                 val brandTitle =
                     backStackEntry.arguments?.getString("brandTitle") ?: return@composable
+
+                ProductsScreen(brandId, brandTitle, navControllerBottom, productViewModel,
+                    navController)
+
                 ProductsScreen(
                     brandId,
                     brandTitle,
@@ -536,6 +619,7 @@ fun MainScreen(
                     productViewModel,
                     navController
                 )
+
             }
         }
     }
@@ -554,3 +638,185 @@ fun HomeScreenPreview() {
         navController = rememberNavController()
     )
 }
+
+
+
+/*@Suppress("UNCHECKED_CAST")
+@Composable
+fun HomeScreenDesign(
+    userName: String,
+    onFavouriteClick: () -> Unit,
+    query: TextFieldValue,
+    onQueryChange: (TextFieldValue) -> Unit,
+    smartCollectionsState: ApiState,
+    forYouProductsState: ApiState,
+    onRefresh: () -> Unit = {},
+    navController: NavController
+) {
+    // Currency state
+    val selectedCurrency = remember { mutableStateOf("EGP") }
+    val conversionRates = remember { mutableStateOf<Map<String, Double>>(emptyMap()) }
+
+    // Fetch currency rates using LaunchedEffect
+    LaunchedEffect(Unit) {
+        val response = currencyApi.getRates("db5f5601837148c482888a4cdf945326") // Replace with your actual API key
+        if (response.isSuccessful) {
+            conversionRates.value = response.body()?.rates ?: emptyMap()
+        }
+    }
+
+    val isRefreshing = remember { mutableStateOf(false) }
+    isRefreshing.value =
+        smartCollectionsState is ApiState.Loading || forYouProductsState is ApiState.Loading
+
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing.value),
+        onRefresh = {
+            isRefreshing.value = true
+            onRefresh()
+        }
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            item {
+                Header(userName, onFavouriteClick)
+            }
+            item {
+                SearchBar(query, onQueryChange)
+            }
+            item {
+                // Currency Switch
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Currency:")
+                    Button(onClick = { selectedCurrency.value = "EGP" }) {
+                        Text("EGP")
+                    }
+                    Button(onClick = { selectedCurrency.value = "USD" }) {
+                        Text("USD")
+                    }
+                }
+            }
+            item {
+                CouponsSliderWithIndicator(
+                    imageList = listOf(
+                        R.drawable.black_friday,
+                        R.drawable.nike_ads,
+                        R.drawable.discount
+                    ),
+                    couponText = "20% Off All Products"
+                )
+            }
+            when (smartCollectionsState) {
+                is ApiState.Loading -> {}
+                is ApiState.Failure -> {
+                    item {
+                        Text(
+                            text = "Error fetching brands",
+                            color = Color.Red,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+
+                is ApiState.Success -> {
+                    val smartCollections = (smartCollectionsState).data
+                    item {
+                        BrandsSection(
+                            navController = navController,
+                            smartCollections as List<SmartCollectionsItem?>
+                        )
+                    }
+                }
+            }
+            when (forYouProductsState) {
+                is ApiState.Loading -> {}
+                is ApiState.Failure -> {
+                    item {
+                        val errorMessage = (forYouProductsState)
+                        Text(
+                            text = "Error fetching products: $errorMessage",
+                            color = Color.Red,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+
+                is ApiState.Success -> {
+                    val forYouProducts = (forYouProductsState).data
+                    item {
+                        ForYouSection(
+                            products = forYouProducts as List<ProductsItem>,
+                            selectedCurrency = selectedCurrency.value,
+                            conversionRates = conversionRates.value
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ForYouSection(
+    products: List<ProductsItem>,
+    selectedCurrency: String,
+    conversionRates: Map<String, Double>
+) {
+    val randomProducts = remember { products.shuffled().take(5) }
+    val visible = remember { mutableStateOf(false) }
+
+    LaunchedEffect(randomProducts) {
+        if (randomProducts.isNotEmpty()) {
+            visible.value = true
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp)
+    ) {
+        Text(
+            text = "For You",
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        AnimatedVisibility(
+            visible = visible.value,
+            enter = slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(durationMillis = 600) // Duration of the animation
+            ),
+        ) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                items(randomProducts.size) { index ->
+                    val product = randomProducts[index]
+                    val price = product.variants?.get(0)?.price?.toDoubleOrNull()?.toInt() ?: 0
+
+                    // Convert price based on selected currency
+                    val conversionRate = conversionRates[selectedCurrency] ?: 1.0
+                    val convertedPrice = (price * conversionRate).toInt()
+
+                    ProductCard(
+                        productName = product.title.toString(),
+                        productPrice = "$convertedPrice $selectedCurrency",
+                        productImage = product.images?.get(0)?.src,
+                        onClick = {
+
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+*/

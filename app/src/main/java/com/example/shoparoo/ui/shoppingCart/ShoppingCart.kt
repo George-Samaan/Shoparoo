@@ -243,6 +243,7 @@ fun QuantitySelector(quantity: Int) {
 fun ApplyCoupons(productList: List<Product>, onApplyCoupon: (Double) -> Unit) {
     val couponText = remember { mutableStateOf("") }
     val context = LocalContext.current
+    var totalDiscount: Double
 
     Row(
         modifier = Modifier
@@ -266,17 +267,25 @@ fun ApplyCoupons(productList: List<Product>, onApplyCoupon: (Double) -> Unit) {
         Button(
             onClick = {
                 // Check if the coupon code is valid and apply discount
-                val discount = if (couponText.value.isNotEmpty()) {
+                val discount = if (couponText.value.isNotEmpty() && couponText.value == "Shoparoo20") {
                     0.20 // 20% discount
                 } else {
                     0.0
                 }
 
-                val totalDiscount = discount * calculateSubtotal(productList)
-                onApplyCoupon(totalDiscount)
+                if (couponText.value == "Shoparoo20") {
+                    totalDiscount = discount * calculateSubtotal(productList)
+                    onApplyCoupon(totalDiscount)
+                    Toast.makeText(context, "Coupon Applied: ${couponText.value}", Toast.LENGTH_SHORT).show()
+                }else{
+                    Toast.makeText(context, "Invalid Coupon Code", Toast.LENGTH_SHORT).show()
+                    onApplyCoupon(0.0)
+                }
+
 
                 Toast.makeText(context, "Coupon Applied: ${couponText.value}", Toast.LENGTH_SHORT)
                     .show()
+
             },
             modifier = Modifier
                 .padding(start = 8.dp, top = 4.dp)

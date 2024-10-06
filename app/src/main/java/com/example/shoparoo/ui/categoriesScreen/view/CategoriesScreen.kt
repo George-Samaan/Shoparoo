@@ -2,6 +2,7 @@
 
 package com.example.shoparoo.ui.categoriesScreen.view
 
+import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -34,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -65,11 +67,29 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
 
     var showProductTypeMenu by remember { mutableStateOf(false) }
     var selectedProductType by remember { mutableStateOf("Shoes") } // Default product type
+    //var conversionRate by remember { mutableStateOf(1.0f) } // Default conversion rate (USD to
+    // USD)
 
+    // Collecting states from ViewModel
     val womenProductsState = viewModel.womenProducts.collectAsState()
     val menProductsState = viewModel.mensProducts.collectAsState()
     val salesProductsState = viewModel.salesProducts.collectAsState()
     val kidsProductsState = viewModel.kidsProducts.collectAsState()
+
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+
+    // Get saved currency and conversion rate from SharedPreferences
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
+
+    // Define a currency symbol map
+    val currencySymbols = mapOf(
+        "USD" to "$",
+        "EGP" to "EGP "
+        // Add more currency symbols as needed
+    )
+
 
     LaunchedEffect(Unit) {
         viewModel.getWomenProducts()
@@ -78,7 +98,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
         viewModel.getKidsProducts()
     }
 
-    // Update filtering when product type or other filters change
     LaunchedEffect(
         selectedFilter,
         selectedProductType,
@@ -99,12 +118,14 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
             is ApiState.Success -> {
                 products = (state.data as? List<ProductsItem>) ?: emptyList()
                 maxPrice = products.map {
-                    it.variants?.firstOrNull()?.price?.toFloatOrNull()?.toInt() ?: 0
-                }.maxOrNull() ?: 2500
+                    // Apply conversion rate to price
+                    (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
+                }.maxOrNull()?.toInt() ?: 2500
+
                 sliderValue = maxPrice
                 isReady = true
                 filteredProducts =
-                    filterProductsByType(products, selectedProductType, searchQuery, sliderValue)
+                    filterProductsByType(products, selectedProductType, searchQuery, sliderValue, conversionRate)
                 isFilteringComplete = true
             }
 
@@ -125,7 +146,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
         isFilteringComplete = false
         delay(300)
         filteredProducts =
-            filterProductsByType(products, selectedProductType, searchQuery, sliderValue)
+            filterProductsByType(products, selectedProductType, searchQuery, sliderValue, conversionRate)
         isFilteringComplete = true
     }
 
@@ -154,6 +175,10 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                     enter = scaleIn(animationSpec = tween(durationMillis = 600)),
                     exit = scaleOut(animationSpec = tween(durationMillis = 600))
                 ) {
+
+                    ProductGrid(filteredProducts, navController = null , selectedCurrency,
+                        conversionRate, currencySymbols)
+
 
                     ProductGrid(filteredProducts, navController = navController)
                 }
@@ -197,6 +222,8 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
         }
     }
 }
+
+
 
 @Composable
 fun FilterTypeFABs(
@@ -246,11 +273,11 @@ fun filterProductsByType(
     products: List<ProductsItem>,
     productType: String,
     searchQuery: String,
-    sliderValue: Int
+    sliderValue: Int,
+    conversionRate: Float // New parameter for conversion rate
 ): List<ProductsItem> {
     return products.filter { product ->
-        val productPrice =
-            product.variants?.firstOrNull()?.price?.toFloatOrNull()?.toInt() ?: 0
+        val productPrice = (product.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
         val matchesSearch = searchQuery.isEmpty() || product.title?.contains(
             searchQuery,
             ignoreCase = true

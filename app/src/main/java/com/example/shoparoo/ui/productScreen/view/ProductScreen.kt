@@ -2,6 +2,7 @@
 
 package com.example.shoparoo.ui.productScreen.view
 
+import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -68,7 +70,12 @@ fun ProductsScreen(
     brandTitle: String,
     navControllerBottom: NavController,
     viewModel: ProductViewModel,
+
+     navController: NavController,
+
+
     navController: NavController
+
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var products by remember { mutableStateOf(emptyList<ProductsItem>()) }
@@ -79,6 +86,20 @@ fun ProductsScreen(
     var isInitialLoad by remember { mutableStateOf(true) }
     var isReady by remember { mutableStateOf(false) }
     var isFilteringComplete by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+
+    // Get saved currency and conversion rate from SharedPreferences
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
+
+    val currencySymbols = mapOf(
+        "USD" to "$",
+        "EGP" to "EGP "
+    )
+
+
     // Reset isGridVisible and loading state on initial load
     LaunchedEffect(Unit) {
         if (isInitialLoad) {
@@ -155,14 +176,24 @@ fun ProductsScreen(
                 enter = scaleIn(animationSpec = tween(durationMillis = 600)),
                 exit = scaleOut(animationSpec = tween(durationMillis = 600))
             ) {
+
+                ProductGrid(filteredProducts,navController, selectedCurrency, conversionRate, currencySymbols)
+
                 ProductGrid(filteredProducts, navController)
+
             }
         }
     }
 }
 
 @Composable
-fun ProductGrid(filteredProducts: List<ProductsItem>, navController: NavController?) {
+fun ProductGrid(
+    filteredProducts: List<ProductsItem>,
+    navController: NavController?,
+    selectedCurrency: String,
+    conversionRate: Float,
+    currencySymbols: Map<String, String>
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(16.dp),
@@ -174,11 +205,17 @@ fun ProductGrid(filteredProducts: List<ProductsItem>, navController: NavControll
             val product = filteredProducts[index]
             val fullTitle = product.title ?: "Unknown"
             val productName = fullTitle.split("|").getOrNull(1)?.trim() ?: fullTitle
-            val price = product.variants?.firstOrNull()?.price?.toDoubleOrNull()?.toInt() ?: 0
+            val priceInUSD = product.variants?.get(0)?.price?.toDoubleOrNull() ?: 0.0
+            val convertedPrice = priceInUSD * conversionRate
+            val formattedPrice = String.format("%.2f", convertedPrice)
+
             ProductCard(
                 productName = productName,
-                productPrice = "$price",
+                productPrice = "$formattedPrice",
                 productImage = product.images?.firstOrNull()?.src ?: "",
+
+                currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$")
+
                 onClick = {
                     navController!!.navigate("productDetails")
                 }
@@ -187,6 +224,7 @@ fun ProductGrid(filteredProducts: List<ProductsItem>, navController: NavControll
         }
     }
 }
+
 
 @Composable
 fun SearchBar(searchQuery: String, onSearchQueryChange: (String) -> Unit) {
