@@ -72,12 +72,13 @@ fun LoginScreen(navController: NavHostController) {
 
             is AuthState.Failed -> {
                 Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+                isLoading=false
             }
 
             AuthState.Authenticated -> {
                 navController.navigate("home")
-                isLoading=false
                 Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
+                isLoading=false
             }
 
             AuthState.Loading ->  isLoading = true
