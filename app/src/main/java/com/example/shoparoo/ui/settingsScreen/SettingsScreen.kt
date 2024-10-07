@@ -28,6 +28,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -46,9 +48,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.shoparoo.R
+import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
+import com.example.shoparoo.data.network.ApiClient
+import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
+import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
+import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.nav.BottomNav
 
 
@@ -142,6 +150,15 @@ fun SignOutConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
 
 @Composable
 fun ProfileHeader() {
+    val viewModel: HomeViewModel = viewModel(
+        factory = HomeViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val userName by viewModel.userName.collectAsState()
+    val userEmail by viewModel.email.collectAsState()
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -157,13 +174,13 @@ fun ProfileHeader() {
         )
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = stringResource(R.string.user_name),
+            text = userName?: "Guest",
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = stringResource(R.string.email),
+            text = userEmail?:"Example@example",
             fontSize = 16.sp,
             color = Color.Gray
         )
