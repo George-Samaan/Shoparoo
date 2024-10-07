@@ -99,5 +99,16 @@ dependencies {
     //Animation
     implementation("com.airbnb.android:lottie-compose:6.0.0")
 
+    //implementation ("com.paymob.accept:acceptsdk:2.3.5")
+
+    implementation ("androidx.webkit:webkit:1.5.0")
+
+    // OkHttp Logging (optional, for debugging)
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.0")
+
+
+
+
+
 
 }

@@ -479,4 +479,6 @@ fun ChoosePaymentMethod(selectedPaymentMethod: String, onPaymentMethodSelected: 
         }
     }
 }
+private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+            Log.i(TAG, "checkUser: user is authenticated+${firebaseAuth.currentUser!!.email}")
 */
