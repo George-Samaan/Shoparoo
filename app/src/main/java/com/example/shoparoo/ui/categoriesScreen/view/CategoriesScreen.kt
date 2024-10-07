@@ -199,7 +199,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                         exit = scaleOut(animationSpec = tween(durationMillis = 600))
                     ) {
                         ProductGrid(
-                            filteredProducts, navController = null, selectedCurrency,
+                            filteredProducts, navController = navController, selectedCurrency,
                             conversionRate, currencySymbols
                         )
                     }
@@ -210,14 +210,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
             val fabModifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(top = 8.dp, end = 16.dp)
-
-
-                AnimatedVisibility(
-                    visible = isReady && isFilteringComplete,
-                    enter = scaleIn(animationSpec = tween(durationMillis = 600)),
-                    exit = scaleOut(animationSpec = tween(durationMillis = 600))
-                ) {
-                    ProductGrid(filteredProducts, navController = navController)
 
             FloatingActionButton(
                 onClick = { showProductTypeMenu = !showProductTypeMenu },
@@ -235,7 +227,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                         painter = painterResource(id = R.drawable.ic_filter),
                         contentDescription = "Filter Products"
                     )
-
                 }
             }
 
