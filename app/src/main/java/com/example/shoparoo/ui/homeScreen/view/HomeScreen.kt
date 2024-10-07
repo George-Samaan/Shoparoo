@@ -47,7 +47,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -91,6 +90,7 @@ fun HomeScreenDesign(
     smartCollectionsState: ApiState,
     forYouProductsState: ApiState,
     onRefresh: () -> Unit = {},
+    bottomNavController: NavController,
     navController: NavController
 ) {
     val isRefreshing = remember { mutableStateOf(false) }
@@ -139,7 +139,7 @@ fun HomeScreenDesign(
                     val smartCollections = (smartCollectionsState).data
                     item {
                         BrandsSection(
-                            navController = navController,
+                            navController = bottomNavController,
                             smartCollections as List<SmartCollectionsItem?>
                         ) // Pass navController here
                     }
@@ -161,7 +161,7 @@ fun HomeScreenDesign(
                 is ApiState.Success -> {
                     val forYouProducts = (forYouProductsState).data
                     item {
-                        ForYouSection(forYouProducts as List<ProductsItem>)
+                        ForYouSection(forYouProducts as List<ProductsItem>,navController)
                     }
                 }
             }
@@ -231,7 +231,9 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .padding(horizontal = 15.dp)
-            .height(56.dp),
+            .height(56.dp).clickable {
+                Log.d("SearchBar", "Search bar clicked")
+            },
         shape = RoundedCornerShape(28.dp),
         colors = TextFieldDefaults.textFieldColors(
             containerColor = Color(0xFFF2F2F2),
@@ -329,7 +331,7 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
 }
 
 @Composable
-fun ForYouSection(products: List<ProductsItem>) {
+fun ForYouSection(products: List<ProductsItem>, navController: NavController) {
     val randomProducts = remember { products.shuffled().take(5) }
     val visible = remember { mutableStateOf(false) }
     LaunchedEffect(randomProducts) {
@@ -369,7 +371,7 @@ fun ForYouSection(products: List<ProductsItem>) {
                         productPrice = "$price",
                         productImage = product.images?.get(0)?.src,
                         onClick = {
-
+                            navController.navigate("productDetails/${product.id}")
                         }
                     )
                 }
@@ -482,11 +484,12 @@ fun MainScreen(
                     onRefresh = {
                         viewModel.refreshData()
                     },
-                    navControllerBottom
+                    navControllerBottom,
+                    navController
                 )
             }
             composable(BottomNav.Categories.route) {
-                CategoriesScreen(categoryViewModel)
+                CategoriesScreen(categoryViewModel,navController)
             }
             composable(BottomNav.Cart.route) {
                 ShoppingCartScreen(navControllerBottom)
@@ -514,16 +517,17 @@ fun MainScreen(
     }
 }
 
-@Preview(showSystemUi = true)
-@Composable
-fun HomeScreenPreview() {
-    HomeScreenDesign(
-        "George",
-        {},
-        query = TextFieldValue(""),
-        onQueryChange = {},
-        smartCollectionsState = ApiState.Loading,
-        forYouProductsState = ApiState.Loading,
-        navController = rememberNavController()
-    )
-}
+//@Preview(showSystemUi = true)
+//@Composable
+//fun HomeScreenPreview() {
+//    HomeScreenDesign(
+//        "George",
+//        {},
+//        query = TextFieldValue(""),
+//        onQueryChange = {},
+//        smartCollectionsState = ApiState.Loading,
+//        forYouProductsState = ApiState.Loading,
+//        bottomNavController = rememberNavController(),
+//        navController = navController
+//    )
+//}

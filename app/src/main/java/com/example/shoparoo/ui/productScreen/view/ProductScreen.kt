@@ -178,7 +178,7 @@ fun ProductGrid(filteredProducts: List<ProductsItem>, navController: NavControll
                 productPrice = "$price",
                 productImage = product.images?.firstOrNull()?.src ?: "",
                 onClick = {
-                   navController!!.navigate("productDetails")
+                   navController!!.navigate("productDetails/${product.id}")
                 }
 
             )
