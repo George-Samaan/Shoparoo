@@ -51,7 +51,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -97,7 +96,9 @@ fun HomeScreenDesign(
     smartCollectionsState: ApiState,
     forYouProductsState: ApiState,
     onRefresh: () -> Unit = {},
-    navController: NavController,
+    bottomNavController: NavController,
+    navController: NavController
+
 ) {
     val isNetworkAvailable = networkListener()
     if (!isNetworkAvailable.value) {
@@ -162,14 +163,24 @@ fun HomeScreenDesign(
                         }
                     }
 
-                    is ApiState.Success -> {
-                        val smartCollections = (smartCollectionsState).data
-                        item {
-                            BrandsSection(
-                                navController = navController,
-                                smartCollections as List<SmartCollectionsItem?>
-                            )
-                        }
+
+                is ApiState.Success -> {
+                    val smartCollections = (smartCollectionsState).data
+                    item {
+                        BrandsSection(
+                            navController = bottomNavController,
+                            smartCollections as List<SmartCollectionsItem?>
+                        ) // Pass navController here
+// =======
+//                     is ApiState.Success -> {
+//                         val smartCollections = (smartCollectionsState).data
+//                         item {
+//                             BrandsSection(
+//                                 navController = navController,
+//                                 smartCollections as List<SmartCollectionsItem?>
+//                             )
+//                         }
+// >>>>>>> Development
                     }
                 }
                 when (forYouProductsState) {
@@ -185,16 +196,24 @@ fun HomeScreenDesign(
                         }
                     }
 
+
+//                 is ApiState.Success -> {
+//                     val forYouProducts = (forYouProductsState).data
+//                     item {
+//                         ForYouSection(forYouProducts as List<ProductsItem>,navController)
+
                     is ApiState.Success -> {
                         val forYouProducts = (forYouProductsState).data
                         item {
                             ForYouSection(
                                 products = forYouProducts as List<ProductsItem>,
+                              navController,
                                 selectedCurrency = selectedCurrency,
                                 conversionRate = conversionRate,
                                 currencySymbols = currencySymbols
                             )
                         }
+
                     }
                 }
             }
@@ -264,7 +283,9 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .padding(horizontal = 15.dp)
-            .height(56.dp),
+            .height(56.dp).clickable {
+                Log.d("SearchBar", "Search bar clicked")
+            },
         shape = RoundedCornerShape(28.dp),
         colors = TextFieldDefaults.textFieldColors(
             containerColor = Color(0xFFE0E0E0),
@@ -360,12 +381,16 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
 }
 
 @Composable
+
+//fun ForYouSection(products: List<ProductsItem>, navController: NavController) {
+
 fun ForYouSection(
-    products: List<ProductsItem>,
+    products: List<ProductsItem>,navController: NavController,
     selectedCurrency: String,
     conversionRate: Float,
     currencySymbols: Map<String, String>
 ) {
+
     val randomProducts = remember { products.shuffled().take(5) }
     val visible = remember { mutableStateOf(false) }
     LaunchedEffect(randomProducts) {
@@ -406,13 +431,19 @@ fun ForYouSection(
                         productName = product.title.toString(),
                         productPrice = formattedPrice,
                         productImage = product.images?.get(0)?.src,
+
+                        onClick = {
+                            navController.navigate("productDetails/${product.id}")
+                        }
+
                         currencySymbol = currencySymbols[selectedCurrency] ?: "$"
+
                     )
                 }
             }
         }
     }
-}
+
 
 @Composable
 fun ProductCard(
@@ -526,11 +557,14 @@ fun MainScreen(
                     onRefresh = {
                         viewModel.refreshData()
                     },
-                    navControllerBottom
+                    navControllerBottom,
+                    navController
                 )
             }
             composable(BottomNav.Categories.route) {
-                CategoriesScreen(categoryViewModel, navController)
+
+                CategoriesScreen(categoryViewModel,navController)
+
             }
             composable(BottomNav.Cart.route) {
                 ShoppingCartScreen(navControllerBottom)
@@ -569,16 +603,17 @@ fun MainScreen(
     }
 }
 
-@Preview(showSystemUi = true)
-@Composable
-fun HomeScreenPreview() {
-    HomeScreenDesign(
-        "George",
-        {},
-        query = TextFieldValue(""),
-        onQueryChange = {},
-        smartCollectionsState = ApiState.Loading,
-        forYouProductsState = ApiState.Loading,
-        navController = rememberNavController()
-    )
-}
+//@Preview(showSystemUi = true)
+//@Composable
+//fun HomeScreenPreview() {
+//    HomeScreenDesign(
+//        "George",
+//        {},
+//        query = TextFieldValue(""),
+//        onQueryChange = {},
+//        smartCollectionsState = ApiState.Loading,
+//        forYouProductsState = ApiState.Loading,
+//        bottomNavController = rememberNavController(),
+//        navController = navController
+//    )
+//}

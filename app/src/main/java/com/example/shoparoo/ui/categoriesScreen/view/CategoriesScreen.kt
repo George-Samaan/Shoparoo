@@ -211,6 +211,14 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                 .align(Alignment.TopEnd)
                 .padding(top = 8.dp, end = 16.dp)
 
+
+                AnimatedVisibility(
+                    visible = isReady && isFilteringComplete,
+                    enter = scaleIn(animationSpec = tween(durationMillis = 600)),
+                    exit = scaleOut(animationSpec = tween(durationMillis = 600))
+                ) {
+                    ProductGrid(filteredProducts, navController = navController)
+
             FloatingActionButton(
                 onClick = { showProductTypeMenu = !showProductTypeMenu },
                 containerColor = primary,
@@ -227,6 +235,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                         painter = painterResource(id = R.drawable.ic_filter),
                         contentDescription = "Filter Products"
                     )
+
                 }
             }
 

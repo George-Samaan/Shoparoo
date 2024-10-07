@@ -73,9 +73,10 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
-//ViewModel
+    //ViewModel
     implementation("androidx.lifecycle:lifecycle-runtime-compose-android:2.8.6")
     implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
@@ -96,8 +97,15 @@ dependencies {
     //google icons
     implementation("androidx.compose.material:material-icons-extended-android:1.7.2")
 
+
+    //rating bar
+    implementation("com.github.SmartToolFactory:Compose-RatingBar:1.1.1")
+  //  implementation("com.github.SmartToolFactory:Compose-RatingBar:1.0.0")
+    //implementation ("com.github.a914-gowtham:compose-ratingbar:1.3.12")
+
     //Animation
     implementation("com.airbnb.android:lottie-compose:6.0.0")
+
 
 
 }

@@ -224,7 +224,14 @@ fun ProductGrid(
                 productName = productName,
                 productPrice = "$formattedPrice",
                 productImage = product.images?.firstOrNull()?.src ?: "",
+
+                onClick = {
+                   navController!!.navigate("productDetails/${product.id}")
+                }
+
+
                 currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$")
+
             )
         }
     }
