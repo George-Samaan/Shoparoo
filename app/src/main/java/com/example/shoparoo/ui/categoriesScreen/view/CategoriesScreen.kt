@@ -50,6 +50,7 @@ import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.productScreen.view.PriceSlider
 import com.example.shoparoo.ui.productScreen.view.ProductGrid
 import com.example.shoparoo.ui.productScreen.view.ProductInfoMessage
+import com.example.shoparoo.ui.productScreen.view.SearchBar
 import com.example.shoparoo.ui.theme.Purple40
 import com.example.shoparoo.ui.theme.bg
 import com.example.shoparoo.ui.theme.primary
@@ -174,7 +175,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
 
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
-                com.example.shoparoo.ui.productScreen.view.SearchBar(
+                SearchBar(
                     searchQuery = searchQuery,
                     onSearchQueryChange = { query -> searchQuery = query },
                 )
