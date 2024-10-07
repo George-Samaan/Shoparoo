@@ -27,6 +27,8 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> get() = _isLoading // Expose it
 
+
+
     init {
         val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
         val db = Firebase.firestore

@@ -3,7 +3,7 @@
 package com.example.shoparoo.ui.settingsScreen
 
 import android.content.Context
-import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,7 +51,12 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.MainActivity
 import com.example.shoparoo.R
+import com.example.shoparoo.data.network.currencyApi
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @Composable
@@ -60,10 +65,8 @@ fun SettingsScreen(navController: NavController) {
     var showLanguageSheet by remember { mutableStateOf(false) }
     var showAboutUsSheet by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val savedLanguage = getLanguagePreference(context)
-    var selectedLanguage by remember { mutableStateOf(savedLanguage) }
 
-    // Load the saved currency preference
+
     val savedCurrency = getCurrencyPreference(context)
     var selectedCurrency by remember { mutableStateOf(savedCurrency) }
 
@@ -151,22 +154,17 @@ fun SettingsScreen(navController: NavController) {
                 onCurrencySelected = { currency ->
                     selectedCurrency = currency
                     saveCurrencyPreference(context, currency)
-                    // Optionally refresh product prices
+                    Toast.makeText(context, "Currency changed to $currency", Toast.LENGTH_SHORT).show()
+                    showCurrencySheet = false
                 }
             )
         }
     }
 
+
     if (showLanguageSheet) {
         BottomSheet(onDismiss = { showLanguageSheet = false }) {
-            Language(
-                selectedLanguage = selectedLanguage,
-                onLanguageSelected = { language ->
-                    selectedLanguage = language
-                    changeLanguage(context, language)
-                    saveLanguagePreference(context, language)
-                }
-            )
+            Language()
         }
     }
 
@@ -220,28 +218,60 @@ fun SettingsItem(title: String, icon: Int, arrowIcon: Int, onClick: () -> Unit) 
 
 @Composable
 fun Currency(selectedCurrency: String, onCurrencySelected: (String) -> Unit) {
-    val countries = listOf(
+    val context = LocalContext.current
+    val currencies = listOf(
         Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8"),
-        Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC"),
+        Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC")
     )
 
     LazyColumn {
-        items(countries) { (country, flag) ->
+        items(currencies) { (currency, flag) ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 10.dp, horizontal = 20.dp)
+                    .clickable {
+                        // Trigger currency conversion
+                        onCurrencySelected(currency)
+                        fetchConversionRate(context, currency)
+                    }
             ) {
                 Text(
                     text = flag,
                     modifier = Modifier.padding(end = 20.dp)
                 )
-                Text(text = country)
+                Text(text = currency)
             }
         }
     }
 }
 
+fun fetchConversionRate(context: Context, selectedCurrency: String) {
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val response = currencyApi.getRates("db5f5601837148c482888a4cdf945326")
+            if (response.isSuccessful) {
+                val rates = response.body()?.rates
+                rates?.let {
+                    val conversionRate = it[selectedCurrency] ?: 1.0
+                    updatePrices(context, conversionRate)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+}
+
+fun updatePrices(context: Context, conversionRate: Double) {
+    //store the conversion rate in SharedPreferences and update product prices across the app
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    sharedPreferences.edit().putFloat("conversionRate", conversionRate.toFloat()).apply()
+
+    CoroutineScope(Dispatchers.Main).launch {
+        // Call necessary composables to update UI
+    }
+}
 fun saveCurrencyPreference(context: Context, currency: String) {
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
     sharedPreferences.edit().putString("currency", currency).apply()
@@ -254,10 +284,10 @@ fun getCurrencyPreference(context: Context): String {
 
 
 @Composable
-fun Language(selectedLanguage: String, onLanguageSelected: (String) -> Unit) {
+fun Language() {
     val languages = listOf(
-        Pair("English", "\uD83C\uDDFA\uD83C\uDDF8"),
-        Pair("Arabic", "\uD83C\uDDEA\uD83C\uDDEC")
+        Pair("English", "\uD83C\uDDFA\uD83C\uDDF8")
+        //Pair("Arabic", "\uD83C\uDDEA\uD83C\uDDEC")
     )
 
     LazyColumn {
@@ -266,9 +296,7 @@ fun Language(selectedLanguage: String, onLanguageSelected: (String) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 10.dp, horizontal = 20.dp)
-                    .clickable {
-                        onLanguageSelected(language)  // Trigger language change
-                    }
+                    .clickable {}
             ) {
                 Text(
                     text = flag,
@@ -276,42 +304,13 @@ fun Language(selectedLanguage: String, onLanguageSelected: (String) -> Unit) {
                 )
                 Text(
                     text = language,
-                    fontWeight = if (language == selectedLanguage) FontWeight.Bold else FontWeight.Normal // Highlight selected language
+                    fontWeight =  FontWeight.Bold
                 )
             }
         }
     }
 }
 
-fun changeLanguage(context: Context, language: String) {
-    val locale = when (language) {
-        "English" -> Locale("en")
-        "Arabic" -> Locale("ar")
-        else -> Locale.getDefault()
-    }
-
-    Locale.setDefault(locale)
-
-    val config = context.resources.configuration
-    config.setLocale(locale)
-
-    context.resources.updateConfiguration(config, context.resources.displayMetrics)
-
-    val intent = Intent(context, MainActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-    }
-    context.startActivity(intent)
-}
-
-fun saveLanguagePreference(context: Context, language: String) {
-    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    sharedPreferences.edit().putString("language", language).apply()
-}
-
-fun getLanguagePreference(context: Context): String {
-    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    return sharedPreferences.getString("language", "English") ?: "English"  // Default to English
-}
 //___________________________________________________________________
 
 @Composable

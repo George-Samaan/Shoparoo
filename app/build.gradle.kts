@@ -97,9 +97,15 @@ dependencies {
     //google icons
     implementation("androidx.compose.material:material-icons-extended-android:1.7.2")
 
+
     //rating bar
     implementation("com.github.SmartToolFactory:Compose-RatingBar:1.1.1")
   //  implementation("com.github.SmartToolFactory:Compose-RatingBar:1.0.0")
     //implementation ("com.github.a914-gowtham:compose-ratingbar:1.3.12")
+
+    //Animation
+    implementation("com.airbnb.android:lottie-compose:6.0.0")
+
+
 
 }

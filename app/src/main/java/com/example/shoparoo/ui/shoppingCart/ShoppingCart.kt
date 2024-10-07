@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.R
+import com.example.shoparoo.ui.theme.primary
 
 // Data class to represent products in the cart
 data class Product(
@@ -64,9 +65,27 @@ fun ShoppingCartScreen(navController: NavController) {
     // Sample product list
     val productList = remember {
         mutableStateListOf(
-            Product(imageRes = R.drawable.ic_watch, productName = "Watch", productBrand = "Rolex", price = 40.0, quantity = 1),
-            Product(imageRes = R.drawable.ic_watch, productName = "Airpods", productBrand = "Apple", price = 333.0, quantity = 1),
-            Product(imageRes = R.drawable.ic_watch, productName = "Hoodie", productBrand = "Puma", price = 50.0, quantity = 1)
+            Product(
+                imageRes = R.drawable.ic_watch,
+                productName = "Watch",
+                productBrand = "Rolex",
+                price = 40.0,
+                quantity = 1
+            ),
+            Product(
+                imageRes = R.drawable.ic_watch,
+                productName = "Airpods",
+                productBrand = "Apple",
+                price = 333.0,
+                quantity = 1
+            ),
+            Product(
+                imageRes = R.drawable.ic_watch,
+                productName = "Hoodie",
+                productBrand = "Puma",
+                price = 50.0,
+                quantity = 1
+            )
         )
     }
 
@@ -97,7 +116,7 @@ fun Header(navController: NavController) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 30.dp, start = 10.dp)
+            .padding(top = 30.dp, start = 5.dp)
     ) {
         Box(
             modifier = Modifier
@@ -108,7 +127,7 @@ fun Header(navController: NavController) {
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_arrow_back_2),
+                painter = painterResource(id = R.drawable.ic_back),
                 contentDescription = stringResource(R.string.back),
                 modifier = Modifier.size(24.dp)
             )
@@ -118,6 +137,7 @@ fun Header(navController: NavController) {
             text = stringResource(R.string.cart),
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
+            color = primary,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .weight(1f)
@@ -142,7 +162,13 @@ fun ProductList(productList: List<Product>) {
 }
 
 @Composable
-fun ProductItem(imageRes: Int, productName: String, productBrand: String, price: String, quantity: Int) {
+fun ProductItem(
+    imageRes: Int,
+    productName: String,
+    productBrand: String,
+    price: String,
+    quantity: Int
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -163,11 +189,20 @@ fun ProductItem(imageRes: Int, productName: String, productBrand: String, price:
         Spacer(modifier = Modifier.width(16.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = productName, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            Text(text = productBrand, color = Color.Gray, fontSize = 14.sp)
-            Text(text = price, color = Color(0xFF673AB7), fontWeight = FontWeight.Bold)
+            Text(
+                text = productName,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = primary
+            )
+            Text(
+                text = productBrand,
+                color = Color.Gray,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(text = price, color = Color.Gray, fontSize = 16.sp, fontWeight = FontWeight.W400)
         }
-
         QuantitySelector(quantity = quantity)
 
         Icon(
@@ -176,7 +211,7 @@ fun ProductItem(imageRes: Int, productName: String, productBrand: String, price:
             tint = Color.Red,
             modifier = Modifier
                 .padding(8.dp)
-                .size(24.dp)
+                .size(30.dp)
                 .clickable { /* Handle remove item */ }
         )
     }
@@ -187,11 +222,19 @@ fun QuantitySelector(quantity: Int) {
     var count by remember { mutableStateOf(quantity) }
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { if (count > 0) count-- }) {
-            Icon(painter = painterResource(id = R.drawable.ic_mini), contentDescription = "Minus")
+            Icon(
+                painter = painterResource(id = R.drawable.ic_mini),
+                contentDescription = "Minus",
+                tint = Color.Gray
+            )
         }
-        Text(text = count.toString(), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(text = count.toString(), fontWeight = FontWeight.Bold, fontSize = 18.sp)
         IconButton(onClick = { count++ }) {
-            Icon(painter = painterResource(id = R.drawable.ic_add_circle), contentDescription = "Plus")
+            Icon(
+                painter = painterResource(id = R.drawable.ic_add_circle),
+                contentDescription = "Plus",
+                tint = primary
+            )
         }
     }
 }
@@ -200,6 +243,7 @@ fun QuantitySelector(quantity: Int) {
 fun ApplyCoupons(productList: List<Product>, onApplyCoupon: (Double) -> Unit) {
     val couponText = remember { mutableStateOf("") }
     val context = LocalContext.current
+    var totalDiscount: Double
 
     Row(
         modifier = Modifier
@@ -211,7 +255,8 @@ fun ApplyCoupons(productList: List<Product>, onApplyCoupon: (Double) -> Unit) {
         OutlinedTextField(
             value = couponText.value,
             onValueChange = { couponText.value = it },
-            label = { Text(text = "Enter Coupon Code") },
+            label = { Text(text = "Enter Coupon Code", color = primary) },
+            shape = RoundedCornerShape(25.dp),
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 8.dp), // Add space between EditText and button
@@ -222,26 +267,36 @@ fun ApplyCoupons(productList: List<Product>, onApplyCoupon: (Double) -> Unit) {
         Button(
             onClick = {
                 // Check if the coupon code is valid and apply discount
-                val discount = if (couponText.value.isNotEmpty()) {
+                val discount = if (couponText.value.isNotEmpty() && couponText.value == "Shoparoo20") {
                     0.20 // 20% discount
                 } else {
                     0.0
                 }
 
-                val totalDiscount = discount * calculateSubtotal(productList)
-                onApplyCoupon(totalDiscount)
+                if (couponText.value == "Shoparoo20") {
+                    totalDiscount = discount * calculateSubtotal(productList)
+                    onApplyCoupon(totalDiscount)
+                    Toast.makeText(context, "Coupon Applied: ${couponText.value}", Toast.LENGTH_SHORT).show()
+                }else{
+                    Toast.makeText(context, "Invalid Coupon Code", Toast.LENGTH_SHORT).show()
+                    onApplyCoupon(0.0)
+                }
 
-                Toast.makeText(context, "Coupon Applied: ${couponText.value}", Toast.LENGTH_SHORT).show()
+
+                Toast.makeText(context, "Coupon Applied: ${couponText.value}", Toast.LENGTH_SHORT)
+                    .show()
+
             },
             modifier = Modifier
-                .padding(start = 8.dp)
+                .padding(start = 8.dp, top = 4.dp)
                 .height(56.dp), // Adjust height to match EditText
-            colors = ButtonDefaults.buttonColors(Color.Black)
+            colors = ButtonDefaults.buttonColors(primary)
         ) {
             Text(text = "Apply", color = Color.White)
         }
     }
 }
+
 // Helper function to calculate subtotal
 fun calculateSubtotal(productList: List<Product>): Double {
     return productList.sumOf { it.price * it.quantity }
@@ -262,38 +317,51 @@ fun OrderSummary(productList: List<Product>, totalDiscount: Double) {
             .background(Color(0xFFF5F5F5), RoundedCornerShape(10.dp))
             .padding(16.dp)
     ) {
-        Text(text = "Order Summary", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text(
+            text = "Order Summary",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            color = primary
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Items", color = Color.Gray)
-            Text(text = totalItems.toString())
+            Text(text = "Items", color = Color.Gray, fontSize = 17.sp)
+            Text(text = totalItems.toString(), fontSize = 17.sp)
         }
         Spacer(modifier = Modifier.height(5.dp))
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Subtotal", color = Color.Gray)
-            Text(text = "$${"%.2f".format(subtotal)}")
+            Text(text = "Subtotal", color = Color.Gray, fontSize = 17.sp)
+            Text(text = "$${"%.2f".format(subtotal)}", fontSize = 17.sp)
         }
         Spacer(modifier = Modifier.height(5.dp))
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Discount", color = Color.Gray)
-            Text(text = "-$${"%.2f".format(totalDiscount)}")  // Format totalDiscount correctly
+            Text(text = "Discount", color = Color.Gray, fontSize = 17.sp)
+            Text(
+                text = "-$${"%.2f".format(totalDiscount)}",
+                fontSize = 17.sp
+            )  // Format totalDiscount correctly
         }
         Spacer(modifier = Modifier.height(5.dp))
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Delivery Charges", color = Color.Gray)
-            Text(text = "$deliveryCharges")
+            Text(text = "Delivery Charges", color = Color.Gray, fontSize = 17.sp)
+            Text(text = "$deliveryCharges", fontSize = 17.sp)
         }
         Spacer(modifier = Modifier.height(5.dp))
 
         Divider(modifier = Modifier.padding(vertical = 8.dp))
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Total", fontWeight = FontWeight.Bold)
-            Text(text = "$${"%.2f".format(total)}")
+            Text(text = "Total", fontWeight = FontWeight.Bold, color = primary, fontSize = 20.sp)
+            Text(
+                text = "$${"%.2f".format(total)}",
+                fontWeight = FontWeight.Bold,
+                color = primary,
+                fontSize = 20.sp
+            )
         }
     }
 }
@@ -308,7 +376,7 @@ fun CheckoutButton(navController: NavController) {
             .padding(16.dp)
             .height(50.dp),
         shape = RoundedCornerShape(25.dp),
-        colors = ButtonDefaults.buttonColors(Color.Black)
+        colors = ButtonDefaults.buttonColors(primary)
     ) {
         Text(text = "Proceed to Checkout", color = Color.White)
     }

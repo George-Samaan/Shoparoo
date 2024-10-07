@@ -1,7 +1,9 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
+@file:Suppress("DEPRECATION")
 
 package com.example.shoparoo.ui.homeScreen.view
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -9,6 +11,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -43,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -63,6 +67,7 @@ import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
 import com.example.shoparoo.ui.auth.view.LoginScreen
+import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.categoriesScreen.view.CategoriesScreen
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModel
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModelFactory
@@ -77,10 +82,11 @@ import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModelFactory
 import com.example.shoparoo.ui.settingsScreen.ProfileScreen
 import com.example.shoparoo.ui.settingsScreen.SettingsScreen
 import com.example.shoparoo.ui.shoppingCart.ShoppingCartScreen
+import com.example.shoparoo.ui.theme.primary
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import networkListener
 
-@Suppress("UNCHECKED_CAST")
 @Composable
 fun HomeScreenDesign(
     userName: String,
@@ -92,48 +98,71 @@ fun HomeScreenDesign(
     onRefresh: () -> Unit = {},
     bottomNavController: NavController,
     navController: NavController
-) {
-    val isRefreshing = remember { mutableStateOf(false) }
-    isRefreshing.value =
-        smartCollectionsState is ApiState.Loading || forYouProductsState is ApiState.Loading
 
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(isRefreshing.value),
-        onRefresh = {
-            isRefreshing.value = true
-            onRefresh()
-        }
-    ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth()
+) {
+    val isNetworkAvailable = networkListener()
+    if (!isNetworkAvailable.value) {
+        // Show No Internet connection message
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            item {
-                Header(userName, onFavouriteClick)
+            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp)
+        }
+    } else {
+        val context = LocalContext.current
+        val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+
+        val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+        val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
+
+        val currencySymbols = mapOf(
+            "USD" to "$",
+            "EGP" to "EGP "
+        )
+
+        val isRefreshing = remember { mutableStateOf(false) }
+        isRefreshing.value =
+            smartCollectionsState is ApiState.Loading || forYouProductsState is ApiState.Loading
+
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(isRefreshing.value),
+            onRefresh = {
+                isRefreshing.value = true
+                onRefresh()
             }
-            item {
-                SearchBar(query, onQueryChange)
-            }
-            item {
-                CouponsSliderWithIndicator(
-                    imageList = listOf(
-                        R.drawable.black_friday,
-                        R.drawable.nike_ads,
-                        R.drawable.discount
-                    ),
-                    couponText = "20% Off All Products"
-                )
-            }
-            when (smartCollectionsState) {
-                is ApiState.Loading -> {}
-                is ApiState.Failure -> {
-                    item {
-                        Text(
-                            text = "Error fetching brands",
-                            color = Color.Red,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                item {
+                    Header(userName, onFavouriteClick)
                 }
+                item {
+                    SearchBar(query, onQueryChange)
+                }
+                item {
+                    CouponsSliderWithIndicator(
+                        imageList = listOf(
+                            R.drawable.black_friday,
+                            R.drawable.nike_ads,
+                            R.drawable.discount
+                        ),
+                        couponText = "Shoparoo20"
+                    )
+                }
+                when (smartCollectionsState) {
+                    is ApiState.Loading -> {}
+                    is ApiState.Failure -> {
+                        item {
+                            Text(
+                                text = "Error fetching brands",
+                                color = Color.Red,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+
 
                 is ApiState.Success -> {
                     val smartCollections = (smartCollectionsState).data
@@ -142,33 +171,55 @@ fun HomeScreenDesign(
                             navController = bottomNavController,
                             smartCollections as List<SmartCollectionsItem?>
                         ) // Pass navController here
+// =======
+//                     is ApiState.Success -> {
+//                         val smartCollections = (smartCollectionsState).data
+//                         item {
+//                             BrandsSection(
+//                                 navController = navController,
+//                                 smartCollections as List<SmartCollectionsItem?>
+//                             )
+//                         }
+// >>>>>>> Development
                     }
                 }
-            }
-            when (forYouProductsState) {
-                is ApiState.Loading -> {}
-                is ApiState.Failure -> {
-                    item {
-                        val errorMessage = (forYouProductsState)
-                        Text(
-                            text = "Error fetching products: $errorMessage",
-                            color = Color.Red,
-                            modifier = Modifier.padding(16.dp)
-                        )
+                when (forYouProductsState) {
+                    is ApiState.Loading -> {}
+                    is ApiState.Failure -> {
+                        item {
+                            val errorMessage = (forYouProductsState)
+                            Text(
+                                text = "Error fetching products: $errorMessage",
+                                color = Color.Red,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
                     }
-                }
 
-                is ApiState.Success -> {
-                    val forYouProducts = (forYouProductsState).data
-                    item {
-                        ForYouSection(forYouProducts as List<ProductsItem>,navController)
+
+//                 is ApiState.Success -> {
+//                     val forYouProducts = (forYouProductsState).data
+//                     item {
+//                         ForYouSection(forYouProducts as List<ProductsItem>,navController)
+
+                    is ApiState.Success -> {
+                        val forYouProducts = (forYouProductsState).data
+                        item {
+                            ForYouSection(
+                                products = forYouProducts as List<ProductsItem>,
+                              navController,
+                                selectedCurrency = selectedCurrency,
+                                conversionRate = conversionRate,
+                                currencySymbols = currencySymbols
+                            )
+                        }
+
                     }
                 }
             }
         }
     }
 }
-
 @Composable
 fun Header(userName: String, onFavouriteClick: () -> Unit) {
     Row(
@@ -195,7 +246,7 @@ fun ProfileSection(userName: String) {
             contentScale = ContentScale.Crop
         )
         Column(modifier = Modifier.padding(start = 10.dp)) {
-            Text("Hello!", fontSize = 16.sp)
+            Text("Hello!", fontSize = 18.sp)
             Text(userName, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
     }
@@ -220,11 +271,12 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
     TextField(
         value = query,
         onValueChange = onQueryChange,
-        placeholder = { Text(text = "Search") },
+        placeholder = { Text(text = "Search", color = primary) },
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_search),
-                contentDescription = null
+                contentDescription = null,
+                tint = primary
             )
         },
         modifier = Modifier
@@ -236,7 +288,7 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
             },
         shape = RoundedCornerShape(28.dp),
         colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFF2F2F2),
+            containerColor = Color(0xFFE0E0E0),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         )
@@ -244,10 +296,7 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
 }
 
 @Composable
-fun BrandsSection(
-    navController: NavController,
-    smartCollections: List<SmartCollectionsItem?>
-) {
+fun BrandsSection(navController: NavController, smartCollections: List<SmartCollectionsItem?>) {
     val visible = remember { mutableStateOf(false) }
 
     LaunchedEffect(smartCollections) {
@@ -322,16 +371,26 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
             )
         }
         Text(
-            text = brandName,
+            text = brandName.capitalizeWords(),
+            color = primary,
             fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
+            fontSize = 17.sp,
             modifier = Modifier.padding(top = 12.dp)
         )
     }
 }
 
 @Composable
-fun ForYouSection(products: List<ProductsItem>, navController: NavController) {
+
+//fun ForYouSection(products: List<ProductsItem>, navController: NavController) {
+
+fun ForYouSection(
+    products: List<ProductsItem>,navController: NavController,
+    selectedCurrency: String,
+    conversionRate: Float,
+    currencySymbols: Map<String, String>
+) {
+
     val randomProducts = remember { products.shuffled().take(5) }
     val visible = remember { mutableStateOf(false) }
     LaunchedEffect(randomProducts) {
@@ -354,7 +413,7 @@ fun ForYouSection(products: List<ProductsItem>, navController: NavController) {
             visible = visible.value,
             enter = slideInHorizontally(
                 initialOffsetX = { it },
-                animationSpec = tween(durationMillis = 600) // Duration of the animation
+                animationSpec = tween(durationMillis = 600)
             ),
         ) {
             LazyRow(
@@ -362,35 +421,46 @@ fun ForYouSection(products: List<ProductsItem>, navController: NavController) {
                 modifier = Modifier.fillMaxHeight()
             ) {
                 items(randomProducts.size) { index ->
-                    val product = randomProducts[index]
-                    val price = product.variants?.get(0)?.price?.toDoubleOrNull()?.toInt()
-                        ?: 0 // Convert to int
+                    val product = products[index]
+                    val priceInUSD = product.variants?.get(0)?.price?.toDoubleOrNull() ?: 0.0
+                    val convertedPrice = priceInUSD * conversionRate
+
+                    val formattedPrice = String.format("%.2f", convertedPrice)
 
                     ProductCard(
                         productName = product.title.toString(),
-                        productPrice = "$price",
+                        productPrice = formattedPrice,
                         productImage = product.images?.get(0)?.src,
+
                         onClick = {
                             navController.navigate("productDetails/${product.id}")
                         }
+
+                        currencySymbol = currencySymbols[selectedCurrency] ?: "$"
+
                     )
                 }
             }
         }
     }
-}
+
 
 @Composable
-fun ProductCard(productName: String, productPrice: String, productImage: String?,onClick: () -> Unit) {
+fun ProductCard(
+    productName: String,
+    productPrice: String,
+    productImage: String?,
+    currencySymbol: String,
+) {
     Card(
         modifier = Modifier
             .width(170.dp)
             .height(240.dp)
-            .padding(6.dp),
+            .padding(6.dp)
+            .clickable {},
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEEEE)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-        onClick = onClick
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Image(
@@ -398,21 +468,21 @@ fun ProductCard(productName: String, productPrice: String, productImage: String?
                 contentDescription = productName,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp),
+                    .height(155.dp),
                 contentScale = ContentScale.Crop
             )
             Text(
-                text = productName,
+                text = productName.capitalizeWords(),
+                color = primary,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
-                maxLines = 3,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                // this USD if changed will change in all the app till now
-                text = "$productPrice USD",
+                text = "$currencySymbol$productPrice",
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
                 color = Color.Gray,
@@ -422,6 +492,10 @@ fun ProductCard(productName: String, productPrice: String, productImage: String?
     }
 }
 
+fun String.capitalizeWords(): String {
+    return this.split(" ")
+        .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
+}
 
 @Composable
 fun MainScreen(
@@ -459,7 +533,6 @@ fun MainScreen(
     val userName by viewModel.userName.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-// Call to fetch smart collections
     LaunchedEffect(Unit) {
         viewModel.getSmartCollections()
         viewModel.getForYouProducts()
@@ -489,17 +562,26 @@ fun MainScreen(
                 )
             }
             composable(BottomNav.Categories.route) {
+
                 CategoriesScreen(categoryViewModel,navController)
+
             }
             composable(BottomNav.Cart.route) {
                 ShoppingCartScreen(navControllerBottom)
             }
-
-            composable(BottomNav.Profile.route) { ProfileScreen(navControllerBottom, navController) }
-            composable("settings") { SettingsScreen(navControllerBottom) }
-            composable("login") { LoginScreen(navControllerBottom)}
+            composable(BottomNav.orders.route) {
+                Text(text = "Orders Screen")
+            }
             composable(BottomNav.Profile.route) {
-                ProfileScreen(navControllerBottom,navController)
+                ProfileScreen(
+                    navControllerBottom,
+                    navController
+                )
+            }
+            composable("settings") { SettingsScreen(navControllerBottom) }
+            composable("login") { LoginScreen(navControllerBottom) }
+            composable(BottomNav.Profile.route) {
+                ProfileScreen(navControllerBottom, navController)
             }
             composable("settings") {
                 SettingsScreen(navControllerBottom)
@@ -511,7 +593,11 @@ fun MainScreen(
                 val brandId = backStackEntry.arguments?.getString("brandId") ?: return@composable
                 val brandTitle =
                     backStackEntry.arguments?.getString("brandTitle") ?: return@composable
-                ProductsScreen(brandId, brandTitle, navControllerBottom, productViewModel,navController)
+
+                ProductsScreen(
+                    brandId, brandTitle, navControllerBottom, productViewModel,
+                    navController
+                )
             }
         }
     }

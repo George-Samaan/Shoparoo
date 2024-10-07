@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.shoparoo.R
-import com.example.shoparoo.ui.theme.Purple40
+import com.example.shoparoo.ui.theme.primary
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
@@ -88,11 +88,13 @@ fun CouponsSliderWithIndicator(
                         .background(Color.Transparent)
                         .clip(RoundedCornerShape(28.dp))
                         .clickable {
-                          if(imageList[page] == R.drawable.discount){
-                              val clip = ClipData.newPlainText("Coupon Code", couponText)
-                              clipBoardManager.setPrimaryClip(clip)
-                              Toast.makeText(context, "Coupon Code Copied", Toast.LENGTH_SHORT).show()
-                          }
+                            if (imageList[page] == R.drawable.discount) {
+                                val clip = ClipData.newPlainText("Coupon Code", couponText)
+                                clipBoardManager.setPrimaryClip(clip)
+                                Toast
+                                    .makeText(context, "Coupon Code Copied", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
                         },
                     contentScale = ContentScale.Crop
                 )
@@ -104,7 +106,7 @@ fun CouponsSliderWithIndicator(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 16.dp),
-            activeColor = Purple40,
+            activeColor = primary,
             inactiveColor = Color.Gray,
             indicatorWidth = 12.dp,
             spacing = 8.dp
@@ -112,15 +114,3 @@ fun CouponsSliderWithIndicator(
     }
 }
 
-/*
-@Preview(showBackground = true)
-@Composable
-fun CouponsSliderWithIndicatorPreview() {
-    CouponsSliderWithIndicator(
-        imageList = listOf(
-            R.drawable.ic_watch,
-            R.drawable.fifty_off,
-            R.drawable.nike_discount
-        )
-    )
-}*/
