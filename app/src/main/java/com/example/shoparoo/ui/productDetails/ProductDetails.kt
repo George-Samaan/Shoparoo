@@ -105,12 +105,6 @@ private fun productInfo(res: SingleProduct) {
                 .align(Alignment.Start)
                 .padding(start = 5.dp)
         )
-//        Text(
-//            text = "555"+ "$"//stringResource(id = R.string.currency)
-//            ,fontSize = 20.sp,
-//            fontWeight = FontWeight.Bold,
-//            modifier = Modifier.align(Alignment.End).padding(end = 20.dp)
-//        )
         ReviewSection()
 
         Text(
