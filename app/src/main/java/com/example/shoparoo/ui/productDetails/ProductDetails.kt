@@ -148,7 +148,7 @@ private fun stockAndPrice(selected: MutableState<VariantsItem?>) {
             .fillMaxWidth()
     ) {
         Text(
-            text = (selected.value!!.inventoryQuantity).toString() + " left",
+            text = (selected.value!!.inventoryQuantity).toString() + " items left",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color =  if (selected.value!!.inventoryQuantity!! > 10) Color.Gray else Color.Red
