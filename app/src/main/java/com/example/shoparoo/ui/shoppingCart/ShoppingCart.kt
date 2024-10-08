@@ -49,6 +49,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.R
 import com.example.shoparoo.ui.theme.primary
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 
 // Data class to represent products in the cart
 data class Product(
@@ -89,26 +91,44 @@ fun ShoppingCartScreen(navController: NavController) {
         )
     }
 
-
     var totalDiscount by remember { mutableStateOf(0.0) }
 
     Scaffold {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(3.dp)
         ) {
-            Header(navController)
-            Spacer(modifier = Modifier.height(16.dp))
-            ProductList(productList = productList)
-            ApplyCoupons(productList = productList) { discount ->
-                totalDiscount = discount
+            item {
+                Header(navController)
             }
-            OrderSummary(productList = productList, totalDiscount = totalDiscount)
-            CheckoutButton(navController)
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            items(productList) { product ->
+                ProductItem(
+                    imageRes = product.imageRes,
+                    productName = product.productName,
+                    productBrand = product.productBrand,
+                    price = "$${product.price}",
+                    quantity = product.quantity
+                )
+            }
+            item {
+                ApplyCoupons(productList = productList) { discount ->
+                    totalDiscount = discount
+                }
+            }
+            item {
+                OrderSummary(productList = productList, totalDiscount = totalDiscount)
+            }
+            item {
+                CheckoutButton(navController)
+            }
         }
     }
 }
+
 
 @Composable
 fun Header(navController: NavController) {
