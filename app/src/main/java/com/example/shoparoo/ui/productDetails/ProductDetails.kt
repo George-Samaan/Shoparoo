@@ -28,15 +28,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,7 +65,9 @@ import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ImagesItem
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
+import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
 import com.example.shoparoo.ui.theme.Purple40
+import com.example.shoparoo.ui.theme.primary
 import com.smarttoolfactory.ratingbar.RatingBar
 import com.smarttoolfactory.ratingbar.model.Shimmer
 import kotlin.random.Random
@@ -95,23 +99,28 @@ fun ProductDetails(id: String, navController: NavHostController) {
         is ApiState.Success -> {
             val res = ui.value as ApiState.Success
             // Log.i("ProductDetails", "Success ${res.product!!.bodyHtml}")
+
             productInfo(res.data as SingleProduct, navController,viewModel)
+
         }
     }
 
 }
 
 @Composable
+
 private fun productInfo(
     res: SingleProduct,
     NavController: NavHostController,
     viewModel: ProductDetailsViewModel,
     ) {
+
     Log.i("ProductDetails", "Success ${res.product!!.variants!![0]!!.price}")
     val selected = remember { mutableStateOf(res.product.variants!![0]) }
 
     Column(
-        Modifier.padding(25.dp)
+        Modifier
+            .padding(top = 50.dp)
             .fillMaxSize()
             .verticalScroll(
                 state = rememberScrollState(),
@@ -123,24 +132,40 @@ private fun productInfo(
         ProductImg(onClick = { NavController.popBackStack() }, images = res.product.images)
 
 
+        Column(
+            modifier = Modifier.padding(start = 25.dp, end = 25.dp, bottom = 25.dp)
+        ) {
+            Text(
+                text = res.product.title!!.capitalizeWords(),
+                fontSize = 23.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(top = 10.dp)
+            )
+
+        Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = res.product.title!!,
             fontSize = 25.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .align(Alignment.Start)
-                .padding(start = 5.dp, bottom = 5.dp)
+                .padding(start = 5.dp)
         )
+            ReviewSection()
 
-        ReviewSection()
+            StockAndPrice(selected)
 
-        StockAndPrice(selected)
 
-        VariantSection(res.product.variants, selected)
+            VariantSection(res.product.variants, selected)
 
-        DescriptionSection(res.product!!.bodyHtml)
+            DescriptionSection(res.product!!.bodyHtml)
 
+
+        }
         Spacer(modifier = Modifier.weight(1f))
+
 
         BottomSection(onClickCart = {
             if (selected.value!!.inventoryQuantity!! < 1) {
@@ -162,6 +187,7 @@ private fun productInfo(
             viewModel.getDraftOrder(res, selected.value!!, false)
             Toast.makeText(NavController.context, "Added to favorites", Toast.LENGTH_SHORT).show()
         })
+
     }
 }
 
@@ -173,7 +199,7 @@ private fun StockAndPrice(selected: MutableState<VariantsItem?>) {
             .fillMaxWidth()
     ) {
         Text(
-            text = (selected.value!!.inventoryQuantity).toString() + " items left",
+            text = (selected.value!!.inventoryQuantity).toString() + " item left",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color =  if (selected.value!!.inventoryQuantity!! > 10) Color.Gray else Color.Red
@@ -181,7 +207,7 @@ private fun StockAndPrice(selected: MutableState<VariantsItem?>) {
         Spacer(Modifier.weight(1f))
         Text(
             text = selected.value!!.price + " USD",              //stringResource(id = R.string.currency)
-            fontSize = 20.sp,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
         )
     }
@@ -189,40 +215,17 @@ private fun StockAndPrice(selected: MutableState<VariantsItem?>) {
 
 @Composable
 fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
-    Row {
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-              //  .align(Alignment.TopStart)
-                .clip(CircleShape)
-                .background(
-                    Color(0x4D000000)
-
-                )
-        ) {
-            IconButton(
-                onClick, // navController.popBackStack()
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBackIosNew,
-                    contentDescription = "Back",
-                    tint = Color.Black
-                )
-            }
-        }
-            Spacer(modifier = Modifier.weight(1f))
-
-    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp)
+            .padding(top = 30.dp, start = 5.dp)
     ) {
         LazyRow(Modifier.fillMaxWidth()) {
             items(images!!.size) { index ->
                 Log.i("ProductDetails", "Success ${images[index]!!.src}")
                 Image(
-                    painter = rememberAsyncImagePainter(model = images!![index]!!.src),
+                    painter = rememberAsyncImagePainter(model = images[index]!!.src),
                     contentDescription = null,
                     modifier = Modifier
                         .size(300.dp)
@@ -236,6 +239,24 @@ fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
 
             }
 
+        }
+        IconButton(
+            onClick, // navController.popBackStack // ()
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFF5F5F5)),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_back),
+                    contentDescription = stringResource(R.string.back),
+                    modifier = Modifier
+                        .size(24.dp)
+                )
+            }
         }
 
     }
@@ -264,12 +285,13 @@ fun ReviewSection() {
             itemSize = 25.dp,
             gestureEnabled = false,
             animationEnabled = true,
-            shimmer =  Shimmer(
+            shimmer = Shimmer(
                 color = Purple40,
                 animationSpec = infiniteRepeatable(
                     animation = tween(durationMillis = 5000, easing = LinearEasing),
                     repeatMode = RepeatMode.Restart
-                ), drawBorder = false,
+                ),
+                drawBorder = false,
             ),
         )
         Text(
@@ -281,7 +303,7 @@ fun ReviewSection() {
 
         Text(
             text = "(${reviews.first.size} reviews)",
-            fontSize = 20.sp,
+            fontSize = 18.sp,
             color = Color.Gray,
             modifier = Modifier
                 .padding(start = 10.dp)
@@ -299,7 +321,7 @@ fun ReviewSection() {
                 ) {
                     Text(
                         text = "Reviews",
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(5.dp)
                     )
@@ -319,14 +341,15 @@ fun ReviewItem(reviews: List<Reviews>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 5.dp, top = 5.dp, bottom = 10.dp).verticalScroll(scrollState),
+            .padding(start = 5.dp, top = 5.dp, bottom = 10.dp)
+            .verticalScroll(scrollState),
     ) {
         reviews.forEach() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(vertical = 5.dp),
 
-            ) {
+                ) {
 
                 Image(
                     painter = painterResource(id = it.userImage),
@@ -345,19 +368,20 @@ fun ReviewItem(reviews: List<Reviews>) {
                 RatingBar(
                     rating = it.rating,
                     space = 2.dp,
-                   imageVectorEmpty = Icons.Default.StarOutline,
+                    imageVectorEmpty = Icons.Default.StarOutline,
                     imageVectorFFilled = Icons.Default.StarRate,
                     tintEmpty = Color.Black,
                     tintFilled = Purple40,
                     itemSize = 25.dp,
                     gestureEnabled = false,
                     animationEnabled = true,
-                    shimmer =  Shimmer(
+                    shimmer = Shimmer(
                         color = Purple40,
                         animationSpec = infiniteRepeatable(
                             animation = tween(durationMillis = 10000, easing = LinearEasing),
                             repeatMode = RepeatMode.Restart
-                        ), drawBorder = false,
+                        ),
+                        drawBorder = false,
                     ),
                 )
 
@@ -375,16 +399,20 @@ fun DescriptionSection(bodyHtml: String?) {
     Column(Modifier.fillMaxWidth()) {
         Text(
             text = "Description",
-            fontSize = 23.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 5.dp, top = 5.dp)
+            modifier = Modifier.padding(start = 5.dp, top = 5.dp, bottom = 15.dp)
 
         )
-
         Text(
             text = bodyHtml!!,
-            fontSize = 20.sp,
-            modifier = Modifier.padding(5.dp)
+            fontSize = 18.sp,
+            color = MaterialTheme.colorScheme.onSurface,
+            lineHeight = 28.sp,
+            fontWeight = FontWeight.Normal,
+            modifier = Modifier
+                .background(Color(0xFFEFEFEF), RoundedCornerShape(8.dp))
+                .padding(12.dp)
         )
     }
 }
@@ -392,12 +420,16 @@ fun DescriptionSection(bodyHtml: String?) {
 @Composable
 fun VariantSection(variants: List<VariantsItem?>?, selected: MutableState<VariantsItem?>) {
     val scrollState = rememberScrollState()
-    Row(Modifier.fillMaxWidth().padding(vertical = 5.dp) .horizontalScroll(scrollState),
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp)
+            .horizontalScroll(scrollState),
         verticalAlignment = Alignment.CenterVertically,
 
-    ) {
+        ) {
         Text(
-            text = "Sizes available : ",
+            text = "Sizes Available : ",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 5.dp)
@@ -405,15 +437,16 @@ fun VariantSection(variants: List<VariantsItem?>?, selected: MutableState<Varian
         Spacer(modifier = Modifier.width(5.dp))
 
         for (variant in variants!!) {
-            Row(modifier = Modifier
-                .background(
-                    if (selected.value == variant) Color(0x4D000000) else Color.Transparent,
-                    RoundedCornerShape(40.dp)
-                )
-                .padding(horizontal = 10.dp, vertical = 5.dp)
-                .clickable {
-                    selected.value = variant
-                },
+            Row(
+                modifier = Modifier
+                    .background(
+                        if (selected.value == variant) Color(0xFFEFEFEF) else Color.Transparent,
+                        RoundedCornerShape(40.dp)
+                    )
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                    .clickable {
+                        selected.value = variant
+                    },
                 verticalAlignment = Alignment.CenterVertically,
             ) {
 
@@ -426,7 +459,7 @@ fun VariantSection(variants: List<VariantsItem?>?, selected: MutableState<Varian
                 )
                 Text(
                     text = " " + variant!!.option1!!,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
                     modifier = Modifier.padding(start = 2.dp)
@@ -442,13 +475,19 @@ fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
-            .padding(bottom = 15.dp),
-        horizontalArrangement = Arrangement.Center
+            .padding(bottom = 15.dp, top = 15.dp, start = 25.dp, end = 25.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.Bottom
     ) {
         //add to cart button
         Button(
+
             onClick = onClickCart,
-           modifier = Modifier.weight(3f)
+
+            colors = ButtonDefaults.buttonColors(primary),
+        
+            modifier = Modifier.weight(3f)
+
         ) {
             Text(
                 text = "Add to Cart",
@@ -462,17 +501,22 @@ fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit) {
                 tint = Color.White
             )
         }
+
       //  Spacer(modifier = Modifier.weight(1f))
         //favorite button
         Button(onClick = onClickFav,
+
             colors = ButtonColors(
                 containerColor = Color.Gray,
                 //those are placeholders
                 contentColor = Color.White,
                 disabledContentColor = Color.Gray,
-                disabledContainerColor = Color(0xFF000000)),
-            modifier = Modifier.padding(horizontal = 10.dp).weight(1f)
-            ) {
+                disabledContainerColor = Color(0xFF000000)
+            ),
+            modifier = Modifier
+                .padding(horizontal = 10.dp)
+                .weight(1f)
+        ) {
 
             Icon(
                 imageVector = Icons.Filled.FavoriteBorder,
@@ -480,14 +524,16 @@ fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit) {
                 tint = Color.White,
                 modifier = Modifier.padding(vertical = 5.dp),
 
-            )
+                )
         }
     }
 }
 
+
 @Composable
 private fun colorSetter(
-    variant: VariantsItem?): Color {
+    variant: VariantsItem?
+): Color {
     when (variant!!.option2) {
         "black" -> return Color.Black
         "blue" -> return Color.Blue
