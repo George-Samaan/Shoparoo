@@ -1,6 +1,7 @@
 package com.example.shoparoo.ui.productDetails
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
@@ -41,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -55,7 +58,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import com.example.shoparoo.R
 import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
@@ -78,6 +80,8 @@ fun ProductDetails(id: String, navController: NavHostController) {
         )
     )
     val ui = viewModel.singleProductDetail.collectAsState()
+    var itemInCart = viewModel.exists.collectAsState()
+
     LaunchedEffect(Unit) {
         viewModel.getSingleProductDetail(id)
     }
@@ -93,14 +97,20 @@ fun ProductDetails(id: String, navController: NavHostController) {
         is ApiState.Success -> {
             val res = ui.value as ApiState.Success
             // Log.i("ProductDetails", "Success ${res.product!!.bodyHtml}")
-            productInfo(res.data as SingleProduct, navController)
+            productInfo(res.data as SingleProduct, navController,viewModel,itemInCart)
         }
     }
 
 }
 
 @Composable
-private fun productInfo(res: SingleProduct, NavController: NavHostController) {
+private fun productInfo(
+    res: SingleProduct,
+    NavController: NavHostController,
+    viewModel: ProductDetailsViewModel,
+    itemInCart: State<Boolean>,
+
+    ) {
     Log.i("ProductDetails", "Success ${res.product!!.variants!![0]!!.price}")
     val selected = remember { mutableStateOf(res.product.variants!![0]) }
 
@@ -136,7 +146,17 @@ private fun productInfo(res: SingleProduct, NavController: NavHostController) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        BottomSection()
+        BottomSection(onClick = {
+            if (viewModel.userMail == null) {
+               Toast.makeText(NavController.context, "Please login to add to cart", Toast.LENGTH_SHORT).show()
+            } else  {
+                viewModel.getDraftOrder(res, selected.value!!)
+                if(itemInCart.value) {
+                    Toast.makeText(NavController.context, "Item already in cart", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+        })
     }
 }
 
@@ -413,15 +433,16 @@ fun VariantSection(variants: List<VariantsItem?>?, selected: MutableState<Varian
 }
 
 @Composable
-fun BottomSection() {
+fun BottomSection(onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .padding(bottom = 15.dp),
         horizontalArrangement = Arrangement.Center
     ) {
+        //add to cart button
         Button(
-            onClick = {},
+            onClick = onClick,
            modifier = Modifier.weight(3f)
         ) {
             Text(
@@ -437,6 +458,7 @@ fun BottomSection() {
             )
         }
       //  Spacer(modifier = Modifier.weight(1f))
+        //favorite button
         Button(onClick = {},
             colors = ButtonColors(
                 containerColor = Color.Gray,

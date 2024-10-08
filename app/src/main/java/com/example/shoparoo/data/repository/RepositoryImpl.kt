@@ -1,8 +1,10 @@
 package com.example.shoparoo.data.repository
 
-import android.util.Log
 import com.example.shoparoo.data.db.remote.RemoteDataSource
 import com.example.shoparoo.data.db.sharedPrefs.SharedPreferences
+import com.example.shoparoo.model.DraftOrderRequest
+import com.example.shoparoo.model.DraftOrderResponse
+import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
@@ -50,5 +52,17 @@ class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repositor
 
     override fun getCurrencyPreference(): String {
         return sharedPreferences.getCurrencyPreference()
+    }
+
+      override suspend fun createDraftOrder(createDraftOrder: DraftOrderRequest) {
+      remoteDataSource.createDraftOrder(createDraftOrder)
+      }
+
+    override fun getDraftOrder(): Flow<DraftOrderResponse> {
+        return remoteDataSource.getDraftOrder()
+    }
+
+    override fun updateDraftOrder(item: LineItem){
+         remoteDataSource.updateDraftOrder(item)
     }
 }

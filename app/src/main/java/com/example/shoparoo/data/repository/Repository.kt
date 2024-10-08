@@ -1,5 +1,8 @@
 package com.example.shoparoo.data.repository
 
+import com.example.shoparoo.model.DraftOrderRequest
+import com.example.shoparoo.model.DraftOrderResponse
+import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
@@ -19,7 +22,11 @@ interface Repository {
     fun getMensProducts(): Flow<Product>
     fun getKidsProducts(): Flow<Product>
 
-
     fun saveCurrencyPreference(currency: String)
     fun getCurrencyPreference(): String
+
+    // draft order section
+    suspend fun createDraftOrder(createDraftOrder: DraftOrderRequest)
+    fun getDraftOrder(): Flow<DraftOrderResponse>
+    fun updateDraftOrder(item: LineItem)//: Flow<DraftOrderResponse>
 }
