@@ -10,7 +10,8 @@ import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.auth.view.Signup
 import com.example.shoparoo.ui.homeScreen.view.MainScreen
 import com.example.shoparoo.ui.productDetails.ProductDetails
-import com.example.shoparoo.ui.settingsScreen.SettingsScreen
+
+//import com.example.shoparoo.ui.settingsScreen.SettingsScreen
 
 @Composable
 @Preview
@@ -20,7 +21,11 @@ fun Navigation() {
         composable("login") { LoginScreen(navController = navController) }
         composable("signup") { Signup(navController = navController) }
         composable("home") { MainScreen({}, query = TextFieldValue(""), onQueryChange = {},navController = navController) }
-        composable("productDetails") { ProductDetails(id = "7653161992291") }
+
+        composable("productDetails/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+            ProductDetails(id = id, navController = navController)
+        }
 
     }
 }

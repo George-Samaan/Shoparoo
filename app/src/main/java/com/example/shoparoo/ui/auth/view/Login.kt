@@ -2,6 +2,7 @@ package com.example.shoparoo.ui.auth.view
 
 
 import android.widget.Toast
+import androidx.annotation.RawRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -51,6 +53,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -115,14 +118,14 @@ fun LoginScreen(navController: NavHostController) {
             ) {
                 Text(
                     "Existing User ? Sign in",
-                    fontSize = 40.sp,
+                    fontSize = 37.sp,
                     fontWeight = FontWeight.Bold,
                     color = primary,
                     modifier = Modifier.padding(top = 20.dp, start = 10.dp)
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
-            YourLottieAnimation()
+            ReusableLottie(R.raw.login_anim, R.drawable.ic_bg, 200.dp)
         }
 
         Column(
@@ -190,6 +193,7 @@ fun LoginScreen(navController: NavHostController) {
 
 
             Button(
+                colors = ButtonDefaults.buttonColors(primary),
                 onClick = {
                     if (passwordValue.value.isEmpty()) {
                         passValidation = true
@@ -216,7 +220,7 @@ fun LoginScreen(navController: NavHostController) {
                                 .padding(horizontal = 70.dp)
                         }
                     }
-                    .animateContentSize(), // Smooth transition between sizes
+                    .animateContentSize(),
                 contentPadding = PaddingValues(15.dp),
                 enabled = !isLoading,
             ) {
@@ -269,8 +273,13 @@ fun LoginScreen(navController: NavHostController) {
 }
 
 @Composable
-fun YourLottieAnimation() {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.login_anim))
+fun ReusableLottie(
+    @RawRes lottieRes: Int,
+    backgroundImageRes: Int?,
+    size: Dp
+
+) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(lottieRes))
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = LottieConstants.IterateForever,
@@ -279,14 +288,14 @@ fun YourLottieAnimation() {
 
     Box(
         modifier = Modifier
-            .size(200.dp)
+            .size(size)
             .padding(top = 10.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(Color.Transparent)
     ) {
         // Background Image
         Image(
-            painter = painterResource(id = R.drawable.ic_bg),
+            painter = painterResource(backgroundImageRes!!),
             contentDescription = null,
             modifier = Modifier.fillMaxSize()
         )

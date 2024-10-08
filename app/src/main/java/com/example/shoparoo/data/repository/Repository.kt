@@ -1,5 +1,6 @@
 package com.example.shoparoo.data.repository
 
+import com.example.shoparoo.model.OrderResponse
 import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
@@ -22,4 +23,7 @@ interface Repository {
 
     fun saveCurrencyPreference(currency: String)
     fun getCurrencyPreference(): String
+
+    //orders
+    fun getOrders(): Flow<OrderResponse>
 }

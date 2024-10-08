@@ -7,6 +7,7 @@ pluginManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        maven("https://jitpack.io")
         mavenCentral()
         gradlePluginPortal()
     }
@@ -20,5 +21,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Shoparoo"
+rootProject.name = "Shoparo"
 include(":app")
