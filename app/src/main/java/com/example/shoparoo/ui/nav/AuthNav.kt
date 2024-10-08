@@ -10,7 +10,8 @@ import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.auth.view.Signup
 import com.example.shoparoo.ui.homeScreen.view.MainScreen
 import com.example.shoparoo.ui.productDetails.ProductDetails
-import com.example.shoparoo.ui.settingsScreen.SettingsScreen
+
+//import com.example.shoparoo.ui.settingsScreen.SettingsScreen
 
 @Composable
 @Preview

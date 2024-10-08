@@ -76,11 +76,13 @@ import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.nav.BottomNav
 import com.example.shoparoo.ui.nav.BottomNavigationBar
+import com.example.shoparoo.ui.ordersScreen.view.OrderScreen
+import com.example.shoparoo.ui.ordersScreen.viewModel.OrdersViewModel
+import com.example.shoparoo.ui.ordersScreen.viewModel.OrdersViewModelFactory
 import com.example.shoparoo.ui.productScreen.view.ProductsScreen
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModel
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModelFactory
 import com.example.shoparoo.ui.settingsScreen.ProfileScreen
-import com.example.shoparoo.ui.settingsScreen.SettingsScreen
 import com.example.shoparoo.ui.shoppingCart.ShoppingCartScreen
 import com.example.shoparoo.ui.theme.primary
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -192,7 +194,7 @@ fun HomeScreenDesign(
                         item {
                             ForYouSection(
                                 products = forYouProducts as List<ProductsItem>,
-                              navController,
+                                navController,
                                 selectedCurrency = selectedCurrency,
                                 conversionRate = conversionRate,
                                 currencySymbols = currencySymbols
@@ -205,6 +207,7 @@ fun HomeScreenDesign(
         }
     }
 }
+
 @Composable
 fun Header(userName: String, onFavouriteClick: () -> Unit) {
     Row(
@@ -268,7 +271,8 @@ fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .padding(horizontal = 15.dp)
-            .height(56.dp).clickable {
+            .height(56.dp)
+            .clickable {
                 Log.d("SearchBar", "Search bar clicked")
             },
         shape = RoundedCornerShape(28.dp),
@@ -298,7 +302,7 @@ fun BrandsSection(navController: NavController, smartCollections: List<SmartColl
         Text(
             text = "Brands",
             fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
+            fontSize = 20.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -359,18 +363,15 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
             text = brandName.capitalizeWords(),
             color = primary,
             fontWeight = FontWeight.Bold,
-            fontSize = 17.sp,
+            fontSize = 16.sp,
             modifier = Modifier.padding(top = 12.dp)
         )
     }
 }
 
 @Composable
-
-//fun ForYouSection(products: List<ProductsItem>, navController: NavController) {
-
 fun ForYouSection(
-    products: List<ProductsItem>,navController: NavController,
+    products: List<ProductsItem>, navController: NavController,
     selectedCurrency: String,
     conversionRate: Float,
     currencySymbols: Map<String, String>
@@ -391,7 +392,7 @@ fun ForYouSection(
         Text(
             text = "For You",
             fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
+            fontSize = 20.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         AnimatedVisibility(
@@ -403,21 +404,21 @@ fun ForYouSection(
         ) {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxHeight()
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(bottom = 10.dp)
             ) {
                 items(randomProducts.size) { index ->
-                    val product = products[index]
+                    val product = randomProducts[index]
                     val priceInUSD = product.variants?.get(0)?.price?.toDoubleOrNull() ?: 0.0
                     val convertedPrice = priceInUSD * conversionRate
-
                     val formattedPrice = String.format("%.2f", convertedPrice)
-
                     ProductCard(
                         productName = product.title.toString(),
                         productPrice = formattedPrice,
                         productImage = product.images?.get(0)?.src,
                         onClick = { navController.navigate("productDetails/${product.id}") },
-                        currencySymbol = currencySymbols [selectedCurrency] ?: "$"
+                        currencySymbol = currencySymbols[selectedCurrency] ?: "$"
                     )
                 }
             }
@@ -425,168 +426,178 @@ fun ForYouSection(
     }
 
 }
-    @Composable
-    fun ProductCard(
-        productName: String,
-        productPrice: String,
-        productImage: String?,
-        currencySymbol: String,
-        onClick: () -> Unit,
+
+@Composable
+fun ProductCard(
+    productName: String,
+    productPrice: String,
+    productImage: String?,
+    currencySymbol: String,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .width(170.dp)
+            .height(240.dp)
+            .padding(6.dp)
+            .clickable {
+                onClick()
+            },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFAEFEEEE)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
-        Card(
-            modifier = Modifier
-                .width(170.dp)
-                .height(240.dp)
-                .padding(6.dp)
-                .clickable {
-                    onClick()
-                },
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEEEE)),
-            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+        Column(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = rememberAsyncImagePainter(model = productImage),
+                contentDescription = productName,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(155.dp),
+                contentScale = ContentScale.Crop
+            )
+            Text(
+                text = productName.capitalizeWords(),
+                color = primary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "$currencySymbol$productPrice",
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
+            )
+        }
+    }
+}
+
+
+fun String.capitalizeWords(): String {
+    return this.split(" ")
+        .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
+}
+
+@Composable
+fun MainScreen(
+    onFavouriteClick: () -> Unit,
+    query: TextFieldValue,
+    onQueryChange: (TextFieldValue) -> Unit,
+    navController: NavController
+) {
+    val navControllerBottom = rememberNavController()
+    val viewModel: HomeViewModel = viewModel(
+        factory = HomeViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+
+    val productViewModel: ProductViewModel = viewModel(
+        factory = ProductViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val categoryViewModel: CategoriesViewModel = viewModel(
+        factory = CategoriesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val orderViewModel: OrdersViewModel = viewModel(
+        factory = OrdersViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+
+    val smartCollectionsState by viewModel.smartCollections.collectAsState()
+    val forYouProductsState by viewModel.forYouProducts.collectAsState()
+    val userName by viewModel.userName.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getSmartCollections()
+        viewModel.getForYouProducts()
+    }
+
+    Scaffold(
+        bottomBar = { BottomNavigationBar(navController = navControllerBottom) }
+    ) {
+        NavHost(
+            navController = navControllerBottom,
+            startDestination = BottomNav.Home.route,
+            modifier = Modifier.padding(it)
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Image(
-                    painter = rememberAsyncImagePainter(model = productImage),
-                    contentDescription = productName,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(155.dp),
-                    contentScale = ContentScale.Crop
+            composable(BottomNav.Home.route) {
+                HomeScreenDesign(
+                    if (isLoading) "" else userName ?: "Guest",
+                    onFavouriteClick,
+                    query,
+                    onQueryChange,
+                    smartCollectionsState,
+                    forYouProductsState,
+                    onRefresh = {
+                        viewModel.refreshData()
+                    },
+                    navControllerBottom,
+                    navController
                 )
-                Text(
-                    text = productName.capitalizeWords(),
-                    color = primary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+            }
+            composable(BottomNav.Categories.route) {
+
+                CategoriesScreen(categoryViewModel, navController)
+
+            }
+            composable(BottomNav.Cart.route) {
+                ShoppingCartScreen(navControllerBottom)
+            }
+            composable(BottomNav.orders.route) {
+                Text(text = "Orders Screen")
+            }
+            composable(BottomNav.Profile.route) {
+                ProfileScreen(
+                    navControllerBottom,
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = "$currencySymbol$productPrice",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
+            }
+            composable(BottomNav.orders.route) {
+                OrderScreen(orderViewModel = orderViewModel, navController)
+            }
+//            composable("settings") { SettingsScreen(navControllerBottom) }
+            composable("login") { LoginScreen(navControllerBottom) }
+            composable(BottomNav.Profile.route) {
+                ProfileScreen(navControllerBottom)
+            }
+//            composable("settings") {
+//                SettingsScreen(navControllerBottom)
+//            }
+            composable("checkout") {
+                CheckoutScreen(navControllerBottom)
+            }
+            composable("brand/{brandId}/{brandTitle}") { backStackEntry ->
+                val brandId =
+                    backStackEntry.arguments?.getString("brandId") ?: return@composable
+                val brandTitle =
+                    backStackEntry.arguments?.getString("brandTitle") ?: return@composable
+
+                ProductsScreen(
+                    brandId, brandTitle, navControllerBottom, productViewModel,
+                    navController
                 )
             }
         }
     }
-
-
-    fun String.capitalizeWords(): String {
-        return this.split(" ")
-            .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
-    }
-
-    @Composable
-    fun MainScreen(
-        onFavouriteClick: () -> Unit,
-        query: TextFieldValue,
-        onQueryChange: (TextFieldValue) -> Unit,
-        navController: NavController
-    ) {
-        val navControllerBottom = rememberNavController()
-        val viewModel: HomeViewModel = viewModel(
-            factory = HomeViewModelFactory(
-                repository = RepositoryImpl(
-                    remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
-                )
-            )
-        )
-
-        val productViewModel: ProductViewModel = viewModel(
-            factory = ProductViewModelFactory(
-                repository = RepositoryImpl(
-                    remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
-                )
-            )
-        )
-        val categoryViewModel: CategoriesViewModel = viewModel(
-            factory = CategoriesViewModelFactory(
-                repository = RepositoryImpl(
-                    remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
-                )
-            )
-        )
-
-        val smartCollectionsState by viewModel.smartCollections.collectAsState()
-        val forYouProductsState by viewModel.forYouProducts.collectAsState()
-        val userName by viewModel.userName.collectAsState()
-        val isLoading by viewModel.isLoading.collectAsState()
-
-        LaunchedEffect(Unit) {
-            viewModel.getSmartCollections()
-            viewModel.getForYouProducts()
-        }
-
-        Scaffold(
-            bottomBar = { BottomNavigationBar(navController = navControllerBottom) }
-        ) {
-            NavHost(
-                navController = navControllerBottom,
-                startDestination = BottomNav.Home.route,
-                modifier = Modifier.padding(it)
-            ) {
-                composable(BottomNav.Home.route) {
-                    HomeScreenDesign(
-                        if (isLoading) "" else userName ?: "Guest",
-                        onFavouriteClick,
-                        query,
-                        onQueryChange,
-                        smartCollectionsState,
-                        forYouProductsState,
-                        onRefresh = {
-                            viewModel.refreshData()
-                        },
-                        navControllerBottom,
-                        navController
-                    )
-                }
-                composable(BottomNav.Categories.route) {
-
-                    CategoriesScreen(categoryViewModel, navController)
-
-                }
-                composable(BottomNav.Cart.route) {
-                    ShoppingCartScreen(navControllerBottom)
-                }
-                composable(BottomNav.orders.route) {
-                    Text(text = "Orders Screen")
-                }
-                composable(BottomNav.Profile.route) {
-                    ProfileScreen(
-                        navControllerBottom,
-                        navController
-                    )
-                }
-                composable("settings") { SettingsScreen(navControllerBottom) }
-                composable("login") { LoginScreen(navControllerBottom) }
-                composable(BottomNav.Profile.route) {
-                    ProfileScreen(navControllerBottom, navController)
-                }
-                composable("settings") {
-                    SettingsScreen(navControllerBottom)
-                }
-                composable("checkout") {
-                    CheckoutScreen(navControllerBottom)
-                }
-                composable("brand/{brandId}/{brandTitle}") { backStackEntry ->
-                    val brandId =
-                        backStackEntry.arguments?.getString("brandId") ?: return@composable
-                    val brandTitle =
-                        backStackEntry.arguments?.getString("brandTitle") ?: return@composable
-
-                    ProductsScreen(
-                        brandId, brandTitle, navControllerBottom, productViewModel,
-                        navController
-                    )
-                }
-            }
-        }
-    }
+}
 
 //@Preview(showSystemUi = true)
 //@Composable

@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name" translatable="false">Shoparoo</string>
-    <string name="user_name">Galal Ahmed</string>
-    <string name="email">Galal_3@protonmail.com</string>
     <string name="my_orders">My Orders</string>
     <string name="my_wishlist">My Wishlist</string>
     <string name="delivery_address">Delivery Address</string>

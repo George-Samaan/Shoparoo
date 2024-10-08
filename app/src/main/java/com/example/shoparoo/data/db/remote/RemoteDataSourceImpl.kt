@@ -1,10 +1,13 @@
 package com.example.shoparoo.data.db.remote
 
+import android.content.ContentValues.TAG
 import android.util.Log
 import com.example.shoparoo.data.network.ApiServices
+import com.example.shoparoo.model.OrderResponse
 import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -129,4 +132,44 @@ class RemoteDataSourceImpl(private val apiService: ApiServices) : RemoteDataSour
             throw Throwable("Error retrieving products")
         }
     }
+
+    override fun getOrders(): Flow<OrderResponse> = flow {
+        val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+        val userEmail = firebaseAuth.currentUser?.email
+
+        if (userEmail != null) {
+            Log.i(TAG, "checkUser: user is authenticated with email: $userEmail")
+            val response = apiService.getOrders()
+            if (response.isSuccessful && response.body() != null) {
+                val orders = response.body()!!.orders
+                val filteredOrders = orders.filter { order ->
+                    order.customer?.email == userEmail
+                }
+                Log.d("RemoteDataSourceImpl", "Filtered Orders: $filteredOrders")
+                emit(response.body()!!.copy(orders = filteredOrders))
+            } else {
+                throw Throwable("Error retrieving products")
+            }
+        } else {
+            Log.e(TAG, "User is not authenticated")
+        }
+    }
 }
+
+/*    override fun getOrders(): Flow<OrderResponse> = flow {
+        val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+        Log.i(TAG, "checkUser: user is authenticated+${firebaseAuth.currentUser!!.email}")
+        val response = apiService.getOrders()
+        if (response.isSuccessful && response.body() != null) {
+            Log.d("RemoteDataSourceImpl", "Products received Orders: ${response.body()!!.orders}")
+            emit(response.body()!!)
+        } else {
+            Log.e(
+                "RemoteDataSourceImpl",
+                "Error retrieving products: ${response.errorBody()?.string()}"
+            )
+            throw Throwable("Error retrieving products")
+        }
+   }
+}*/
+

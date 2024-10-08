@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="user_name">جلال أحمد</string>
-    <string name="email">Galal_3@protonmail.com</string>
     <string name="my_orders">طلباتي</string>
     <string name="my_wishlist">قائمة الرغبات</string>
     <string name="delivery_address">عنوان التسليم</string>

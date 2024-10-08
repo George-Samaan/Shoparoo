@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -42,15 +43,20 @@ fun BottomNavigationBar(navController: NavController) {
         BottomNav.orders,
         BottomNav.Profile,
     )
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
+            .shadow(
+                8.dp,
+                RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)
+            ) // Add shadow for elevation
     ) {
         BottomNavigation(
             modifier = Modifier
                 .height(70.dp),
-            backgroundColor = Color(0xFFE0E0E0)
+            backgroundColor = Color(0xFFEAEAEA)
         ) {
             val currentRoute =
                 navController.currentBackStackEntryAsState().value?.destination?.route
@@ -66,7 +72,7 @@ fun BottomNavigationBar(navController: NavController) {
                             modifier = Modifier
                                 .size(48.dp)
                                 .background(
-                                    if (isSelected) Color.LightGray else Color.Transparent,
+                                    if (isSelected) primary.copy(alpha = 0.2f) else Color.Transparent,
                                     shape = RoundedCornerShape(24.dp)
                                 )
                         ) {
@@ -81,7 +87,7 @@ fun BottomNavigationBar(navController: NavController) {
                     label = {
                         Text(
                             text = item.label,
-                            fontSize = 13.sp,
+                            fontSize = 14.sp, // Increased font size for better visibility
                             color = if (isSelected) primary else Color.Gray
                         )
                     },
