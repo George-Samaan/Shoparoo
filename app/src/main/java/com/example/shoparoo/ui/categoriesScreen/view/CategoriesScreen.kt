@@ -38,13 +38,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.shoparoo.R
 import com.example.shoparoo.data.network.ApiState
-import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModel
@@ -189,17 +187,17 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                     selectedFilter = filter
                 }
 
-                currencySymbols[selectedCurrency]?.let {
-                    PriceSlider(
-                        sliderValue, maxPrice, maxPriceWithSymbol, conversionRate, it
-                    )
 
-                    { newValue -> sliderValue = newValue }
-                }
 
                 if (!isReady) {
                     LoadingIndicator()
                 } else {
+                    currencySymbols[selectedCurrency]?.let {
+                        PriceSlider(
+                            sliderValue, maxPrice, maxPriceWithSymbol, conversionRate, it
+                        )
+                        { newValue -> sliderValue = newValue }
+                    }
                     AnimatedContent(targetState = filteredProducts.isEmpty()) { isEmpty ->
                         ProductInfoMessage(
                             isEmpty = isEmpty,
