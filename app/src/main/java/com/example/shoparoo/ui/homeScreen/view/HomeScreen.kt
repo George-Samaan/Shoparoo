@@ -467,7 +467,7 @@ fun ProductCard(
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "$currencySymbol$productPrice",
+                text = "$productPrice $currencySymbol",
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
                 color = Color.Gray,

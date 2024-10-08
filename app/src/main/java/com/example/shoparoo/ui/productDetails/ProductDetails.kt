@@ -68,7 +68,6 @@ import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ImagesItem
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
-import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
 import com.example.shoparoo.ui.theme.Purple40
 import com.example.shoparoo.ui.theme.primary
 import com.smarttoolfactory.ratingbar.RatingBar
@@ -153,16 +152,8 @@ private fun productInfo(
         Column(
             modifier = Modifier.padding(start = 25.dp, end = 25.dp, bottom = 25.dp)
         ) {
-            Text(
-                text = res.product.title!!.capitalizeWords(),
-                fontSize = 23.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(top = 10.dp)
-            )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             Text(
                 text = res.product.title!!,
                 fontSize = 25.sp,
@@ -175,10 +166,9 @@ private fun productInfo(
 
             StockAndPrice(selected, selectedCurrency, conversionRate)
 
-
             VariantSection(res.product.variants, selected)
 
-            DescriptionSection(res.product!!.bodyHtml)
+            DescriptionSection(res.product.bodyHtml)
 
 
         }
@@ -224,13 +214,13 @@ private fun StockAndPrice(selected: MutableState<VariantsItem?>, selectedCurrenc
     ) {
         Text(
             text = (selected.value!!.inventoryQuantity).toString() + " item left",
-            fontSize = 20.sp,
+            fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
             color = if (selected.value!!.inventoryQuantity!! > 10) Color.Gray else Color.Red
         )
         Spacer(Modifier.weight(1f))
         Text(
-            text = "${currencySymbols[selectedCurrency] ?: "$"}${"%.2f".format(price)}",
+            text = "${"%.2f".format(price)} ${currencySymbols[selectedCurrency] ?: " $"}",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
         )

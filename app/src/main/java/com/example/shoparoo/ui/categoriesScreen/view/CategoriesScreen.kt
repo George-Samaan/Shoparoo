@@ -3,6 +3,7 @@
 package com.example.shoparoo.ui.categoriesScreen.view
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -56,7 +57,6 @@ import com.example.shoparoo.ui.theme.bg
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
 import networkListener
-import kotlin.math.roundToInt
 
 @Composable
 fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavController) {
@@ -71,8 +71,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
 
     var showProductTypeMenu by remember { mutableStateOf(false) }
     var selectedProductType by remember { mutableStateOf("Shoes") } // Default product type
-    //var conversionRate by remember { mutableStateOf(1.0f) } // Default conversion rate (USD to
-    // USD)
 
     // Collecting states from ViewModel
     val womenProductsState = viewModel.womenProducts.collectAsState()
@@ -157,8 +155,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                 else -> {}
             }
         }
-        val maxPriceWithSymbol = "${currencySymbols[selectedCurrency]}"
-
 
         LaunchedEffect(searchQuery, sliderValue, selectedProductType) {
             isFilteringComplete = false
@@ -185,21 +181,23 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                     selectedFilter = filter
                 }
 
-
-
                 if (!isReady) {
                     LoadingIndicator()
                 } else {
                     currencySymbols[selectedCurrency]?.let {
+                        Log.d("jeooooX", "Max Price Before Khara: $sliderValue")
                         PriceSlider(
-                            sliderValue, maxPrice, maxPriceWithSymbol, conversionRate, it
+                            sliderValue, maxPrice, it
                         )
-                        { newValue -> sliderValue = newValue }
+                        { newValue ->
+                            sliderValue = newValue
+                            Log.d("jeooooX", "Max Price After Khara: $sliderValue")
+                        }
                     }
                     AnimatedContent(targetState = filteredProducts.isEmpty()) { isEmpty ->
                         ProductInfoMessage(
                             isEmpty = isEmpty,
-                            convertedSliderValue = (sliderValue * conversionRate).roundToInt(),
+                            convertedSliderValue = (sliderValue),
                             currencySymbol = currencySymbols[selectedCurrency] ?: "$"
                         )
                     }
@@ -266,7 +264,6 @@ fun FilterTypeFABs(
 ) {
     val productTypes = listOf("Shoes", "Accessories", "T-Shirts")
 
-    // Column layout for FABs to display vertically
     Column(
         modifier = modifier
             .padding(top = 70.dp)
@@ -314,7 +311,6 @@ fun filterProductsByType(products: List<ProductsItem>, productType: String, sear
         val withinPriceRange = productPrice <= sliderValue
         val matchesProductType =
             product.productType?.equals(productType, ignoreCase = true) ?: false
-
         matchesSearch && withinPriceRange && matchesProductType
     }
 }
