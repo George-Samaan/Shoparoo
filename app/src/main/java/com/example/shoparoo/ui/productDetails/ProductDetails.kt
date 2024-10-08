@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.example.shoparoo.R
 import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState

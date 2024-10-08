@@ -364,7 +364,7 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
             color = primary,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
-            modifier = Modifier.padding(top = 12.dp)
+            modifier = Modifier.padding(top = 8.dp)
         )
     }
 }
