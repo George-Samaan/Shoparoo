@@ -130,9 +130,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                     products = (state.data as? List<ProductsItem>) ?: emptyList()
                     maxPrice = products.maxOfOrNull {
                         (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
-                    }?.toInt() ?: 2500
-
-
+                    }.maxOrNull()?.let { kotlin.math.ceil(it.toDouble()).toInt() } ?: 2500
 
                     sliderValue = maxPrice
                     isReady = true

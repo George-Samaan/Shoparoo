@@ -97,18 +97,18 @@ fun ProductDetails(id: String, navController: NavHostController) {
     }
     when (ui.value) {
         is ApiState.Loading -> {
-            Log.i("ProductDetails", "Loading")
+          //  Log.i("ProductDetails", "Loading")
         }
 
         is ApiState.Failure -> {
-            Log.i("ProductDetails", "Error ${(ui.value as ApiState.Failure).message}")
+           // Log.i("ProductDetails", "Error ${(ui.value as ApiState.Failure).message}")
         }
 
         is ApiState.Success -> {
             val res = ui.value as ApiState.Success
             // Log.i("ProductDetails", "Success ${res.product!!.bodyHtml}")
 
-            productInfo(res.data as SingleProduct, navController,viewModel)
+            productInfo(res.data as SingleProduct, navController, viewModel)
 
 
         }
@@ -122,6 +122,7 @@ private fun productInfo(
     res: SingleProduct,
     NavController: NavHostController,
     viewModel: ProductDetailsViewModel,
+
     ) {
 
     val context = LocalContext.current
@@ -161,15 +162,15 @@ private fun productInfo(
                     .padding(top = 10.dp)
             )
 
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = res.product.title!!,
-            fontSize = 25.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .align(Alignment.Start)
-                .padding(start = 5.dp)
-        )
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = res.product.title!!,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 5.dp)
+            )
             ReviewSection()
 
             StockAndPrice(selected, selectedCurrency, conversionRate)
@@ -225,7 +226,7 @@ private fun StockAndPrice(selected: MutableState<VariantsItem?>, selectedCurrenc
             text = (selected.value!!.inventoryQuantity).toString() + " item left",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color =  if (selected.value!!.inventoryQuantity!! > 10) Color.Gray else Color.Red
+            color = if (selected.value!!.inventoryQuantity!! > 10) Color.Gray else Color.Red
         )
         Spacer(Modifier.weight(1f))
         Text(
@@ -246,7 +247,7 @@ fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
     ) {
         LazyRow(Modifier.fillMaxWidth()) {
             items(images!!.size) { index ->
-                Log.i("ProductDetails", "Success ${images[index]!!.src}")
+                //Log.i("ProductDetails", "Success ${images[index]!!.src}")
                 Image(
                     painter = rememberAsyncImagePainter(model = images[index]!!.src),
                     contentDescription = null,
@@ -525,9 +526,10 @@ fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit) {
             )
         }
 
-      //  Spacer(modifier = Modifier.weight(1f))
+        //  Spacer(modifier = Modifier.weight(1f))
         //favorite button
-        Button(onClick = onClickFav,
+        Button(
+            onClick = onClickFav,
 
             colors = ButtonColors(
                 containerColor = Color.Gray,

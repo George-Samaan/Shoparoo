@@ -46,59 +46,83 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
             _singleProductDetail.value = ApiState.Loading
             repository.getSingleProductFromId(productId).catch {
                 _singleProductDetail.value = ApiState.Failure(it.message ?: "Unknown Error")
-                Log.i("ProductDetails", "Error ${it.message}")
+                Log.i("ProductDetailsviewModel", "Error ${it.message}")
             }.collect {
                 _singleProductDetail.value = ApiState.Success(it)
                 Log.i("ProductDetailsssss", "Success ${it.product!!.bodyHtml}")
                 fetchConversionRate(context, selectedCurrency)
+
             }
         }
     }
 
     fun getDraftOrder(theSingleProduct: SingleProduct, varient: VariantsItem, isCart: Boolean) {
+        Log.i("ProductDetailsviewModel", "get draft order")
         viewModelScope.launch {
             _draftOrder.value = ApiState.Loading
             repository.getDraftOrder().catch {
                 _draftOrder.value = ApiState.Failure(it.message ?: "Unknown Error")
-                Log.i("ProductDetails", "Error ${it.message}")
+                Log.i("ProductDetailsviewModel", "Error ${it.message}")
             }.collect {
                 _draftOrder.value = ApiState.Success(it)
                 filterByUser(it, theSingleProduct, varient, isCart)
-                Log.i("ProductDetails get draft order", "Success ${it.draft_orders}")
+                Log.i("ProductDetailsviewModel get draft order", "Success ")
             }
         }
     }
 
-    fun filterByUser(
+   fun filterByUser(
         draftOrdersResponse: DraftOrderResponse,
         theSingleProduct: SingleProduct,
         varient: VariantsItem,
         isCart: Boolean
     ) {
-        var user: DraftOrderDetails? = null
+       Log.i("ProductDetailsviewModel", "filter by user ${userMail}")
+
+
+        var user : DraftOrderDetails? = null
+        var check : Boolean = false
         if (isCart) {
             for (draftOrder in draftOrdersResponse.draft_orders!!) {
                 if (draftOrder.email == userMail) {
-                    Log.i("ProductDetails", "Draft Order Found ${draftOrder.email}")
+                    // filterByItem(id, draftOrder)
+                    Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
+                    Log.i("ProductDetailsviewModel", "Draft Order Found ${draftOrder}")
+
                     user = draftOrder
+                    check = true
                 }
             }
         } else {
             for (draftOrder in draftOrdersResponse.draft_orders!!) {
-                if (draftOrder.email == "FAV_$userMail") {
-                    Log.i("ProductDetails", "Draft Order Found ${draftOrder}")
+                if (draftOrder.email == "FAV_"+userMail) {
+                    Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
+                    Log.i("ProductDetailsviewModel", "Draft Order Found ${draftOrder}")
                     user = draftOrder
+                    check = true
                 }
             }
         }
+//
+//        if (user != null && isCart)
+//            filterByItem(user, varient, theSingleProduct, isCart)
+//        else if (user != null && !isCart) {
+//          updateFavDraftOrder(user, theSingleProduct, varient)
+//        }
+//        else {
+//            createDraftOrder(theSingleProduct, varient, isCart)
+//        }
 
-        if (user != null && isCart) {
-            filterByItem(user, varient, theSingleProduct, isCart)
-        } else if (user != null && !isCart) {
-            updateFavDraftOrder(user, theSingleProduct, varient)
+
+        if (check) {
+            if (isCart)
+                filterByItem(user!!, varient, theSingleProduct, isCart)
+            else
+                updateFavDraftOrder(user!!, theSingleProduct, varient)
         } else {
             createDraftOrder(theSingleProduct, varient, isCart)
         }
+
     }
 
     private fun updateFavDraftOrder(
@@ -167,9 +191,8 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
     }
 
     fun createDraftOrder(theSingleProduct: SingleProduct, varient: VariantsItem, isCart: Boolean) {
-        Log.i("ProductDetails", "createDraftOrder")
-        val mail = if (isCart) userMail else "FAV_$userMail"
-
+        Log.i("ProductDetailsviewModel", "createDraftOrder")
+        val mail = if (isCart) userMail else "FAV_" + userMail
         viewModelScope.launch {
             val order = DraftOrderRequest(
                 DraftOrderDetails(

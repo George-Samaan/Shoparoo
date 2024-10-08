@@ -576,7 +576,7 @@ fun MainScreen(
 //            composable("settings") { SettingsScreen(navControllerBottom) }
             composable("login") { LoginScreen(navControllerBottom) }
             composable(BottomNav.Profile.route) {
-                ProfileScreen(navControllerBottom)
+                ProfileScreen(navController)
             }
 //            composable("settings") {
 //                SettingsScreen(navControllerBottom)
