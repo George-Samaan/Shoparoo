@@ -10,6 +10,7 @@ import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
 import com.example.shoparoo.model.LineItem
+import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.Property
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
@@ -25,9 +26,6 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
 
     private val _draftOrder = MutableStateFlow<ApiState>(ApiState.Loading)
     val draftOrder = _draftOrder.asStateFlow()
-
-    private val _exists = MutableStateFlow<Boolean>(false)
-    var exists = _exists.asStateFlow()
 
     val userMail by lazy {
         FirebaseAuth.getInstance().currentUser?.email
@@ -55,7 +53,7 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
                 Log.i("ProductDetails", "Error ${it.message}")
             }.collect {
                 _draftOrder.value = ApiState.Success(it)
-               filterByUser(it, theSingleProduct, varient)
+                filterByUser(it, theSingleProduct, varient)
                 Log.i("ProductDetails get draft order", "Success ${it.draft_orders}")
             }
         }
@@ -71,54 +69,64 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
             if (draftOrder.email == userMail) {
                 // filterByItem(id, draftOrder)
                 Log.i("ProductDetails", "filter by user ${draftOrder.email}")
-                 Log.i("ProductDetails", "Draft Order Found ${draftOrder}")
+                Log.i("ProductDetails", "Draft Order Found ${draftOrder}")
                 user = draftOrder
             }
         }
         if (user != null) //varients need to be handled
-            filterByItem(varient.id.toString(), user)
+            filterByItem(user, varient, theSingleProduct)
         else {
             createDraftOrder(theSingleProduct, varient)
         }
     }
 
-    fun filterByItem(varientId: String, draftOrder: DraftOrderDetails) {
-       var exists   = false
-     for (line_item in draftOrder.line_items){
-         if (line_item.variant_id==varientId)
-            exists = true
-     }
-        if (exists)
-            _exists.value = true
-
+    fun filterByItem(
+        draftOrder: DraftOrderDetails,
+        varient: VariantsItem,
+        theSingleProduct: SingleProduct
+    ) {
+        var exists = false
+        for (line_item in draftOrder.line_items) {
+            if (line_item.variant_id == varient.id.toString())
+                exists = true
+        }
+        if (exists) { //update count
+            updateDraftOrderItemCount(draftOrder)
+        } else {  // add new item
+            updateDraftOrder(draftOrder, varient, theSingleProduct)
+        }
     }
+
+    private fun updateDraftOrder(
+        draftOrder: DraftOrderDetails,
+        varient: VariantsItem,
+        theSingleProduct: SingleProduct
+    ) {
+        draftOrder.line_items.add(
+            setLineItem(theSingleProduct, varient)
+        )
+        viewModelScope.launch {
+            val order = DraftOrderRequest(draftOrder)
+            repository.updateDraftOrder(order)
+        }
+    }
+
+    fun updateDraftOrderItemCount(draftOrder: DraftOrderDetails) {
+        draftOrder.line_items[0].quantity += 1
+        viewModelScope.launch {
+            val order = DraftOrderRequest(draftOrder)
+            repository.updateDraftOrder(order)
+        }
+    }
+
 
     fun createDraftOrder(theSingleProduct: SingleProduct, varient: VariantsItem) {
         Log.i("ProductDetails", "createDraftOrder")
         viewModelScope.launch {
             var order = DraftOrderRequest(
                 DraftOrderDetails(
-                    line_items = listOf(
-                        LineItem(
-                            title = theSingleProduct.product!!.title!!,
-                            price = varient.price!!,
-                            quantity = 1,
-                            variant_id =varient.id.toString(),
-                            properties = listOf(
-                                Property(
-                                    "imageUrl",
-                                    theSingleProduct.product.images!![0]!!.src!!
-                                ),
-                                Property(
-                                    "Color",
-                                   varient.option1!!
-                                ),
-                                Property(
-                                    "Size",
-                                    varient.option2!!
-                                )
-                            )
-                        )
+                    line_items = mutableListOf(
+                        setLineItem(theSingleProduct, varient)
                     ),
                     email = userMail!!,
                     note = "Order",
@@ -129,6 +137,30 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         }
 
     }
+
+    private fun setLineItem(
+        theSingleProduct: SingleProduct,
+        varient: VariantsItem,
+    ) = LineItem(
+        title = theSingleProduct.product!!.title!!,
+        price = varient.price!!,
+        quantity = 1,
+        variant_id = varient.id.toString(),
+        properties = listOf(
+            Property(
+                "imageUrl",
+                theSingleProduct.product.images!![0]!!.src!!
+            ),
+            Property(
+                "Color",
+                varient.option1!!
+            ),
+            Property(
+                "Size",
+                varient.option2!!
+            )
+        )
+    )
 }
 
 class ProductDetailsViewModelFactory(private val repository: Repository) :

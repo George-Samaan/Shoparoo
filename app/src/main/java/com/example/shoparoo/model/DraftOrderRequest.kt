@@ -24,7 +24,7 @@ data class DraftOrderRequest(
 
 data class DraftOrderDetails(
     val id: Long?=null,
-    var line_items: List<LineItem>,  // Items in the draft order
+    var line_items: MutableList<LineItem>,  // Items in the draft order
     val email: String,          // Customer details
     val note: String? = null,       // Optional: Notes for the order
     val tags: String? = null, // Optional: Tags to categorize the order

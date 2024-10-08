@@ -4,7 +4,6 @@ import android.util.Log
 import com.example.shoparoo.data.network.ApiServices
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
-import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
@@ -152,8 +151,7 @@ class RemoteDataSourceImpl(private val apiService: ApiServices) : RemoteDataSour
         }
     }
 
-    override fun updateDraftOrder(item: LineItem) {
-       //apiService.updateDraftOrder(item)
-
+    override suspend fun updateDraftOrder(draftOrderDetails: DraftOrderRequest) {
+       apiService.updateDraftOrder(draftOrderDetails, draftOrderDetails.draft_order.id.toString())
     }
 }

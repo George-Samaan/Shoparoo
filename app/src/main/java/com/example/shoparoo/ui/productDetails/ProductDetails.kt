@@ -80,7 +80,7 @@ fun ProductDetails(id: String, navController: NavHostController) {
         )
     )
     val ui = viewModel.singleProductDetail.collectAsState()
-    var itemInCart = viewModel.exists.collectAsState()
+
 
     LaunchedEffect(Unit) {
         viewModel.getSingleProductDetail(id)
@@ -97,7 +97,7 @@ fun ProductDetails(id: String, navController: NavHostController) {
         is ApiState.Success -> {
             val res = ui.value as ApiState.Success
             // Log.i("ProductDetails", "Success ${res.product!!.bodyHtml}")
-            productInfo(res.data as SingleProduct, navController,viewModel,itemInCart)
+            productInfo(res.data as SingleProduct, navController,viewModel)
         }
     }
 
@@ -108,8 +108,6 @@ private fun productInfo(
     res: SingleProduct,
     NavController: NavHostController,
     viewModel: ProductDetailsViewModel,
-    itemInCart: State<Boolean>,
-
     ) {
     Log.i("ProductDetails", "Success ${res.product!!.variants!![0]!!.price}")
     val selected = remember { mutableStateOf(res.product.variants!![0]) }
@@ -147,15 +145,12 @@ private fun productInfo(
         Spacer(modifier = Modifier.weight(1f))
 
         BottomSection(onClick = {
-            if (viewModel.userMail == null) {
+            if (viewModel.userMail == null) { //this is bullshit but i'll change it later
                Toast.makeText(NavController.context, "Please login to add to cart", Toast.LENGTH_SHORT).show()
             } else  {
                 viewModel.getDraftOrder(res, selected.value!!)
-                if(itemInCart.value) {
-                    Toast.makeText(NavController.context, "Item already in cart", Toast.LENGTH_SHORT).show()
-                }
+               Toast.makeText(NavController.context, "Added to cart", Toast.LENGTH_SHORT).show()
             }
-
         })
     }
 }

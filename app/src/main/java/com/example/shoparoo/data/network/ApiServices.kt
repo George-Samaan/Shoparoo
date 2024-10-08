@@ -55,11 +55,8 @@ interface ApiServices {
     @GET("draft_orders.json")
     suspend fun getDraftOrder(): Response<DraftOrderResponse>
 
-    //put draft order
-    //handle what u want to get
-//    @PUT("draft_orders/{id}.json")
-//    suspend fun updateDraftOrder(
-//        @Path("id") id: String
-//    )
+    //put draft order add the body
+    @PUT("draft_orders/{id}.json")
+    suspend fun updateDraftOrder(@Body draftOrderDetails: DraftOrderRequest,  @Path("id") id: String)
 
 }
