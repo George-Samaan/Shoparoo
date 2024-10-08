@@ -105,8 +105,14 @@ dependencies {
 
     // OkHttp Logging (optional, for debugging)
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.0")
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
 
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
+    implementation("com.github.mumayank:AirLocation:2.5.2")
+
+    implementation("com.github.KeepSafe:TapTargetView:1.13.2")
 
 
 
