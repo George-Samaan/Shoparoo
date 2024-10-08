@@ -28,5 +28,6 @@ data class DraftOrderDetails(
     val email: String,          // Customer details
     val note: String? = null,       // Optional: Notes for the order
     val tags: String? = null, // Optional: Tags to categorize the order
-    val invoice_url: String? = null
-)
+    val invoice_url: String? = null,
+    val current_total_price: String? = null,
+    )

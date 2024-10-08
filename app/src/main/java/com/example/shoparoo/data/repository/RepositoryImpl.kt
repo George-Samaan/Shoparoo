@@ -1,5 +1,8 @@
 package com.example.shoparoo.data.repository
 
+import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import com.example.shoparoo.data.db.remote.RemoteDataSource
 import com.example.shoparoo.data.db.sharedPrefs.SharedPreferences
 import com.example.shoparoo.model.DraftOrderRequest
@@ -12,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 
 class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repository {
     lateinit var sharedPreferences: SharedPreferences
+
 
     // remote data source
     override fun getSmartCollections(): Flow<SmartCollections> {
@@ -72,4 +76,5 @@ class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repositor
         return remoteDataSource.getOrders()
 
     }
+
 }

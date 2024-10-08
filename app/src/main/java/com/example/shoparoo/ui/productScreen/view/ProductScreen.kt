@@ -335,12 +335,13 @@ fun PriceSlider(
     onSliderValueChange: (Int) -> Unit
 ) {
 
-    //val convertedMaxPrice = (maxPrice * conversionRate).roundToInt()
-    val convertedSliderValue = (sliderValue * conversionRate).roundToInt()
+
+    val convertedMaxPrice = (maxPrice * conversionRate).roundToInt()
+    //val convertedSliderValue = (sliderValue * conversionRate).roundToInt()
 
     Column {
         Text(
-            "Max Price: $currencySymbol${convertedSliderValue}",
+            "Max Price: $currencySymbol${convertedMaxPrice}",
             modifier = Modifier
                 .padding(horizontal = 20.dp, vertical = 4.dp)
         )
