@@ -42,7 +42,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,7 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -136,7 +134,7 @@ private fun productInfo(
 
         ReviewSection()
 
-        stockAndPrice(selected)
+        StockAndPrice(selected)
 
         VariantSection(res.product.variants, selected)
 
@@ -144,19 +142,31 @@ private fun productInfo(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        BottomSection(onClick = {
-            if (viewModel.userMail == null) { //this is bullshit but i'll change it later
-               Toast.makeText(NavController.context, "Please login to add to cart", Toast.LENGTH_SHORT).show()
-            } else  {
-                viewModel.getDraftOrder(res, selected.value!!)
-               Toast.makeText(NavController.context, "Added to cart", Toast.LENGTH_SHORT).show()
+        BottomSection(onClickCart = {
+            if (selected.value!!.inventoryQuantity!! < 1) {
+                Toast.makeText(NavController.context, "Out of stock", Toast.LENGTH_SHORT).show()
+            } else {
+                if (viewModel.userMail == null) { //this is bullshit but i'll change it later
+                    Toast.makeText(
+                        NavController.context,
+                        "Please login to add to cart",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    viewModel.getDraftOrder(res, selected.value!!, true)
+                    Toast.makeText(NavController.context, "Added to cart", Toast.LENGTH_SHORT)
+                        .show()
+                }
             }
+        }, onClickFav = {
+            viewModel.getDraftOrder(res, selected.value!!, false)
+            Toast.makeText(NavController.context, "Added to favorites", Toast.LENGTH_SHORT).show()
         })
     }
 }
 
 @Composable
-private fun stockAndPrice(selected: MutableState<VariantsItem?>) {
+private fun StockAndPrice(selected: MutableState<VariantsItem?>) {
     Row(
         modifier = Modifier
             .padding(10.dp)
@@ -428,7 +438,7 @@ fun VariantSection(variants: List<VariantsItem?>?, selected: MutableState<Varian
 }
 
 @Composable
-fun BottomSection(onClick: () -> Unit) {
+fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -437,7 +447,7 @@ fun BottomSection(onClick: () -> Unit) {
     ) {
         //add to cart button
         Button(
-            onClick = onClick,
+            onClick = onClickCart,
            modifier = Modifier.weight(3f)
         ) {
             Text(
@@ -454,7 +464,7 @@ fun BottomSection(onClick: () -> Unit) {
         }
       //  Spacer(modifier = Modifier.weight(1f))
         //favorite button
-        Button(onClick = {},
+        Button(onClick = onClickFav,
             colors = ButtonColors(
                 containerColor = Color.Gray,
                 //those are placeholders
