@@ -1,6 +1,7 @@
 package com.example.shoparoo.ui.productDetails
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
@@ -57,7 +58,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import com.example.shoparoo.R
 import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
@@ -82,6 +82,8 @@ fun ProductDetails(id: String, navController: NavHostController) {
         )
     )
     val ui = viewModel.singleProductDetail.collectAsState()
+
+
     LaunchedEffect(Unit) {
         viewModel.getSingleProductDetail(id)
     }
@@ -97,14 +99,22 @@ fun ProductDetails(id: String, navController: NavHostController) {
         is ApiState.Success -> {
             val res = ui.value as ApiState.Success
             // Log.i("ProductDetails", "Success ${res.product!!.bodyHtml}")
-            ProductInfo(res.data as SingleProduct, navController)
+
+            productInfo(res.data as SingleProduct, navController,viewModel)
+
         }
     }
 
 }
 
 @Composable
-private fun ProductInfo(res: SingleProduct, NavController: NavHostController) {
+
+private fun productInfo(
+    res: SingleProduct,
+    NavController: NavHostController,
+    viewModel: ProductDetailsViewModel,
+    ) {
+
     Log.i("ProductDetails", "Success ${res.product!!.variants!![0]!!.price}")
     val selected = remember { mutableStateOf(res.product.variants!![0]) }
 
@@ -147,6 +157,7 @@ private fun ProductInfo(res: SingleProduct, NavController: NavHostController) {
 
             StockAndPrice(selected)
 
+
             VariantSection(res.product.variants, selected)
 
             DescriptionSection(res.product!!.bodyHtml)
@@ -154,7 +165,29 @@ private fun ProductInfo(res: SingleProduct, NavController: NavHostController) {
 
         }
         Spacer(modifier = Modifier.weight(1f))
-        BottomSection()
+
+
+        BottomSection(onClickCart = {
+            if (selected.value!!.inventoryQuantity!! < 1) {
+                Toast.makeText(NavController.context, "Out of stock", Toast.LENGTH_SHORT).show()
+            } else {
+                if (viewModel.userMail == null) { //this is bullshit but i'll change it later
+                    Toast.makeText(
+                        NavController.context,
+                        "Please login to add to cart",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    viewModel.getDraftOrder(res, selected.value!!, true)
+                    Toast.makeText(NavController.context, "Added to cart", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }, onClickFav = {
+            viewModel.getDraftOrder(res, selected.value!!, false)
+            Toast.makeText(NavController.context, "Added to favorites", Toast.LENGTH_SHORT).show()
+        })
+
     }
 }
 
@@ -438,7 +471,7 @@ fun VariantSection(variants: List<VariantsItem?>?, selected: MutableState<Varian
 }
 
 @Composable
-fun BottomSection() {
+fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -446,10 +479,15 @@ fun BottomSection() {
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.Bottom
     ) {
+        //add to cart button
         Button(
+
+            onClick = onClickCart,
+
             colors = ButtonDefaults.buttonColors(primary),
-            onClick = {},
+        
             modifier = Modifier.weight(3f)
+
         ) {
             Text(
                 text = "Add to Cart",
@@ -463,9 +501,11 @@ fun BottomSection() {
                 tint = Color.White
             )
         }
-        //  Spacer(modifier = Modifier.weight(1f))
-        Button(
-            onClick = {},
+
+      //  Spacer(modifier = Modifier.weight(1f))
+        //favorite button
+        Button(onClick = onClickFav,
+
             colors = ButtonColors(
                 containerColor = Color.Gray,
                 //those are placeholders

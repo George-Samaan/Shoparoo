@@ -3,6 +3,8 @@ package com.example.shoparoo.data.db.remote
 import android.content.ContentValues.TAG
 import android.util.Log
 import com.example.shoparoo.data.network.ApiServices
+import com.example.shoparoo.model.DraftOrderRequest
+import com.example.shoparoo.model.DraftOrderResponse
 import com.example.shoparoo.model.OrderResponse
 import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SingleProduct
@@ -133,6 +135,21 @@ class RemoteDataSourceImpl(private val apiService: ApiServices) : RemoteDataSour
         }
     }
 
+
+    override suspend fun createDraftOrder(createDraftOrder: DraftOrderRequest) {
+        Log.i("RemoteDataSourceImplCreate", "Create Draft Order")
+      apiService.createDraftOrder(createDraftOrder)
+    }
+
+    override fun getDraftOrder(): Flow<DraftOrderResponse> = flow {
+        val response = apiService.getDraftOrder()
+        if (response.isSuccessful && response.body() != null) {
+            Log.d("RemoteDataSourceImpl", "Draft Order received: ${response.body()!!.draft_orders}")
+ 
+   override suspend fun updateDraftOrder(draftOrderDetails: DraftOrderRequest) {
+       apiService.updateDraftOrder(draftOrderDetails, draftOrderDetails.draft_order.id.toString())
+    }
+ 
     override fun getOrders(): Flow<OrderResponse> = flow {
         val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
         val userEmail = firebaseAuth.currentUser?.email
@@ -162,14 +179,28 @@ class RemoteDataSourceImpl(private val apiService: ApiServices) : RemoteDataSour
         val response = apiService.getOrders()
         if (response.isSuccessful && response.body() != null) {
             Log.d("RemoteDataSourceImpl", "Products received Orders: ${response.body()!!.orders}")
+
             emit(response.body()!!)
         } else {
             Log.e(
                 "RemoteDataSourceImpl",
+
+                "Error retrieving draft order: ${response.errorBody()?.string()}"
+            )
+            throw Throwable("Error retrieving draft order")
+        }
+    }
+
+    override suspend fun updateDraftOrder(draftOrderDetails: DraftOrderRequest) {
+       apiService.updateDraftOrder(draftOrderDetails, draftOrderDetails.draft_order.id.toString())
+    }
+}
+=======
                 "Error retrieving products: ${response.errorBody()?.string()}"
             )
             throw Throwable("Error retrieving products")
         }
    }
 }*/
+
 
