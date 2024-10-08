@@ -1,5 +1,6 @@
 package com.example.shoparoo.ui.productDetails
 
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
@@ -50,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -75,6 +77,12 @@ import kotlin.random.Random
 
 @Composable
 fun ProductDetails(id: String, navController: NavHostController) {
+
+
+
+
+
+
     val viewModel: ProductDetailsViewModel = viewModel(
         factory = ProductDetailsViewModelFactory(
             repository = RepositoryImpl(
@@ -103,6 +111,7 @@ fun ProductDetails(id: String, navController: NavHostController) {
 
             productInfo(res.data as SingleProduct, navController, viewModel)
 
+
         }
     }
 
@@ -114,7 +123,17 @@ private fun productInfo(
     res: SingleProduct,
     NavController: NavHostController,
     viewModel: ProductDetailsViewModel,
-) {
+
+    ) {
+
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+
+
+    // Get saved currency and conversion rate from SharedPreferences
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
+
     Log.i("ProductDetails", "Success ${res.product!!.variants!![0]!!.price}")
     val selected = remember { mutableStateOf(res.product.variants!![0]) }
 
@@ -155,7 +174,7 @@ private fun productInfo(
             )
             ReviewSection()
 
-            StockAndPrice(selected)
+            StockAndPrice(selected, selectedCurrency, conversionRate)
 
 
             VariantSection(res.product.variants, selected)
@@ -192,7 +211,13 @@ private fun productInfo(
 }
 
 @Composable
-private fun StockAndPrice(selected: MutableState<VariantsItem?>) {
+private fun StockAndPrice(selected: MutableState<VariantsItem?>, selectedCurrency: String, conversionRate: Float) {
+    val currencySymbols = mapOf(
+        "USD" to "$ ",
+        "EGP" to "EGP "
+    )
+    val price = selected.value?.price?.toFloatOrNull()?.times(conversionRate) ?: 0f
+
     Row(
         modifier = Modifier
             .padding(10.dp)
@@ -206,7 +231,7 @@ private fun StockAndPrice(selected: MutableState<VariantsItem?>) {
         )
         Spacer(Modifier.weight(1f))
         Text(
-            text = selected.value!!.price + " USD",              //stringResource(id = R.string.currency)
+            text = "${currencySymbols[selectedCurrency] ?: "$"}${"%.2f".format(price)}",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
         )

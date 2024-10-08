@@ -119,7 +119,7 @@ fun HomeScreenDesign(
         val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
         val currencySymbols = mapOf(
-            "USD" to "$",
+            "USD" to "$ ",
             "EGP" to "EGP "
         )
 
@@ -364,7 +364,7 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
             color = primary,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
-            modifier = Modifier.padding(top = 12.dp)
+            modifier = Modifier.padding(top = 8.dp)
         )
     }
 }

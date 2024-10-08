@@ -174,6 +174,7 @@ class RemoteDataSourceImpl(private val apiService: ApiServices) : RemoteDataSour
         val response = apiService.getDraftOrder()
         if (response.isSuccessful && response.body() != null) {
             Log.d("RemoteDataSourceImpl", "Draft Order received: ${response.body()!!.draft_orders}")
+
             emit(response.body()!!)
         } else {
             Log.e(
@@ -181,10 +182,41 @@ class RemoteDataSourceImpl(private val apiService: ApiServices) : RemoteDataSour
                 "Error retrieving draft order: ${response.errorBody()?.string()}"
             )
             throw Throwable("Error retrieving draft order")
+
         }
     }
-
 }
+
+
+/*    override fun getOrders(): Flow<OrderResponse> = flow {
+    val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    Log.i(TAG, "checkUser: user is authenticated+${firebaseAuth.currentUser!!.email}")
+    val response = apiService.getOrders()
+    if (response.isSuccessful && response.body() != null) {
+        Log.d("RemoteDataSourceImpl", "Products received Orders: ${response.body()!!.orders}")
+
+        emit(response.body()!!)
+    } else {
+        Log.e(
+            "RemoteDataSourceImpl",
+
+            "Error retrieving draft order: ${response.errorBody()?.string()}"
+        )
+        throw Throwable("Error retrieving draft order")
+    }
+}
+
+override suspend fun updateDraftOrder(draftOrderDetails: DraftOrderRequest) {
+   apiService.updateDraftOrder(draftOrderDetails, draftOrderDetails.draft_order.id.toString())
+}
+}
+=======
+            "Error retrieving products: ${response.errorBody()?.string()}"
+        )
+        throw Throwable("Error retrieving products")
+    }
+}
+}*/
 
 /*    override fun getOrders(): Flow<OrderResponse> = flow {
     val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
