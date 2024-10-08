@@ -145,7 +145,7 @@ data class Fulfillment(
     val updated_at: String?
 )
 
-data class LineItem(
+/*data class LineItem(
     val attributed_staffs: List<AttributedStaff>?,
     val fulfillable_quantity: Int?,
     val fulfillment_service: String?,
@@ -173,16 +173,11 @@ data class LineItem(
     val discount_allocations: List<DiscountAllocation>?,
     val origin_location: OriginLocation?,
     val duties: List<Duty>?
-)
+)*/
 
 data class AttributedStaff(
     val id: String?,
     val quantity: Int?
-)
-
-data class Property(
-    val name: String?,
-    val value: String?
 )
 
 data class TaxLine(
