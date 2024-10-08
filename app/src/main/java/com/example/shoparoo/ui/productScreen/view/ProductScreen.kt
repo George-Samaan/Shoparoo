@@ -85,6 +85,7 @@ fun ProductsScreen(
     var isReady by remember { mutableStateOf(false) }
     var isFilteringComplete by remember { mutableStateOf(false) }
 
+
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
@@ -93,7 +94,7 @@ fun ProductsScreen(
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
     val currencySymbols = mapOf(
-        "USD" to "$",
+        "USD" to "$ ",
         "EGP" to "EGP "
     )
     val isNetworkAvailable = networkListener()
@@ -144,6 +145,8 @@ fun ProductsScreen(
                 }
             }
         }
+        val maxPriceWithSymbol = "${currencySymbols[selectedCurrency]}$maxPrice"
+
 
         LaunchedEffect(searchQuery, sliderValue) {
             isFilteringComplete = false
@@ -172,10 +175,21 @@ fun ProductsScreen(
             if (!isReady) {
                 LoadingIndicator()
             } else {
-                PriceSlider(sliderValue, maxPrice) { newValue -> sliderValue = newValue }
+                currencySymbols[selectedCurrency]?.let {
+                    PriceSlider(
+                        sliderValue, maxPrice, maxPriceWithSymbol, conversionRate, it
+                    )
+
+                    { newValue -> sliderValue = newValue }
+                }
+
 
                 AnimatedContent(targetState = filteredProducts.isEmpty()) { isEmpty ->
-                    ProductInfoMessage(isEmpty = isEmpty, sliderValue = sliderValue)
+                    ProductInfoMessage(
+                        isEmpty = isEmpty,
+                        convertedSliderValue = (sliderValue * conversionRate).roundToInt(),
+                        currencySymbol = currencySymbols[selectedCurrency] ?: "$"
+                    )
                 }
 
                 AnimatedVisibility(
@@ -312,10 +326,21 @@ fun TopBar(navController: NavController, title: String) {
 
 
 @Composable
-fun PriceSlider(sliderValue: Int, maxPrice: Int, onSliderValueChange: (Int) -> Unit) {
+fun PriceSlider(
+    sliderValue: Int,
+    maxPrice: Int,
+    maxPriceWithSymbol: String,
+    conversionRate: Float,
+    currencySymbol: String,
+    onSliderValueChange: (Int) -> Unit
+) {
+
+    //val convertedMaxPrice = (maxPrice * conversionRate).roundToInt()
+    val convertedSliderValue = (sliderValue * conversionRate).roundToInt()
+
     Column {
         Text(
-            "Max Price: $sliderValue",
+            "Max Price: $currencySymbol${convertedSliderValue}",
             modifier = Modifier
                 .padding(horizontal = 20.dp, vertical = 4.dp)
         )
@@ -336,11 +361,11 @@ fun PriceSlider(sliderValue: Int, maxPrice: Int, onSliderValueChange: (Int) -> U
 }
 
 @Composable
-fun ProductInfoMessage(isEmpty: Boolean, sliderValue: Int) {
+fun ProductInfoMessage(isEmpty: Boolean, convertedSliderValue: Int, currencySymbol: String) {
     val message = if (isEmpty) {
         "No products found. Try adjusting your filters."
     } else {
-        "Adjust the slider to filter products by price. Currently showing products under $sliderValue."
+        "Adjust the slider to filter products by price. Currently showing products under $currencySymbol$convertedSliderValue."
     }
 
     Text(
