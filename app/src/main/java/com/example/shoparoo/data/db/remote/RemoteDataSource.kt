@@ -1,5 +1,6 @@
 package com.example.shoparoo.data.db.remote
 
+import com.example.shoparoo.model.OrderResponse
 import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
@@ -17,6 +18,8 @@ interface RemoteDataSource {
     fun getMensProducts(): Flow<Product>
     fun getKidsProducts(): Flow<Product>
 
+    //orders section
+    fun getOrders(): Flow<OrderResponse>
 
 
 }

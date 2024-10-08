@@ -1,5 +1,6 @@
 package com.example.shoparoo.data.network
 
+import com.example.shoparoo.model.OrderResponse
 import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
@@ -40,5 +41,9 @@ interface ApiServices {
     // kids products
     @GET("products.json?collection_id=281653837923")
     suspend fun getKidsProducts(): Response<Product>
+
+    // get orders
+    @GET("orders.json")
+    suspend fun getOrders(): Response<OrderResponse>
 
 }
