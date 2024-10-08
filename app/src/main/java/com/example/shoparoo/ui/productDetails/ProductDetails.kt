@@ -77,10 +77,9 @@ import kotlin.random.Random
 
 @Composable
 fun ProductDetails(id: String, navController: NavHostController) {
-
-
-
-
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
 
 
     val viewModel: ProductDetailsViewModel = viewModel(
@@ -94,7 +93,7 @@ fun ProductDetails(id: String, navController: NavHostController) {
 
 
     LaunchedEffect(Unit) {
-        viewModel.getSingleProductDetail(id)
+        viewModel.getSingleProductDetail(id, selectedCurrency,context)
     }
     when (ui.value) {
         is ApiState.Loading -> {

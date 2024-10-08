@@ -128,9 +128,9 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
             when (val state = allProducts) {
                 is ApiState.Success -> {
                     products = (state.data as? List<ProductsItem>) ?: emptyList()
-                    maxPrice = products.map {
+                    maxPrice = products.maxOfOrNull {
                         (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
-                    }.maxOrNull()?.toInt() ?: 2500
+                    }?.toInt() ?: 2500
 
 
 
@@ -159,7 +159,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                 else -> {}
             }
         }
-        val maxPriceWithSymbol = "${currencySymbols[selectedCurrency]}$maxPrice"
+        val maxPriceWithSymbol = "${currencySymbols[selectedCurrency]}"
 
 
         LaunchedEffect(searchQuery, sliderValue, selectedProductType) {
@@ -304,12 +304,7 @@ fun FilterTypeFABs(
 }
 
 // Filtering logic function for product types
-fun filterProductsByType(
-    products: List<ProductsItem>,
-    productType: String,
-    searchQuery: String,
-    sliderValue: Int,
-    conversionRate: Float, // New parameter for conversion rate
+fun filterProductsByType(products: List<ProductsItem>, productType: String, searchQuery: String, sliderValue: Int, conversionRate: Float, // New parameter for conversion rate
 ): List<ProductsItem> {
     return products.filter { product ->
         val productPrice =
@@ -327,10 +322,7 @@ fun filterProductsByType(
 }
 
 @Composable
-fun FilterBar(
-    selectedFilter: String?,
-    onFilterSelected: (String) -> Unit
-) {
+fun FilterBar(selectedFilter: String?, onFilterSelected: (String) -> Unit) {
     val filters = listOf("Men", "Women", "Kids", "Sale")
 
     Row(
