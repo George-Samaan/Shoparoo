@@ -128,8 +128,8 @@ fun ProductsScreen(
                     products = (state.data as? List<ProductsItem>) ?: emptyList()
                     filteredProducts = products
                     maxPrice = products.map {
-                        it.variants?.firstOrNull()?.price?.toFloatOrNull()?.toInt() ?: 0
-                    }.maxOrNull() ?: 2500
+                        (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
+                    }.maxOrNull()?.let { kotlin.math.ceil(it.toDouble()).toInt() } ?: 2500
                     sliderValue = maxPrice
                     isReady = true
                     isFilteringComplete = true
@@ -239,7 +239,7 @@ fun ProductGrid(
                 productPrice = "$formattedPrice",
                 productImage = product.images?.firstOrNull()?.src ?: "",
                 onClick = {
-                   navController!!.navigate("productDetails/${product.id}")
+                    navController!!.navigate("productDetails/${product.id}")
                 },
                 currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$")
 
@@ -352,8 +352,8 @@ fun PriceSlider(
             steps = maxPrice - 1,
             modifier = Modifier.padding(horizontal = 30.dp),
             colors = SliderDefaults.colors(
-                thumbColor = primary,
-                activeTrackColor = primary,
+                thumbColor = Color.Black,
+                activeTrackColor = Color.Black,
                 inactiveTrackColor = Color.LightGray
             )
         )

@@ -130,7 +130,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                     products = (state.data as? List<ProductsItem>) ?: emptyList()
                     maxPrice = products.map {
                         (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
-                    }.maxOrNull()?.toInt() ?: 2500
+                    }.maxOrNull()?.let { kotlin.math.ceil(it.toDouble()).toInt() } ?: 2500
 
 
 
