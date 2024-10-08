@@ -38,11 +38,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.shoparoo.R
 import com.example.shoparoo.data.network.ApiState
+import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModel
@@ -56,6 +58,7 @@ import com.example.shoparoo.ui.theme.bg
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
 import networkListener
+import kotlin.math.roundToInt
 
 @Composable
 fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavController) {
@@ -86,11 +89,10 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
     val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
-    // Define a currency symbol map
+
     val currencySymbols = mapOf(
-        "USD" to "$",
+        "USD" to "$ ",
         "EGP" to "EGP "
-        // Add more currency symbols as needed
     )
 
     val isNetworkAvailable = networkListener()
@@ -129,9 +131,10 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                 is ApiState.Success -> {
                     products = (state.data as? List<ProductsItem>) ?: emptyList()
                     maxPrice = products.map {
-                        // Apply conversion rate to price
                         (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
                     }.maxOrNull()?.toInt() ?: 2500
+
+
 
                     sliderValue = maxPrice
                     isReady = true
@@ -158,6 +161,8 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                 else -> {}
             }
         }
+        val maxPriceWithSymbol = "${currencySymbols[selectedCurrency]}$maxPrice"
+
 
         LaunchedEffect(searchQuery, sliderValue, selectedProductType) {
             isFilteringComplete = false
@@ -184,13 +189,23 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                     selectedFilter = filter
                 }
 
-                PriceSlider(sliderValue, maxPrice) { newValue -> sliderValue = newValue }
+                currencySymbols[selectedCurrency]?.let {
+                    PriceSlider(
+                        sliderValue, maxPrice, maxPriceWithSymbol, conversionRate, it
+                    )
+
+                    { newValue -> sliderValue = newValue }
+                }
 
                 if (!isReady) {
                     LoadingIndicator()
                 } else {
                     AnimatedContent(targetState = filteredProducts.isEmpty()) { isEmpty ->
-                        ProductInfoMessage(isEmpty = isEmpty, sliderValue = sliderValue)
+                        ProductInfoMessage(
+                            isEmpty = isEmpty,
+                            convertedSliderValue = (sliderValue * conversionRate).roundToInt(),
+                            currencySymbol = currencySymbols[selectedCurrency] ?: "$"
+                        )
                     }
 
                     AnimatedVisibility(
@@ -296,7 +311,7 @@ fun filterProductsByType(
     productType: String,
     searchQuery: String,
     sliderValue: Int,
-    conversionRate: Float // New parameter for conversion rate
+    conversionRate: Float, // New parameter for conversion rate
 ): List<ProductsItem> {
     return products.filter { product ->
         val productPrice =

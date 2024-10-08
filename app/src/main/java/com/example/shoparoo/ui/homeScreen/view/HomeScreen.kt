@@ -119,7 +119,7 @@ fun HomeScreenDesign(
         val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
         val currencySymbols = mapOf(
-            "USD" to "$",
+            "USD" to "$ ",
             "EGP" to "EGP "
         )
 
