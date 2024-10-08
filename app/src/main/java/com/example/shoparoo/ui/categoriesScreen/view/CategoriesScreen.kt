@@ -128,7 +128,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
             when (val state = allProducts) {
                 is ApiState.Success -> {
                     products = (state.data as? List<ProductsItem>) ?: emptyList()
-                    maxPrice = products.maxOfOrNull {
+                    maxPrice = products.map {
                         (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
                     }.maxOrNull()?.let { kotlin.math.ceil(it.toDouble()).toInt() } ?: 2500
 
