@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -87,21 +88,21 @@ fun Signup(navController: NavHostController) {
             AuthState.UnAuthenticated -> isLoading = false
         }
 
-
-//        viewModel.authState.collect {
-//            when (it) {
-//                is AuthState.Success -> {
-//                    Toast.makeText(context, "Sign up successful", Toast.LENGTH_SHORT).show()
-//                    navController.navigate("login")
-//                }
-//                is AuthState.Failed -> {
-//                    Toast.makeText(context, "Sign up failed", Toast.LENGTH_SHORT).show()
-//                }
-//
-//                AuthState.Authenticated -> TODO()
-//                AuthState.Loading -> Unit
-//            }
-//        }
+        /*
+        //        viewModel.authState.collect {
+        //            when (it) {
+        //                is AuthState.Success -> {
+        //                    Toast.makeText(context, "Sign up successful", Toast.LENGTH_SHORT).show()
+        //                    navController.navigate("login")
+        //                }
+        //                is AuthState.Failed -> {
+        //                    Toast.makeText(context, "Sign up failed", Toast.LENGTH_SHORT).show()
+        //                }
+        //
+        //                AuthState.Authenticated -> TODO()
+        //                AuthState.Loading -> Unit
+        //            }
+        //        }*/
     }
 
     val nameValue = remember { mutableStateOf("") }
@@ -155,8 +156,8 @@ fun Signup(navController: NavHostController) {
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    "Sign up to Shoparoo",
-                    fontSize = 40.sp,
+                    "Sign up to Shoparo",
+                    fontSize = 36.sp,
                     fontWeight = FontWeight.Bold,
                     color = primary,
                     modifier = Modifier.padding(top = 20.dp, start = 8.dp)
@@ -173,6 +174,7 @@ fun Signup(navController: NavHostController) {
         PasswordField(confirmpassValue, "confirmPassword", cPassValidation)
         Spacer(modifier = Modifier.padding(top = 30.dp))
         Button(
+            colors = ButtonDefaults.buttonColors(primary),
             onClick = {
                 nameValidation = nameValue.value.isEmpty()
                 mailValidation = emailValue.value.isEmpty()

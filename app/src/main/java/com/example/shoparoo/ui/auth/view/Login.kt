@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -117,7 +118,7 @@ fun LoginScreen(navController: NavHostController) {
             ) {
                 Text(
                     "Existing User ? Sign in",
-                    fontSize = 40.sp,
+                    fontSize = 37.sp,
                     fontWeight = FontWeight.Bold,
                     color = primary,
                     modifier = Modifier.padding(top = 20.dp, start = 10.dp)
@@ -192,6 +193,7 @@ fun LoginScreen(navController: NavHostController) {
 
 
             Button(
+                colors = ButtonDefaults.buttonColors(primary),
                 onClick = {
                     if (passwordValue.value.isEmpty()) {
                         passValidation = true
@@ -218,7 +220,7 @@ fun LoginScreen(navController: NavHostController) {
                                 .padding(horizontal = 70.dp)
                         }
                     }
-                    .animateContentSize(), // Smooth transition between sizes
+                    .animateContentSize(),
                 contentPadding = PaddingValues(15.dp),
                 enabled = !isLoading,
             ) {

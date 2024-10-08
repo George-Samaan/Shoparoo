@@ -2,6 +2,7 @@ package com.example.shoparoo.data.network
 
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
+import com.example.shoparoo.model.OrderResponse
 import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
@@ -58,5 +59,10 @@ interface ApiServices {
     //put draft order add the body
     @PUT("draft_orders/{id}.json")
     suspend fun updateDraftOrder(@Body draftOrderDetails: DraftOrderRequest,  @Path("id") id: String)
+
+    // get orders
+    @GET("orders.json")
+    suspend fun getOrders(): Response<OrderResponse>
+
 
 }
