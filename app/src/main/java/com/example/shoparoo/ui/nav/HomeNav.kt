@@ -55,7 +55,7 @@ fun BottomNavigationBar(navController: NavController) {
     ) {
         BottomNavigation(
             modifier = Modifier
-                .height(70.dp),
+                .height(65.dp),
             backgroundColor = Color(0xFFEAEAEA)
         ) {
             val currentRoute =
@@ -87,7 +87,7 @@ fun BottomNavigationBar(navController: NavController) {
                     label = {
                         Text(
                             text = item.label,
-                            fontSize = 14.sp, // Increased font size for better visibility
+                            fontSize = 12.sp,
                             color = if (isSelected) primary else Color.Gray
                         )
                     },

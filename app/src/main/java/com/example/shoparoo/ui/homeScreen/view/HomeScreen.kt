@@ -453,7 +453,7 @@ fun ProductCard(
                 contentDescription = productName,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(155.dp),
+                    .height(150.dp),
                 contentScale = ContentScale.Crop
             )
             Text(

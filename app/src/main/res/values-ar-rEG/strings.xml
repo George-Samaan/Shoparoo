@@ -21,9 +21,7 @@
     <string name="currency">العملة</string>
     <string name="language">اللغة</string>
     <string name="about_us">من نحن</string>
-    <string name="contact_number"> +02 123456789</string>
     <string name="contact_number_text">رقم الاتصال: </string>
     <string name="email_text">البريد الإلكتروني: </string>
-    <string name="email_contact"> john.c.calhoun@examplepetstore.com</string>
 
 </resources>
