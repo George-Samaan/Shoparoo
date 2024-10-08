@@ -24,6 +24,9 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
     private val _userName = MutableStateFlow<String?>(null)
     val userName: StateFlow<String?> get() = _userName
 
+    private val _email = MutableStateFlow<String?>(null)
+    val email: StateFlow<String?> get() = _email
+
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> get() = _isLoading // Expose it
 
@@ -36,6 +39,7 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
             .get()
             .addOnSuccessListener { result ->
                 _userName.value = result.data?.get("name") as? String
+                _email.value = result.data?.get("email") as? String
                 _isLoading.value = false // Set loading to false after fetching the name
                 Log.d(TAG, "getSmartCollections: ${_userName.value}")
             }

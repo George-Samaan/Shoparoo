@@ -134,6 +134,15 @@ private fun ProductInfo(res: SingleProduct, NavController: NavHostController) {
                     .padding(top = 10.dp)
             )
 
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = res.product.title!!,
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .align(Alignment.Start)
+                .padding(start = 5.dp)
+        )
             ReviewSection()
 
             StockAndPrice(selected)
