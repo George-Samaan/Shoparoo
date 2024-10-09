@@ -70,11 +70,9 @@ interface ApiServices {
     @DELETE("draft_orders/{id}.json")
     suspend fun deleteDraftOrder(@Path("id") draftOrderId: String)
 
-    /*@PUT("draft_orders/{id}.json")
-    suspend fun updateDraftOrder(
-        @Path("id") draftOrderId: Long,
-        @Body draftOrderRequest: DraftOrderRequest
-    ): DraftOrderDetails*/
 
-
+    @PUT("draft_orders/{id}/complete.json")
+    suspend fun addToCompleteOrder(
+        @Path("id") id: String,
+    ): Response<DraftOrderResponse>
 }

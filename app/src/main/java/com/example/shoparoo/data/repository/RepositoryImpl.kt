@@ -1,8 +1,5 @@
 package com.example.shoparoo.data.repository
 
-import android.content.Context
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import com.example.shoparoo.data.db.remote.RemoteDataSource
 import com.example.shoparoo.data.db.sharedPrefs.SharedPreferences
 import com.example.shoparoo.model.DraftOrderRequest
@@ -78,6 +75,9 @@ class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repositor
 
     override suspend fun deleteDraftOrder(draftOrderId: String) {
         remoteDataSource.deleteDraftOrder(draftOrderId)  // Call the RemoteDataSource function
+    }
+    override suspend fun addToCompleteOrder(id: String) {
+        remoteDataSource.addToCompleteOrder(id)
     }
 
 }
