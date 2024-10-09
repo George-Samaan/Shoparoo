@@ -1,5 +1,6 @@
 package com.example.shoparoo.ui.Favourites
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,8 +18,10 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,6 +51,18 @@ fun Favourites(navController: NavController) {
 
     val favProducts = viewModel.productItems.collectAsStateWithLifecycle()
 
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+
+    // Get saved currency and conversion rate from SharedPreferences
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
+
+
+    val currencySymbols = mapOf(
+        "USD" to "$ ",
+        "EGP" to "EGP "
+    )
     // may run multiple times
     LaunchedEffect(Unit) {
         viewModel.getFavourites()
@@ -63,8 +78,8 @@ fun Favourites(navController: NavController) {
         ) {
        //   Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favourites", modifier = Modifier.size(300.dp))
 
-            ReusableLottie(R.raw.empty, null,size =  400.dp)
-            Text(text = "No favourites yet", fontSize = 35.sp, fontWeight = FontWeight.Bold)
+          /*  ReusableLottie(R.raw.empty, null,size =  400.dp)
+            Text(text = "No favourites yet", fontSize = 35.sp, fontWeight = FontWeight.Bold)*/
         }
     }
 
@@ -82,11 +97,12 @@ fun Favourites(navController: NavController) {
 
 
         //galal handle currency conversion
-    //  ProductGridd(favProducts.value, navController, "gg", 1.0f, emptyMap(),true,viewModel)
+      ProductGridd(favProducts.value, navController, selectedCurrency, conversionRate, currencySymbols,true,
+          viewModel)
 
-        ProductGrid(favProducts.value, navController, "gg", 1.0f, emptyMap(),true,
+       /* ProductGrid(favProducts.value, navController, "gg", 1.0f, emptyMap(),true,
             viewModel = viewModel
-            )
+            )*/
 
     }
 }
@@ -126,15 +142,14 @@ fun ProductGridd(
                     navController!!.navigate("productDetails/${product.id}")
                 },
                 currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$"),
-                inFav = inFav,
+               /* inFav = inFav,
                 onClickDeleteFav = {
                     Log.i("FavouritesViewModeldeleteeeee", "onClickDeleteFav: ${product.id}")
                   //  viewModel.deleteFav(product.id)
                     viewModel.getFavourites(true, product.id!!)
 
-
-                })
-
+                })*/
+            )
 
         }
     }

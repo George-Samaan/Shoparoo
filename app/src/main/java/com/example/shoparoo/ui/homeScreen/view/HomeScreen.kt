@@ -542,7 +542,7 @@ fun MainScreen(
             composable(BottomNav.Home.route) {
                 HomeScreenDesign(
                     if (isLoading) "" else userName ?: "Guest",
-                    onFavouriteClick,
+                    {navController.navigate("favourites")},
                     query,
                     onQueryChange,
                     smartCollectionsState,
