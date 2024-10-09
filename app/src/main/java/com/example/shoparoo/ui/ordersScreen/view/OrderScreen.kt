@@ -146,7 +146,7 @@ fun OrderItem(order: Order) {
                     horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "${order.current_total_price} USD",
+                        text = "${order.current_total_price} ${order.currency}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = primary
