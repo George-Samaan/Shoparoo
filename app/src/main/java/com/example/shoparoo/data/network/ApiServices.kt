@@ -64,5 +64,8 @@ interface ApiServices {
     @GET("orders.json")
     suspend fun getOrders(): Response<OrderResponse>
 
-
+    @PUT("draft_orders/{id}/complete.json")
+    suspend fun addToCompleteOrder(
+        @Path("id") id: String,
+    ): Response<DraftOrderResponse>
 }

@@ -50,6 +50,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.Order
 import com.example.shoparoo.ui.ordersScreen.viewModel.OrdersViewModel
+import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.productScreen.view.TopBar
 import com.example.shoparoo.ui.theme.primary
 import java.text.SimpleDateFormat
@@ -72,6 +73,7 @@ fun OrderScreen(
 
         when (ordersState) {
             is ApiState.Loading -> {
+                LoadingIndicator()
                 Log.d("OrdersScreen", "Loading orders...")
             }
 
