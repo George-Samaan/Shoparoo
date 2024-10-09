@@ -33,9 +33,10 @@ interface Repository {
     // draft order section
     suspend fun createDraftOrder(createDraftOrder: DraftOrderRequest)
     fun getDraftOrder(): Flow<DraftOrderResponse>
-    suspend fun updateDraftOrder(draftOrderDetails: DraftOrderRequest)       
-
+    suspend fun updateDraftOrder(draftOrderDetails: DraftOrderRequest)
+    suspend fun deleteDraftOrder(id: Long)
     //orders
     fun getOrders(): Flow<OrderResponse>
+
 
 }

@@ -68,6 +68,10 @@ class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repositor
         remoteDataSource.updateDraftOrder(draftOrderDetails)
     }
 
+    override suspend fun deleteDraftOrder(id: Long) {
+        remoteDataSource.deleteDraftOrder(id)
+    }
+
     override fun getOrders(): Flow<OrderResponse> {
         return remoteDataSource.getOrders()
 
