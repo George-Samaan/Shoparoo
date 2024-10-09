@@ -87,11 +87,5 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
     }
 }
 
-/*
-fun calculateSubtotal(cartItems: List<LineItem>): Double {
-    return cartItems.sumOf {
-        it.price.toDoubleOrNull()?.times(it.quantity) ?: 0.0
-    }
-}
-*/
+
 

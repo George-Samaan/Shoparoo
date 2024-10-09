@@ -8,6 +8,7 @@ import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -64,5 +65,8 @@ interface ApiServices {
     @GET("orders.json")
     suspend fun getOrders(): Response<OrderResponse>
 
+
+    @DELETE("draft_orders/{id}.json")
+    suspend fun deleteDraftOrder(@Path("id") draftOrderId: String)
 
 }

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,14 +38,19 @@ import androidx.navigation.NavController
 import com.example.shoparoo.R
 import com.example.shoparoo.ui.theme.primary
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.ui.checkOut.AppHeader
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
+import kotlinx.coroutines.delay
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -54,29 +60,69 @@ fun ShoppingCartScreen(
     viewModel: ShoppingCartViewModel
 ) {
     val cartItems by viewModel.cartItems.collectAsState()
+    val isLoading = remember { mutableStateOf(true) }
+    val showDialog = remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         viewModel.getCartItems()
+        delay(1500)
+        isLoading.value = false
+
+        if (cartItems.isEmpty()) {
+            showDialog.value = true
+        }
     }
 
-    val totalItems = cartItems.sumOf { it.quantity } // Calculate total items in cart
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text(text = "Cart is empty") },
+            text = { Text(text = "Please add items to your cart.") },
+            confirmButton = {
+                Button(onClick = {
+                    showDialog.value = false
+                    navController.navigate("home")
+                }) {
+                    Text("OK")
+                }
+            },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        )
+    }
 
-    Scaffold {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(3.dp)
-        ) {
-            item {
-                AppHeader(navController, title = stringResource(R.string.cart))
+    if (isLoading.value) {
+        Scaffold {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+        }
+    } else {
+        Scaffold {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(3.dp)
+            ) {
+                item {
+                    AppHeader(navController, title = stringResource(R.string.cart))
+                }
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
 
-            item { ProductList(cartItems, viewModel) }
+                item { ProductList(cartItems, viewModel, showDialog) }
 
-            item {
-                CheckoutButton(navController, totalItems) // Pass the total items count
+                if (cartItems.isNotEmpty()) {
+                    item {
+                        val totalItems = cartItems.sumOf { it.quantity }
+                        CheckoutButton(navController, totalItems)
+                    }
+                }
             }
         }
     }
@@ -84,7 +130,7 @@ fun ShoppingCartScreen(
 
 
 @Composable
-fun ProductList(cartItems: List<LineItem>, viewModel: ShoppingCartViewModel) {
+fun ProductList(cartItems: List<LineItem>, viewModel: ShoppingCartViewModel, showDialog: MutableState<Boolean>) {
     Column(modifier = Modifier.fillMaxWidth()) {
         cartItems.forEach { lineItem ->
             val imageUrl = lineItem.properties[0].value
@@ -95,13 +141,22 @@ fun ProductList(cartItems: List<LineItem>, viewModel: ShoppingCartViewModel) {
                 productBrand = lineItem.vendor ?: "Unknown Brand",
                 price = "$${lineItem.price}",
                 quantity = lineItem.quantity,
-                onIncrement = { viewModel.incrementItemCount(lineItem) },
-                onDecrement = { viewModel.decrementItemCount(lineItem) }
+                onIncrement = {
+                    viewModel.increaseQuantity(lineItem)
+                },
+                onDecrement = {
+                    viewModel.decreaseQuantity(lineItem)
+                },
+                onRemove = {
+                    viewModel.removeItem(lineItem)
+                    if (cartItems.size == 1) {
+                        showDialog.value = true
+                    }
+                }
             )
         }
     }
 }
-
 
 
 @Composable
@@ -112,7 +167,8 @@ fun ProductItem(
     price: String,
     quantity: Int,
     onIncrement: () -> Unit,
-    onDecrement: () -> Unit
+    onDecrement: () -> Unit,
+    onRemove: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -162,10 +218,11 @@ fun ProductItem(
             modifier = Modifier
                 .padding(8.dp)
                 .size(30.dp)
-                .clickable { /* Handle remove item */ }
+                .clickable { onRemove() }
         )
     }
 }
+
 
 @Composable
 fun QuantitySelector(quantity: Int, onIncrement: () -> Unit, onDecrement: () -> Unit) {
@@ -210,3 +267,4 @@ fun CheckoutButton(navController: NavController, totalItems: Int) {
         Text(text = "Proceed to Checkout ($totalItems items)", color = Color.White)
     }
 }
+

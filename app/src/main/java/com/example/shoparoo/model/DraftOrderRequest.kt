@@ -31,4 +31,12 @@ data class DraftOrderDetails(
     val tags: String? = null, // Optional: Tags to categorize the order
     val invoice_url: String? = null,
     val current_total_price: String? = null,
+    val total_price: String? = null,
+    val subtotal_price: String? = null,
+    val total_tax: String? = null,
+
     )
+
+/*"total_price": "182.34",
+            "subtotal_price": "159.95",
+            "total_tax": "22.39",*/
