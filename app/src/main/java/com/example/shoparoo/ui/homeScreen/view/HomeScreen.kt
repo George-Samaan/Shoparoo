@@ -83,7 +83,9 @@ import com.example.shoparoo.ui.productScreen.view.ProductsScreen
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModel
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModelFactory
 import com.example.shoparoo.ui.settingsScreen.ProfileScreen
-import com.example.shoparoo.ui.shoppingCart.ShoppingCartScreen
+import com.example.shoparoo.ui.shoppingCart.view.ShoppingCartScreen
+import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
+import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModelFactory
 import com.example.shoparoo.ui.theme.primary
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -499,6 +501,14 @@ fun MainScreen(
         )
     )
 
+    val shoppingCartViewModel : ShoppingCartViewModel = viewModel(
+        factory = ShoppingCartViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+
     val productViewModel: ProductViewModel = viewModel(
         factory = ProductViewModelFactory(
             repository = RepositoryImpl(
@@ -560,7 +570,7 @@ fun MainScreen(
 
             }
             composable(BottomNav.Cart.route) {
-                ShoppingCartScreen(navControllerBottom)
+                ShoppingCartScreen(navControllerBottom,shoppingCartViewModel)
             }
             composable(BottomNav.orders.route) {
                 Text(text = "Orders Screen")
@@ -582,7 +592,7 @@ fun MainScreen(
 //                SettingsScreen(navControllerBottom)
 //            }
             composable("checkout") {
-                CheckoutScreen(navControllerBottom)
+                CheckoutScreen(navControllerBottom, shoppingCartViewModel)
             }
             composable("brand/{brandId}/{brandTitle}") { backStackEntry ->
                 val brandId =

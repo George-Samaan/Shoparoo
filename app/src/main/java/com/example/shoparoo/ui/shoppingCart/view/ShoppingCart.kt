@@ -1,7 +1,7 @@
-package com.example.shoparoo.ui.shoppingCart
+package com.example.shoparoo.ui.shoppingCart.view
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -20,7 +20,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,48 +37,28 @@ import androidx.navigation.NavController
 import com.example.shoparoo.R
 import com.example.shoparoo.ui.theme.primary
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import coil.compose.AsyncImage
+import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.ui.checkOut.AppHeader
+import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 
-// Data class to represent products in the cart
-data class Product(
-    val imageRes: Int,
-    val productName: String,
-    val productBrand: String,
-    val price: Double,
-    var quantity: Int
-)
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ShoppingCartScreen(navController: NavController) {
-
-    val productList = remember {
-        mutableStateListOf(
-            Product(
-                imageRes = R.drawable.ic_watch,
-                productName = "Watch",
-                productBrand = "Rolex",
-                price = 40.0,
-                quantity = 1
-            ),
-            Product(
-                imageRes = R.drawable.ic_watch,
-                productName = "Airpods",
-                productBrand = "Apple",
-                price = 333.0,
-                quantity = 1
-            ),
-            Product(
-                imageRes = R.drawable.ic_watch,
-                productName = "Hoodie",
-                productBrand = "Puma",
-                price = 50.0,
-                quantity = 1
-            ),
-        )
-
+fun ShoppingCartScreen(
+    navController: NavController,
+    viewModel: ShoppingCartViewModel
+) {
+    val cartItems by viewModel.cartItems.collectAsState()
+    LaunchedEffect(Unit) {
+        viewModel.getCartItems()
     }
 
+    val totalItems = cartItems.sumOf { it.quantity } // Calculate total items in cart
 
     Scaffold {
         LazyColumn(
@@ -93,10 +72,11 @@ fun ShoppingCartScreen(navController: NavController) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
             }
-          item { ProductList(productList)}
+
+            item { ProductList(cartItems, viewModel) }
 
             item {
-                CheckoutButton(navController)
+                CheckoutButton(navController, totalItems) // Pass the total items count
             }
         }
     }
@@ -104,22 +84,36 @@ fun ShoppingCartScreen(navController: NavController) {
 
 
 @Composable
-fun ProductList(productList: List<Product>) {
+fun ProductList(cartItems: List<LineItem>, viewModel: ShoppingCartViewModel) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        productList.forEach { product ->
+        cartItems.forEach { lineItem ->
+            val imageUrl = lineItem.properties[0].value
+
             ProductItem(
-                imageRes = product.imageRes,
-                productName = product.productName,
-                productBrand = product.productBrand,
-                price = "$${product.price}",
-                quantity = product.quantity
+                imageUrl = imageUrl,
+                productName = lineItem.title,
+                productBrand = lineItem.vendor ?: "Unknown Brand",
+                price = "$${lineItem.price}",
+                quantity = lineItem.quantity,
+                onIncrement = { viewModel.incrementItemCount(lineItem) },
+                onDecrement = { viewModel.decrementItemCount(lineItem) }
             )
         }
     }
 }
 
+
+
 @Composable
-fun ProductItem(imageRes: Int, productName: String, productBrand: String, price: String, quantity: Int) {
+fun ProductItem(
+    imageUrl: String,
+    productName: String,
+    productBrand: String,
+    price: String,
+    quantity: Int,
+    onIncrement: () -> Unit,
+    onDecrement: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -128,8 +122,8 @@ fun ProductItem(imageRes: Int, productName: String, productBrand: String, price:
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(id = imageRes),
+        AsyncImage(
+            model = imageUrl,
             contentDescription = productName,
             modifier = Modifier
                 .size(80.dp)
@@ -143,18 +137,23 @@ fun ProductItem(imageRes: Int, productName: String, productBrand: String, price:
             Text(
                 text = productName,
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
+                fontSize = 14.sp,
                 color = primary
             )
+            Spacer(modifier = Modifier.height(5.dp))
+
             Text(
                 text = productBrand,
                 color = Color.Gray,
-                fontSize = 16.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold
             )
+            Spacer(modifier = Modifier.height(5.dp))
+
             Text(text = price, color = Color.Gray, fontSize = 16.sp, fontWeight = FontWeight.W400)
         }
-        QuantitySelector(quantity = quantity)
+
+        QuantitySelector(quantity = quantity, onIncrement = onIncrement, onDecrement = onDecrement)
 
         Icon(
             painter = painterResource(id = R.drawable.ic_delete),
@@ -169,18 +168,23 @@ fun ProductItem(imageRes: Int, productName: String, productBrand: String, price:
 }
 
 @Composable
-fun QuantitySelector(quantity: Int) {
-    var count by remember { mutableStateOf(quantity) }
+fun QuantitySelector(quantity: Int, onIncrement: () -> Unit, onDecrement: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = { if (count > 0) count-- }) {
+        IconButton(onClick = {
+            if (quantity > 0) {
+                onDecrement()
+            }
+        }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_mini),
                 contentDescription = "Minus",
                 tint = Color.Gray
             )
         }
-        Text(text = count.toString(), fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        IconButton(onClick = { count++ }) {
+        Text(text = quantity.toString(), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        IconButton(onClick = {
+            onIncrement()
+        }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_add_circle),
                 contentDescription = "Plus",
@@ -191,3 +195,18 @@ fun QuantitySelector(quantity: Int) {
 }
 
 
+
+@Composable
+fun CheckoutButton(navController: NavController, totalItems: Int) {
+    Button(
+        onClick = { navController.navigate("checkout") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .height(50.dp),
+        shape = RoundedCornerShape(25.dp),
+        colors = ButtonDefaults.buttonColors(primary)
+    ) {
+        Text(text = "Proceed to Checkout ($totalItems items)", color = Color.White)
+    }
+}

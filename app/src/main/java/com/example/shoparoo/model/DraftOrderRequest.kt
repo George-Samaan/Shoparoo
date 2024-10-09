@@ -7,7 +7,8 @@ data class LineItem(
     val price: String,              // The price of the product
     var quantity: Int,              // The quantity of the product
     val variant_id: String,           // Shopify variant ID (for color/size variants)
-    val properties:List<Property> // Additional properties like size, color
+    val properties:List<Property>, // Additional properties like size, color
+    val vendor:String?=null
 )
 data class Property(
     val name: String,
@@ -25,7 +26,7 @@ data class DraftOrderRequest(
 data class DraftOrderDetails(
     val id: Long?=null,
     var line_items: MutableList<LineItem>,  // Items in the draft order
-    val email: String,          // Customer details
+    val email: String? = null,          // Customer details
     val note: String? = null,       // Optional: Notes for the order
     val tags: String? = null, // Optional: Tags to categorize the order
     val invoice_url: String? = null,

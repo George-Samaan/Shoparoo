@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 class ProductDetailsViewModel(private val repository: Repository) : ViewModel() {
     private var conversionRate: Double = 1.0 // Default conversion rate
 
+
     private val _singleProductDetail = MutableStateFlow<ApiState>(ApiState.Loading)
     val singleProductDetail = _singleProductDetail.asStateFlow()
 
@@ -40,6 +41,8 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
     val userMail by lazy {
         FirebaseAuth.getInstance().currentUser?.email
     }
+
+
 
     fun getSingleProductDetail(productId: String, selectedCurrency: String, context: Context) {
         viewModelScope.launch {
@@ -170,11 +173,7 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         }
     }
 
-    private fun updateDraftOrder(
-        draftOrder: DraftOrderDetails,
-        varient: VariantsItem,
-        theSingleProduct: SingleProduct
-    ) {
+    private fun updateDraftOrder(draftOrder: DraftOrderDetails, varient: VariantsItem, theSingleProduct: SingleProduct) {
         draftOrder.line_items.add(setLineItem(theSingleProduct, varient))
         viewModelScope.launch {
             val order = DraftOrderRequest(draftOrder)
@@ -231,10 +230,7 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         }
     }
 
-    private fun setLineItem(
-        theSingleProduct: SingleProduct,
-        varient: VariantsItem,
-    ) = LineItem(
+    private fun setLineItem(theSingleProduct: SingleProduct, varient: VariantsItem, ) = LineItem(
         title = theSingleProduct.product!!.title!!,
         price = (varient.price?.toFloatOrNull()?.times(conversionRate)).toString(),
         quantity = 1,

@@ -128,11 +128,13 @@ fun CreditCardItem() {
     var cardNumber by remember { mutableStateOf("") }
     var expirationMonth by remember { mutableStateOf("") }
     var expirationYear by remember { mutableStateOf("") }
+    var cvv by remember { mutableStateOf("") }
 
     var isCardHolderNameValid by remember { mutableStateOf(true) }
     var isCardNumberValid by remember { mutableStateOf(true) }
     var isExpirationMonthValid by remember { mutableStateOf(true) }
     var isExpirationYearValid by remember { mutableStateOf(true) }
+    var isCvvValid by remember { mutableStateOf(true) }
 
     val currentYear =
         Calendar.getInstance().get(Calendar.YEAR) % 100 // get last two digits of the year
@@ -153,7 +155,9 @@ fun CreditCardItem() {
             shape = RoundedCornerShape(25.dp),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            isError = !isCardHolderNameValid
+            isError = !isCardHolderNameValid,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+
         )
 
         if (!isCardHolderNameValid) {
@@ -188,6 +192,30 @@ fun CreditCardItem() {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Cvv Number Field
+        OutlinedTextField(value = cvv, onValueChange = {
+            cvv = it
+            isCvvValid = it.length == 3 && it.all { char -> char.isDigit() }
+        },
+            label = { Text("CVV number") },
+            shape = RoundedCornerShape(25.dp),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            isError = !isCvvValid,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+
+        if (!isCvvValid) {
+            Text(
+                text = "CVV number must be 3 digits",
+                color = Color.Red,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
 
         // Expiration Date Fields (MM/YY)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
