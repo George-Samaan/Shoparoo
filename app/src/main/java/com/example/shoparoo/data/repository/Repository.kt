@@ -36,4 +36,8 @@ interface Repository {
     fun getOrders(): Flow<OrderResponse>
     suspend fun addToCompleteOrder(id: String)
 
+    //delete draft order
+    suspend fun deleteDraftOrder(draftOrderId: String)
+
+
 }
