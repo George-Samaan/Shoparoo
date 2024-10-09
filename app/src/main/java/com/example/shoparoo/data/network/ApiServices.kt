@@ -1,5 +1,6 @@
 package com.example.shoparoo.data.network
 
+import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
 import com.example.shoparoo.model.OrderResponse
@@ -8,6 +9,7 @@ import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -63,6 +65,16 @@ interface ApiServices {
     // get orders
     @GET("orders.json")
     suspend fun getOrders(): Response<OrderResponse>
+
+
+    @DELETE("draft_orders/{id}.json")
+    suspend fun deleteDraftOrder(@Path("id") draftOrderId: String)
+
+    /*@PUT("draft_orders/{id}.json")
+    suspend fun updateDraftOrder(
+        @Path("id") draftOrderId: Long,
+        @Body draftOrderRequest: DraftOrderRequest
+    ): DraftOrderDetails*/
 
 
 }

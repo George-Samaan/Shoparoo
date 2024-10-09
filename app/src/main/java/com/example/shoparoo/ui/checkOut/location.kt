@@ -131,7 +131,7 @@ fun Location() {
             // Edit manually button
             Spacer(modifier = Modifier.height(5.dp))
             Text(
-                text = "Edit manually",
+                text = "Edit Location",
                 color = Color.Blue,
                 modifier = Modifier.clickable { showManualDialog = true }
             )
