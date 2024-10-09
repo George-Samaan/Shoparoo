@@ -1,5 +1,6 @@
 package com.example.shoparoo.data.network
 
+import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
 import com.example.shoparoo.model.OrderResponse
@@ -68,5 +69,12 @@ interface ApiServices {
 
     @DELETE("draft_orders/{id}.json")
     suspend fun deleteDraftOrder(@Path("id") draftOrderId: String)
+
+    /*@PUT("draft_orders/{id}.json")
+    suspend fun updateDraftOrder(
+        @Path("id") draftOrderId: Long,
+        @Body draftOrderRequest: DraftOrderRequest
+    ): DraftOrderDetails*/
+
 
 }

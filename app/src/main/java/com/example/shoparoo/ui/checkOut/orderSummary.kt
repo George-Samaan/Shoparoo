@@ -23,7 +23,12 @@ import androidx.navigation.NavController
 import com.example.shoparoo.ui.theme.primary
 
 @Composable
-fun OrderSummary(totalDiscount: Double, subtotal: Double, deliveryCharges: Double, total: Double) {
+fun OrderSummary(
+    subtotal: Double,
+    totalTax: Double,
+    discount: Double,
+    total: Double
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -46,14 +51,14 @@ fun OrderSummary(totalDiscount: Double, subtotal: Double, deliveryCharges: Doubl
         Spacer(modifier = Modifier.height(5.dp))
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Discount", color = Color.Gray, fontSize = 17.sp)
-            Text(text = "-$${"%.2f".format(totalDiscount)}", fontSize = 17.sp)
+            Text(text = "Total tax", color = Color.Gray, fontSize = 17.sp)
+            Text(text = "$${"%.2f".format(totalTax)}", fontSize = 17.sp)
         }
         Spacer(modifier = Modifier.height(5.dp))
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Delivery Charges", color = Color.Gray, fontSize = 17.sp)
-            Text(text = "$${"%.2f".format(deliveryCharges)}", fontSize = 17.sp)
+            Text(text = "Discount", color = Color.Gray, fontSize = 17.sp)
+            Text(text = "-$${"%.2f".format(discount)}", fontSize = 17.sp)
         }
         Spacer(modifier = Modifier.height(5.dp))
 

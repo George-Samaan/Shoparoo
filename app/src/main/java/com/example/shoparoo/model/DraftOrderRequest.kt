@@ -23,6 +23,12 @@ data class DraftOrderRequest(
     val draft_order: DraftOrderDetails
 )
 
+data class AppliedDiscount(
+    val value: Double,
+    val value_type: String,     //percentage
+    val amount: Double?
+)
+
 data class DraftOrderDetails(
     val id: Long?=null,
     var line_items: MutableList<LineItem>,  // Items in the draft order
@@ -34,9 +40,6 @@ data class DraftOrderDetails(
     val total_price: String? = null,
     val subtotal_price: String? = null,
     val total_tax: String? = null,
+    val applied_discount: AppliedDiscount? = null  // Discount applied to the order
+)
 
-    )
-
-/*"total_price": "182.34",
-            "subtotal_price": "159.95",
-            "total_tax": "22.39",*/

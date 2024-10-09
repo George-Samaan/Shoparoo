@@ -3,6 +3,7 @@ package com.example.shoparoo.data.db.remote
 import android.content.ContentValues.TAG
 import android.util.Log
 import com.example.shoparoo.data.network.ApiServices
+import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
 import com.example.shoparoo.model.OrderResponse
@@ -173,6 +174,8 @@ class RemoteDataSourceImpl(private val apiService: ApiServices) : RemoteDataSour
     override suspend fun deleteDraftOrder(draftOrderId: String) {
         apiService.deleteDraftOrder(draftOrderId)
     }
+
+
 
 
 
