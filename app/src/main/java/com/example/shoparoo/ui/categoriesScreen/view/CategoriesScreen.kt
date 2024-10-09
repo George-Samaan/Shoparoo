@@ -122,7 +122,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
 
             when (val state = allProducts) {
                 is ApiState.Success -> {
-                    // Filter products by selected subcategory (e.g., Shoes, T-Shirts)
                     products = (state.data as? List<ProductsItem>)?.filter { product ->
                         product.productType?.equals(selectedProductType, ignoreCase = true) == true
                     } ?: emptyList()
@@ -131,13 +130,9 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                     maxPrice = products.map {
                         (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
                     }.maxOrNull()?.let { kotlin.math.ceil(it.toDouble()).toInt() } ?: 2500
-
-                    // Reset slider value to the new max price
                     sliderValue = maxPrice
 
-                    // Update the filtering status
                     isReady = true
-
                     filteredProducts = filterProductsByType(
                         products,
                         selectedProductType,
@@ -163,7 +158,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
 
         LaunchedEffect(searchQuery, sliderValue, selectedProductType) {
             isFilteringComplete = false
-            // Add a delay before filtering products to avoid flicker
             delay(300)
             filteredProducts = filterProductsByType(
                 products,
@@ -181,7 +175,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                     searchQuery = searchQuery,
                     onSearchQueryChange = { query -> searchQuery = query },
                 )
-
                 FilterBar(selectedFilter) { filter ->
                     selectedFilter = filter
                 }
