@@ -3,6 +3,7 @@
 package com.example.shoparoo.ui.productScreen.view
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -131,6 +132,8 @@ fun ProductsScreen(
                         (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
                     }.maxOrNull()?.let { kotlin.math.ceil(it.toDouble()).toInt() } ?: 2500
                     sliderValue = maxPrice
+                    Log.d("jeooooX", "Max Price: $maxPrice")
+                    Log.d("jeooooX", "Slider Value: $sliderValue")
                     isReady = true
                     isFilteringComplete = true
                 }
@@ -177,7 +180,7 @@ fun ProductsScreen(
             } else {
                 currencySymbols[selectedCurrency]?.let {
                     PriceSlider(
-                        sliderValue, maxPrice, maxPriceWithSymbol, conversionRate, it
+                        sliderValue, maxPrice, it
                     )
 
                     { newValue -> sliderValue = newValue }
@@ -187,7 +190,7 @@ fun ProductsScreen(
                 AnimatedContent(targetState = filteredProducts.isEmpty()) { isEmpty ->
                     ProductInfoMessage(
                         isEmpty = isEmpty,
-                        convertedSliderValue = (sliderValue * conversionRate).roundToInt(),
+                        convertedSliderValue = (sliderValue),
                         currencySymbol = currencySymbols[selectedCurrency] ?: "$"
                     )
                 }
@@ -329,33 +332,29 @@ fun TopBar(navController: NavController, title: String) {
 fun PriceSlider(
     sliderValue: Int,
     maxPrice: Int,
-    maxPriceWithSymbol: String,
-    conversionRate: Float,
     currencySymbol: String,
     onSliderValueChange: (Int) -> Unit
 ) {
-
-
-    val convertedMaxPrice = (maxPrice * conversionRate).roundToInt()
-    //val convertedSliderValue = (sliderValue * conversionRate).roundToInt()
-
     Column {
         Text(
-            "Max Price: $currencySymbol${convertedMaxPrice}",
+            "Max Price: ${maxPrice} $currencySymbol",
             modifier = Modifier
                 .padding(horizontal = 20.dp, vertical = 4.dp)
         )
-
         Slider(
             value = sliderValue.toFloat(),
             onValueChange = { newValue -> onSliderValueChange(newValue.roundToInt()) },
             valueRange = 0f..maxPrice.toFloat(),
             steps = maxPrice - 1,
-            modifier = Modifier.padding(horizontal = 30.dp),
+            modifier = Modifier
+                .padding(horizontal = 40.dp)
+                .align(Alignment.Start),
             colors = SliderDefaults.colors(
                 thumbColor = Color.Black,
                 activeTrackColor = Color.Black,
-                inactiveTrackColor = Color.LightGray
+                inactiveTrackColor = Color.LightGray,
+                inactiveTickColor = Color.LightGray,
+                activeTickColor = Color.Black,
             )
         )
     }
@@ -366,13 +365,12 @@ fun ProductInfoMessage(isEmpty: Boolean, convertedSliderValue: Int, currencySymb
     val message = if (isEmpty) {
         "No products found. Try adjusting your filters."
     } else {
-        "Adjust the slider to filter products by price. Currently showing products under $currencySymbol$convertedSliderValue."
+        "Adjust the slider to filter products by price. Currently showing products under $convertedSliderValue $currencySymbol"
     }
 
     Text(
         message,
-        modifier = Modifier
-            .padding(horizontal = 20.dp),
+        modifier = Modifier.padding(horizontal = 20.dp),
         style = MaterialTheme.typography.body2,
         color = MaterialTheme.colors.onSurface
     )

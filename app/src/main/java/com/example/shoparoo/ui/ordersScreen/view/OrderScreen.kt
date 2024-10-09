@@ -46,7 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.Order
 import com.example.shoparoo.ui.ordersScreen.viewModel.OrdersViewModel
@@ -215,7 +215,7 @@ fun OrderItem(order: Order) {
                                 if (property.name == "imageUrl") {
                                     item {
                                         Image(
-                                            painter = rememberImagePainter(data = property.value),
+                                            painter = rememberAsyncImagePainter(model = property.value),
                                             contentDescription = null,
                                             modifier = Modifier
                                                 .size(60.dp)
