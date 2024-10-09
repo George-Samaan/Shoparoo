@@ -1,6 +1,5 @@
 package com.example.shoparoo.data.network
 
-import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
 import com.example.shoparoo.model.OrderResponse
@@ -74,5 +73,6 @@ interface ApiServices {
     @PUT("draft_orders/{id}/complete.json")
     suspend fun addToCompleteOrder(
         @Path("id") id: String,
-    ): Response<DraftOrderResponse>
+    )
+
 }

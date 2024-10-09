@@ -3,7 +3,6 @@ package com.example.shoparoo.ui.shoppingCart.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.shoparoo.data.network.ApiServices
 import com.example.shoparoo.data.repository.Repository
 import com.example.shoparoo.model.AppliedDiscount
 import com.example.shoparoo.model.DraftOrderDetails
@@ -41,6 +40,7 @@ class ShoppingCartViewModel(private val repository: Repository):ViewModel() {
                         _draftOrderDetails.value = it
                     }
                 }
+            Log.d("PAYMENT", "Draft Order Details: ${_draftOrderDetails.value}")
         }
     }
 
