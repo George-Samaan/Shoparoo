@@ -51,7 +51,6 @@ import com.example.shoparoo.ui.productScreen.view.PriceSlider
 import com.example.shoparoo.ui.productScreen.view.ProductGrid
 import com.example.shoparoo.ui.productScreen.view.ProductInfoMessage
 import com.example.shoparoo.ui.productScreen.view.SearchBar
-import com.example.shoparoo.ui.theme.Purple40
 import com.example.shoparoo.ui.theme.bg
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
@@ -279,7 +278,7 @@ fun FilterTypeFABs(
         productTypes.forEach { type ->
             FloatingActionButton(
                 onClick = { onProductTypeSelected(type) },
-                containerColor = if (type == selectedProductType) Purple40 else Color.LightGray,
+                containerColor = if (type == selectedProductType) Color.Red else Color.LightGray,
                 contentColor = Color.White,
                 modifier = Modifier.size(56.dp)
             ) {
