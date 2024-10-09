@@ -3,7 +3,6 @@
 package com.example.shoparoo.ui.categoriesScreen.view
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -63,7 +62,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("Men") } // Default filter
     var sliderValue by remember { mutableIntStateOf(0) }
-    var maxPrice by remember { mutableIntStateOf(2500) }
+    var maxPrice by remember { mutableIntStateOf(0) }
     var isReady by remember { mutableStateOf(false) }
     var isFilteringComplete by remember { mutableStateOf(false) }
     var products by remember { mutableStateOf<List<ProductsItem>>(emptyList()) }
@@ -84,7 +83,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
     // Get saved currency and conversion rate from SharedPreferences
     val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
-
 
     val currencySymbols = mapOf(
         "USD" to "$ ",
@@ -125,21 +123,29 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
 
             when (val state = allProducts) {
                 is ApiState.Success -> {
-                    products = (state.data as? List<ProductsItem>) ?: emptyList()
+                    // Filter products by selected subcategory (e.g., Shoes, T-Shirts)
+                    products = (state.data as? List<ProductsItem>)?.filter { product ->
+                        product.productType?.equals(selectedProductType, ignoreCase = true) == true
+                    } ?: emptyList()
+
+                    // Calculate the max price based on the filtered products
                     maxPrice = products.map {
                         (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
                     }.maxOrNull()?.let { kotlin.math.ceil(it.toDouble()).toInt() } ?: 2500
 
+                    // Reset slider value to the new max price
                     sliderValue = maxPrice
+
+                    // Update the filtering status
                     isReady = true
-                    filteredProducts =
-                        filterProductsByType(
-                            products,
-                            selectedProductType,
-                            searchQuery,
-                            sliderValue,
-                            conversionRate
-                        )
+
+                    filteredProducts = filterProductsByType(
+                        products,
+                        selectedProductType,
+                        searchQuery,
+                        sliderValue,
+                        conversionRate
+                    )
                     isFilteringComplete = true
                 }
 
@@ -158,15 +164,15 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
 
         LaunchedEffect(searchQuery, sliderValue, selectedProductType) {
             isFilteringComplete = false
+            // Add a delay before filtering products to avoid flicker
             delay(300)
-            filteredProducts =
-                filterProductsByType(
-                    products,
-                    selectedProductType,
-                    searchQuery,
-                    sliderValue,
-                    conversionRate
-                )
+            filteredProducts = filterProductsByType(
+                products,
+                selectedProductType,
+                searchQuery,
+                sliderValue,
+                conversionRate
+            )
             isFilteringComplete = true
         }
 
@@ -184,20 +190,21 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                 if (!isReady) {
                     LoadingIndicator()
                 } else {
-                    currencySymbols[selectedCurrency]?.let {
-                        Log.d("jeooooX", "Max Price Before Khara: $sliderValue")
-                        PriceSlider(
-                            sliderValue, maxPrice, it
-                        )
-                        { newValue ->
-                            sliderValue = newValue
-                            Log.d("jeooooX", "Max Price After Khara: $sliderValue")
+                    // Only show the price slider if there are products available
+                    if (products.isNotEmpty()) {
+                        currencySymbols[selectedCurrency]?.let {
+                            PriceSlider(
+                                sliderValue, maxPrice, it
+                            ) { newValue ->
+                                sliderValue = newValue
+                            }
                         }
                     }
+
                     AnimatedContent(targetState = filteredProducts.isEmpty()) { isEmpty ->
                         ProductInfoMessage(
                             isEmpty = isEmpty,
-                            convertedSliderValue = (sliderValue),
+                            convertedSliderValue = sliderValue,
                             currencySymbol = currencySymbols[selectedCurrency] ?: "$"
                         )
                     }
@@ -252,7 +259,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
             }
         }
     }
-
 }
 
 
@@ -299,7 +305,12 @@ fun FilterTypeFABs(
 }
 
 // Filtering logic function for product types
-fun filterProductsByType(products: List<ProductsItem>, productType: String, searchQuery: String, sliderValue: Int, conversionRate: Float, // New parameter for conversion rate
+fun filterProductsByType(
+    products: List<ProductsItem>,
+    productType: String,
+    searchQuery: String,
+    sliderValue: Int,
+    conversionRate: Float, // New parameter for conversion rate
 ): List<ProductsItem> {
     return products.filter { product ->
         val productPrice =

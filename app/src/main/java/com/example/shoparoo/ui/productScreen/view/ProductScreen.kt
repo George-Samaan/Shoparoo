@@ -370,8 +370,7 @@ fun ProductInfoMessage(isEmpty: Boolean, convertedSliderValue: Int, currencySymb
 
     Text(
         message,
-        modifier = Modifier
-            .padding(horizontal = 20.dp),
+        modifier = Modifier.padding(horizontal = 20.dp),
         style = MaterialTheme.typography.body2,
         color = MaterialTheme.colors.onSurface
     )
