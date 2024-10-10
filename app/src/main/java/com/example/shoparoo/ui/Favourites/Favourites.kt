@@ -1,5 +1,6 @@
 package com.example.shoparoo.ui.Favourites
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,8 +18,10 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,7 +52,7 @@ fun Favourites(navController: NavController) {
     val favProducts = viewModel.productItems.collectAsStateWithLifecycle()
 
     // may run multiple times
-    LaunchedEffect(Unit) {
+    LaunchedEffect(favProducts.value) {
         viewModel.getFavourites()
     }
 
@@ -61,36 +64,44 @@ fun Favourites(navController: NavController) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-       //   Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favourites", modifier = Modifier.size(300.dp))
+            //   Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favourites", modifier = Modifier.size(300.dp))
 
-            ReusableLottie(R.raw.empty, null,size =  400.dp)
-            Text(text = "No favourites yet", fontSize = 35.sp, fontWeight = FontWeight.Bold)
+            ReusableLottie(R.raw.empty, null, size = 400.dp)
+            Text(text = "No Favourites Found", fontSize = 35.sp, fontWeight = FontWeight.Bold)
         }
     }
-
-
-
-        TopBar(navController = navController, title = "Favourites")
+    TopBar(navController = navController, title = "Favourites")
     Column(
         Modifier
             .padding(top = 100.dp)
-            .fillMaxSize()
-          ,
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+        val context = LocalContext.current
+        val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+
+        // Get saved currency and conversion rate from SharedPreferences
+        val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+        val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
+
+
+        val currencySymbols = mapOf(
+            "USD" to "$ ",
+            "EGP" to "EGP "
+        )
+
 
         //galal handle currency conversion
-    //  ProductGridd(favProducts.value, navController, "gg", 1.0f, emptyMap(),true,viewModel)
+        //  ProductGridd(favProducts.value, navController, "gg", 1.0f, emptyMap(),true,viewModel)
 
-        ProductGrid(favProducts.value, navController, "gg", 1.0f, emptyMap(),true,
-            viewModel = viewModel
-            )
+        ProductGrid(favProducts.value, navController, selectedCurrency, conversionRate, currencySymbols,true, viewModel)
 
     }
 }
 
+/*
 
 @Composable
 fun ProductGridd(
@@ -144,7 +155,7 @@ fun ProductGridd(
 
 
 
-/*
+
 @Composable
 fun myProductGrid(
     filteredProducts: List<Triple<String, String, String>>,
@@ -181,4 +192,5 @@ fun myProductGrid(
         }
     }
 }
+
 */

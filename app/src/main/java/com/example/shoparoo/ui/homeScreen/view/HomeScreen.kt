@@ -26,6 +26,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -99,7 +101,8 @@ fun HomeScreenDesign(
     forYouProductsState: ApiState,
     onRefresh: () -> Unit = {},
     bottomNavController: NavController,
-    navController: NavController
+    navController: NavController,
+    viewModel: HomeViewModel
 
 ) {
     val isNetworkAvailable = networkListener()
@@ -138,10 +141,12 @@ fun HomeScreenDesign(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 item {
-                    Header(userName, onFavouriteClick)
+                    Header(userName, onFavouriteClick, onSearchClick = {
+                        navController.navigate("search")
+                    })
                 }
                 item {
-                    SearchBar(query, onQueryChange)
+                   // SearchBar(query, onQueryChange,navController,viewModel)
                 }
                 item {
                     CouponsSliderWithIndicator(
@@ -209,7 +214,7 @@ fun HomeScreenDesign(
 }
 
 @Composable
-fun Header(userName: String, onFavouriteClick: () -> Unit) {
+fun Header(userName: String, onFavouriteClick: () -> Unit, onSearchClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -219,6 +224,7 @@ fun Header(userName: String, onFavouriteClick: () -> Unit) {
     ) {
         ProfileSection(userName)
         FavouriteButton(onFavouriteClick)
+        SearchButton(onSearchClick = onSearchClick)
     }
 }
 
@@ -253,35 +259,17 @@ fun FavouriteButton(onFavouriteClick: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
-    TextField(
-        value = query,
-        onValueChange = onQueryChange,
-        placeholder = { Text(text = "Search", color = primary) },
-        leadingIcon = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_search),
-                contentDescription = null,
-                tint = primary
-            )
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .padding(horizontal = 15.dp)
-            .height(56.dp)
-            .clickable {
-                Log.d("SearchBar", "Search bar clicked")
-            },
-        shape = RoundedCornerShape(28.dp),
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color(0xFFE0E0E0),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+fun SearchButton(onSearchClick: () -> Unit) {
+    IconButton(
+        onClick = onSearchClick,
+        modifier = Modifier.size(70.dp)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.baseline_search_24),
+            contentDescription = null
         )
-    )
+    }
 }
 
 @Composable
@@ -434,45 +422,61 @@ fun ProductCard(
     productImage: String?,
     currencySymbol: String,
     onClick: () -> Unit,
+    inFav: Boolean = false,
+    onClickDeleteFav: () -> Unit = {}// Callback for the delete icon
 ) {
     Card(
         modifier = Modifier
             .width(170.dp)
             .height(240.dp)
             .padding(6.dp)
-            .clickable {
-                onClick()
-            },
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFAEFEEEE)),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Image(
-                painter = rememberAsyncImagePainter(model = productImage),
-                contentDescription = productName,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp),
-                contentScale = ContentScale.Crop
-            )
-            Text(
-                text = productName.capitalizeWords(),
-                color = primary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = "$currencySymbol$productPrice",
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Image(
+                    painter = rememberAsyncImagePainter(model = productImage),
+                    contentDescription = productName,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    contentScale = ContentScale.Crop
+                )
+                Text(
+                    text = productName.capitalizeWords(),
+                    color = primary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "$currencySymbol$productPrice",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
+                )
+            }
+
+            // Conditional delete icon on top right corner
+            if (inFav) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = Color.Red,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(24.dp)
+                        .clickable {onClickDeleteFav() }
+                )
+            }
         }
     }
 }
@@ -542,7 +546,7 @@ fun MainScreen(
             composable(BottomNav.Home.route) {
                 HomeScreenDesign(
                     if (isLoading) "" else userName ?: "Guest",
-                    onFavouriteClick,
+                    {navController.navigate("favourites")},
                     query,
                     onQueryChange,
                     smartCollectionsState,
@@ -551,7 +555,8 @@ fun MainScreen(
                         viewModel.refreshData()
                     },
                     navControllerBottom,
-                    navController
+                    navController,
+                    viewModel
                 )
             }
             composable(BottomNav.Categories.route) {

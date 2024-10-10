@@ -26,9 +26,6 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
         MutableStateFlow(mutableListOf())
     val productItems = _productItems.asStateFlow()
 
-    // var favProducts: StateFlow< MutableList<Triple<String,String,String>>> = MutableStateFlow(mutableListOf())
-    var xXx: MutableStateFlow<MutableList<ProductsItem>> = MutableStateFlow(mutableListOf())
-
     val userMail by lazy {
         FirebaseAuth.getInstance().currentUser?.email
     }
@@ -53,15 +50,15 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
                     Log.d("FavouritesViewModel", "Favourites not found")
                 }
 
-
             }
         }
 
     }
 
     private fun getFavData(second: DraftOrderDetails?) {
+        _productItems.value = mutableListOf()
         for (lineItem in second!!.line_items) {
-            Log.i("FavouritesViewModelwwwwwwww", "getFavData: ${lineItem.product_id}")
+            Log.i("FavouritesViewModel", "getFavData: ${lineItem.product_id}")
             _productItems.value.add(
                 ProductsItem(
                     title = lineItem.title,
@@ -83,28 +80,31 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun deleteFav(id: Long?) {
-        Log.i("FavouritesViewModeldelete", "deleteFav: $id")
 
-        //   getFavourites(false, id!!)
-//        viewModelScope.launch {
-//            _draftOrderFav.value = ApiState.Loading
-//            repository.getDraftOrder().catch {
-//                _draftOrderFav.value = ApiState.Failure(it.message ?: "Unknown Error")
-//            }.collect {
-//                _draftOrderFav.value = ApiState.Success(it)
-//                var filter = filterByUser(it, userMail)
-//
-//                if (filter.first) { //handle this in ui
-//                    deleteItem(filter.second, id)
-//                } else {
-//                    Log.d("FavouritesViewModeldelete", "Favourites not found")
-//                }
-//            }
-//        }
+    /*
+        fun deleteFav(id: Long?) {
+            Log.i("FavouritesViewModeldelete", "deleteFav: $id")
+
+            //   getFavourites(false, id!!)
+    //        viewModelScope.launch {
+    //            _draftOrderFav.value = ApiState.Loading
+    //            repository.getDraftOrder().catch {
+    //                _draftOrderFav.value = ApiState.Failure(it.message ?: "Unknown Error")
+    //            }.collect {
+    //                _draftOrderFav.value = ApiState.Success(it)
+    //                var filter = filterByUser(it, userMail)
+    //
+    //                if (filter.first) { //handle this in ui
+    //                    deleteItem(filter.second, id)
+    //                } else {
+    //                    Log.d("FavouritesViewModeldelete", "Favourites not found")
+    //                }
+    //            }
+    //        }
 
 
-    }
+        }
+    */
 
     private fun deleteItem(second: DraftOrderDetails, id: Long?) {
         viewModelScope.launch {

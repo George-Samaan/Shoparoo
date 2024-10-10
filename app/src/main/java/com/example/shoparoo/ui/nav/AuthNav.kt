@@ -6,6 +6,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.shoparoo.ui.Favourites.Favourites
+import com.example.shoparoo.ui.Search
 import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.auth.view.Signup
 import com.example.shoparoo.ui.homeScreen.view.MainScreen
@@ -26,6 +28,11 @@ fun Navigation() {
             val id = backStackEntry.arguments?.getString("id") ?: ""
             ProductDetails(id = id, navController = navController)
         }
-
+        composable("favourites") {
+            Favourites(navController = navController)
+        }
+        composable("search") {
+            Search(navController = navController)
+        }
     }
 }
