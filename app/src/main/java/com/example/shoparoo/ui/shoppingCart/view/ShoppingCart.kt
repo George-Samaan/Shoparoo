@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,8 +55,9 @@ import kotlinx.coroutines.delay
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ShoppingCartScreen(
-    navController: NavController,
-    viewModel: ShoppingCartViewModel
+    navControllerBottom: NavController,
+    viewModel: ShoppingCartViewModel,
+    navController: NavController
 ) {
     val cartItems by viewModel.cartItems.collectAsState()
     val isLoading = remember { mutableStateOf(true) }
@@ -81,7 +81,7 @@ fun ShoppingCartScreen(
             confirmButton = {
                 Button(onClick = {
                     showDialog.value = false
-                    navController.navigate("home")
+                    navControllerBottom.navigate("home")
                 }) {
                     Text("OK")
                 }
@@ -109,18 +109,18 @@ fun ShoppingCartScreen(
                     .padding(3.dp)
             ) {
                 item {
-                    AppHeader(navController, title = stringResource(R.string.cart))
+                    AppHeader(navControllerBottom, title = stringResource(R.string.cart))
                 }
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                item { ProductList(cartItems, viewModel, showDialog) }
+                item { ProductList(cartItems, viewModel, showDialog,navController) }
 
                 if (cartItems.isNotEmpty()) {
                     item {
                         val totalItems = cartItems.sumOf { it.quantity }
-                        CheckoutButton(navController, totalItems)
+                        CheckoutButton(navControllerBottom, totalItems)
                     }
                 }
             }
@@ -130,7 +130,12 @@ fun ShoppingCartScreen(
 
 
 @Composable
-fun ProductList(cartItems: List<LineItem>, viewModel: ShoppingCartViewModel, showDialog: MutableState<Boolean>) {
+fun ProductList(
+    cartItems: List<LineItem>,
+    viewModel: ShoppingCartViewModel,
+    showDialog: MutableState<Boolean>,
+    navController: NavController
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         cartItems.forEach { lineItem ->
             val imageUrl = lineItem.properties[0].value
@@ -152,7 +157,9 @@ fun ProductList(cartItems: List<LineItem>, viewModel: ShoppingCartViewModel, sho
                     if (cartItems.size == 1) {
                         showDialog.value = true
                     }
-                }
+                },
+                lineItem.product_id,
+                navController
             )
         }
     }
@@ -168,7 +175,9 @@ fun ProductItem(
     quantity: Int,
     onIncrement: () -> Unit,
     onDecrement: () -> Unit,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    productId: Long? = null,
+    navController: NavController
 ) {
     Row(
         modifier = Modifier
@@ -183,7 +192,11 @@ fun ProductItem(
             contentDescription = productName,
             modifier = Modifier
                 .size(80.dp)
-                .clip(RoundedCornerShape(10.dp)),
+                .clip(RoundedCornerShape(10.dp))
+                .clickable {
+                    Log.i("ProductItem", "Product ID: $productId")
+                    navController.navigate("productDetails/$productId")
+                },
             contentScale = ContentScale.Crop
         )
 
