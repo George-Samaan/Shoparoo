@@ -149,20 +149,31 @@ fun ProductsScreen(
                 }
             }
         }
-        val maxPriceWithSymbol = "${currencySymbols[selectedCurrency]}$maxPrice"
-
 
         LaunchedEffect(searchQuery, sliderValue) {
             isFilteringComplete = false
             delay(300)
+
+            if (selectedCurrency == "EGP") {
+                sliderValue / conversionRate // Convert EGP to USD for filtering
+            } else {
+                sliderValue.toFloat()
+            }
+
             filteredProducts = products.filter { product ->
-                val productPrice =
-                    product.variants?.firstOrNull()?.price?.toFloatOrNull()?.toInt() ?: 0
+                val productPriceInUSD =
+                    product.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f
+                // Convert product price to the selected currency for comparison
+                val productPriceInSelectedCurrency = if (selectedCurrency == "EGP") {
+                    productPriceInUSD * conversionRate
+                } else {
+                    productPriceInUSD
+                }
                 val matchesSearch = searchQuery.isEmpty() || product.title?.contains(
                     searchQuery,
                     ignoreCase = true
                 ) == true
-                val withinPriceRange = productPrice <= sliderValue
+                val withinPriceRange = productPriceInSelectedCurrency <= sliderValue
                 matchesSearch && withinPriceRange
             }
             isFilteringComplete = true
