@@ -171,12 +171,17 @@ class RemoteDataSourceImpl(private val apiService: ApiServices) : RemoteDataSour
     }
 
 
+    override suspend fun deleteDraftOrder(id: Long) {
+        apiService.deleteDraftOrder(id)
+
+
     override suspend fun deleteDraftOrder(draftOrderId: String) {
         apiService.deleteDraftOrder(draftOrderId)
     }
 
     override suspend fun addToCompleteOrder(id: String) {
         apiService.addToCompleteOrder(id)
+
     }
 
     override fun getDraftOrder(): Flow<DraftOrderResponse> = flow {

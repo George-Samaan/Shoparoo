@@ -59,6 +59,7 @@ import androidx.navigation.NavController
 import com.example.shoparoo.R
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.ProductsItem
+import com.example.shoparoo.ui.Favourites.FavouritesViewModel
 import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.homeScreen.view.ProductCard
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModel
@@ -220,7 +221,9 @@ fun ProductGrid(
     navController: NavController?,
     selectedCurrency: String,
     conversionRate: Float,
-    currencySymbols: Map<String, String>
+    currencySymbols: Map<String, String>,
+    inFav : Boolean = false,
+   viewModel: FavouritesViewModel? = null
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -244,7 +247,10 @@ fun ProductGrid(
                 onClick = {
                     navController!!.navigate("productDetails/${product.id}")
                 },
-                currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$")
+                currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$"),
+                inFav = inFav, onClickDeleteFav =  {
+                    viewModel!!.getFavourites(true, product.id!!)
+                }
 
             )
         }
