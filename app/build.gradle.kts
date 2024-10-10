@@ -105,6 +105,7 @@ dependencies {
 
     //Animation
     implementation("com.airbnb.android:lottie-compose:6.0.0")
+    implementation("com.github.stevdza-san:OneTapCompose:1.0.14")
 
     //implementation ("com.paymob.accept:acceptsdk:2.3.5")
 

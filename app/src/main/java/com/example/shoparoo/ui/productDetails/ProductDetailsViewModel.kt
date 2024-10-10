@@ -23,8 +23,8 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
     private val _singleProductDetail = MutableStateFlow<ApiState>(ApiState.Loading)
     val singleProductDetail = _singleProductDetail.asStateFlow()
 
-    private val _isFav = MutableStateFlow<ApiState>(ApiState.Loading)
-    val isFav = _singleProductDetail.asStateFlow()
+    private val _isFav = MutableStateFlow<Boolean>(false)
+    var isFav = _isFav.asStateFlow()
 
     private val _draftOrder = MutableStateFlow<ApiState>(ApiState.Loading)
     val draftOrder = _draftOrder.asStateFlow()
@@ -42,23 +42,19 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
             }.collect {
                 _singleProductDetail.value = ApiState.Success(it)
                 Log.i("ProductDetailsviewModel", "Success ${it.product!!.bodyHtml}")
-              //  getDraftOrder(it, it.product.variants!![0]!!, true)
+                getDraftOrder(it, it.product.variants!![0]!!, false, true)
+
             }
-
-           // _isFav.value = ApiState.Loading
-//            repository.getFavProducts().catch {
-//                _isFav.value = ApiState.Failure(it.message ?: "Unknown Error")
-//                Log.i("ProductDetails", "Error ${it.message}")
-//            }.collect {
-//                _isFav.value = ApiState.Success(it)
-//                Log.i("ProductDetails", "Success ${it.products}")
-//            }
-
         }
     }
 
-    fun getDraftOrder(theSingleProduct: SingleProduct, varient: VariantsItem, isCart: Boolean) {
-        Log.i("ProductDetailsviewModel", "get draft order")
+    fun getDraftOrder(
+        theSingleProduct: SingleProduct,
+        varient: VariantsItem,
+        isCart: Boolean,
+        infav: Boolean = false
+    ) {
+        Log.i("ProductDetailsviewModel", "get draft order bOOL ")
         viewModelScope.launch {
             _draftOrder.value = ApiState.Loading
             repository.getDraftOrder().catch {
@@ -66,24 +62,23 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
                 Log.i("ProductDetailsviewModel", "Error ${it.message}")
             }.collect {
                 _draftOrder.value = ApiState.Success(it)
-                filterByUser(it, theSingleProduct, varient, isCart)
+                filterByUser(it, theSingleProduct, varient, isCart, infav)
                 Log.i("ProductDetailsviewModel get draft order", "Success ")
             }
         }
     }
 
-   fun filterByUser(
+    fun filterByUser(
         draftOrdersResponse: DraftOrderResponse,
         theSingleProduct: SingleProduct,
         varient: VariantsItem,
-        isCart: Boolean
+        isCart: Boolean,
+        infav: Boolean = false
     ) {
 
-       Log.i("ProductDetailsviewModel", "filter by user ${userMail}")
-
-
-        var user : DraftOrderDetails? = null
-        var check : Boolean = false
+        Log.i("ProductDetailsviewModel", "filter by user ${userMail}")
+        var user: DraftOrderDetails? = null
+        var check: Boolean = false
         if (isCart) {
             for (draftOrder in draftOrdersResponse.draft_orders!!) {
                 if (draftOrder.email == userMail) {
@@ -94,10 +89,9 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
                     check = true
                 }
             }
-        }
-        else {
+        } else {
             for (draftOrder in draftOrdersResponse.draft_orders!!) {
-                if (draftOrder.email == "FAV_"+userMail) {
+                if (draftOrder.email == "FAV_" + userMail) {
                     Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
                     Log.i("ProductDetailsviewModel", "Draft Order Found ${draftOrder}")
                     user = draftOrder
@@ -105,57 +99,117 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
                 }
             }
         }
-//
-//        if (user != null && isCart)
-//            filterByItem(user, varient, theSingleProduct, isCart)
-//        else if (user != null && !isCart) {
-//          updateFavDraftOrder(user, theSingleProduct, varient)
-//        }
-//        else {
-//            createDraftOrder(theSingleProduct, varient, isCart)
-//        }
+
+        /*
+        //
+        //        if (user != null && isCart)
+        //            filterByItem(user, varient, theSingleProduct, isCart)
+        //        else if (user != null && !isCart) {
+        //          updateFavDraftOrder(user, theSingleProduct, varient)
+        //        }
+        //        else {
+        //            createDraftOrder(theSingleProduct, varient, isCart)
+        //        }
+
+                */
 
         if (check) {
             if (isCart)
                 filterByItem(user!!, varient, theSingleProduct, isCart)
             else
-                updateFavDraftOrder(user!!, theSingleProduct, varient)
-        } else {
+                FilterFavDraftOrder(user!!, theSingleProduct, varient, infav)
+        } else if (!infav)
             createDraftOrder(theSingleProduct, varient, isCart)
-        }
-
     }
 
-    private fun updateFavDraftOrder(
+    private fun FilterFavDraftOrder(
         draftOrderDetails: DraftOrderDetails,
+        theSingleProduct: SingleProduct,
+        varient: VariantsItem,
+        infav: Boolean = false
+    ) {
+        var item: DraftOrderDetails? = null
+        var myLineItem: LineItem? = null
+        for (line_item in draftOrderDetails.line_items) {
+            if (line_item.product_id == varient.productId)
+                item = draftOrderDetails //item already exists in the favourites
+            myLineItem = line_item
+        }
+        if (infav && item != null) {
+            _isFav.value = true
+        } else if (infav && item == null) {
+            _isFav.value = false
+        } else {
+            UpdateFavDraftOrder(draftOrderDetails, item, myLineItem, theSingleProduct, varient)
+        }
+    }
+
+    private fun UpdateFavDraftOrder(
+        draftOrderDetails: DraftOrderDetails,
+        item: DraftOrderDetails?,
+        myLineItem: LineItem?,
         theSingleProduct: SingleProduct,
         varient: VariantsItem
     ) {
 
-        var item : DraftOrderDetails? = null
-        var  myLineItem : LineItem? = null
-        for (line_item in draftOrderDetails.line_items) {
-            if (line_item.product_id == varient.productId)
-                item = draftOrderDetails
-            myLineItem = line_item
+        if (item != null) {
+            Log.i("xoxoxoxoxox", "Update draft order")
+            //if the product already exists in the favourites
+            _isFav.value = false
+            draftOrderDetails.line_items.remove(myLineItem)
+            if (draftOrderDetails.line_items.isEmpty()) {
+                viewModelScope.launch {
+                    repository.deleteDraftOrder(draftOrderDetails.id!!)
+                }
+            }
+            else {
+                viewModelScope.launch {
+                    val order = DraftOrderRequest(draftOrderDetails)
+                    repository.updateDraftOrder(order)
+                }
+            }
+        } else {                                                        // add the product to the favourites
+            Log.i("xoxoxoxoxox", "add draft order")
+            draftOrderDetails.line_items.add(setLineItem(theSingleProduct, varient))
+            _isFav.value = true
+            viewModelScope.launch {
+                val order = DraftOrderRequest(draftOrderDetails)
+                repository.updateDraftOrder(order)
+            }
         }
-       if (item != null) {
-      draftOrderDetails.line_items.remove(myLineItem)
-           viewModelScope.launch {
-               val order = DraftOrderRequest(draftOrderDetails)
-               repository.updateDraftOrder(order)
-           }
-       } else {
-           draftOrderDetails.line_items.add(
-               setLineItem(theSingleProduct, varient)
-           )
-           viewModelScope.launch {
-               val order = DraftOrderRequest(draftOrderDetails)
-               repository.updateDraftOrder(order)
-           }
-       }
-
     }
+
+//    private fun UpdateFavDraftOrder(draftOrderDetails: DraftOrderDetails, item: DraftOrderDetails?, myLineItem: LineItem?, theSingleProduct: SingleProduct, varient: VariantsItem
+//    ) {
+//        if (item != null) {
+//            // If the item already exists in favorites, remove it
+//            Log.i("xoxoxoxoxox", "Update draft order - removing from favorites")
+//            _isFav.value = false
+//            draftOrderDetails.line_items.remove(myLineItem)
+//
+//            if (draftOrderDetails.line_items.isEmpty()) {
+//                viewModelScope.launch {
+//                    repository.deleteDraftOrder(draftOrderDetails.id!!)
+//                }
+//            } else {
+//                // Otherwise, update the draft order without the removed item
+//                viewModelScope.launch {
+//                    val order = DraftOrderRequest(draftOrderDetails)
+//                    repository.updateDraftOrder(order)
+//                }
+//            }
+//        } else {
+//            // If the item does not exist, add it to favorites
+//            Log.i("xoxoxoxoxox", "Adding item to favorites")
+//            draftOrderDetails.line_items.add(setLineItem(theSingleProduct, varient))
+//            _isFav.value = true
+//            viewModelScope.launch {
+//                val order = DraftOrderRequest(draftOrderDetails)
+//                repository.updateDraftOrder(order)
+//            }
+//        }
+//    }
+
 
     fun filterByItem(
         draftOrder: DraftOrderDetails,
@@ -200,8 +254,9 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
 
     fun createDraftOrder(theSingleProduct: SingleProduct, varient: VariantsItem, isCart: Boolean) {
         Log.i("ProductDetailsviewModel", "createDraftOrder")
+        if (!isCart)
+            _isFav.value = true
         val mail = if (isCart) userMail else "FAV_" + userMail
-
         viewModelScope.launch {
             var order = DraftOrderRequest(
                 DraftOrderDetails(

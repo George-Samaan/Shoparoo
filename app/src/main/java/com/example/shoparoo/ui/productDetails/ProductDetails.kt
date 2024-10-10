@@ -68,8 +68,8 @@ import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ImagesItem
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
-import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
-import com.example.shoparoo.ui.theme.Purple40
+import com.example.shoparoo.ui.auth.viewModel.AuthState
+import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.theme.primary
 import com.smarttoolfactory.ratingbar.RatingBar
 import com.smarttoolfactory.ratingbar.model.Shimmer
@@ -78,11 +78,6 @@ import kotlin.random.Random
 @Composable
 fun ProductDetails(id: String, navController: NavHostController) {
 
-
-
-
-
-
     val viewModel: ProductDetailsViewModel = viewModel(
         factory = ProductDetailsViewModelFactory(
             repository = RepositoryImpl(
@@ -90,28 +85,25 @@ fun ProductDetails(id: String, navController: NavHostController) {
             )
         )
     )
-    val ui = viewModel.singleProductDetail.collectAsState()
-
+    var  ui = viewModel.singleProductDetail.collectAsState()
+    var isFav = viewModel.isFav.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.getSingleProductDetail(id)
     }
+    //will change this later
     when (ui.value) {
         is ApiState.Loading -> {
-          //  Log.i("ProductDetails", "Loading")
+            Log.i("ProductDetails", "Loading")
         }
 
         is ApiState.Failure -> {
-           // Log.i("ProductDetails", "Error ${(ui.value as ApiState.Failure).message}")
+            Log.i("ProductDetails", "Error ${(ui.value as ApiState.Failure).message}")
         }
 
         is ApiState.Success -> {
-            val res = ui.value as ApiState.Success
-            // Log.i("ProductDetails", "Success ${res.product!!.bodyHtml}")
-
-            productInfo(res.data as SingleProduct, navController, viewModel)
-
-
+            val data = ui.value as ApiState.Success
+            productInfo(data.data as SingleProduct, navController, viewModel, isFav.value )
         }
     }
 
@@ -120,23 +112,23 @@ fun ProductDetails(id: String, navController: NavHostController) {
 @Composable
 
 private fun productInfo(
-    res: SingleProduct,
+    singleProductDetail: SingleProduct,
     NavController: NavHostController,
     viewModel: ProductDetailsViewModel,
-
+    isFav: Boolean,
     ) {
 
     val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
 
     // Get saved currency and conversion rate from SharedPreferences
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
     val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
-    Log.i("ProductDetails", "Success ${res.product!!.variants!![0]!!.price}")
-    val selected = remember { mutableStateOf(res.product.variants!![0]) }
-
+    Log.i("ProductDetails", "Success ${singleProductDetail.product!!.variants!![0]!!.price}")
+    val selected = remember { mutableStateOf(singleProductDetail.product.variants!![0]) }
+    val isLoggedIn =AuthViewModel().authState.collectAsState()
     Column(
         Modifier
             .padding(top = 50.dp)
@@ -148,24 +140,24 @@ private fun productInfo(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ProductImg(onClick = { NavController.popBackStack() }, images = res.product.images)
+        ProductImg(onClick = { NavController.popBackStack() }, images = singleProductDetail.product.images)
 
 
         Column(
             modifier = Modifier.padding(start = 25.dp, end = 25.dp, bottom = 25.dp)
         ) {
-            Text(
-                text = res.product.title!!.capitalizeWords(),
-                fontSize = 23.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(top = 10.dp)
-            )
+//            Text(
+//                text = res.product.title!!.capitalizeWords(),
+//                fontSize = 23.sp,
+//                fontWeight = FontWeight.Bold,
+//                modifier = Modifier
+//                    .align(Alignment.Start)
+//                    .padding(top = 10.dp)
+//            )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             Text(
-                text = res.product.title!!,
+                text = singleProductDetail.product.title!!,
                 fontSize = 25.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -176,10 +168,9 @@ private fun productInfo(
 
             StockAndPrice(selected, selectedCurrency, conversionRate)
 
+            VariantSection(singleProductDetail.product.variants, selected)
 
-            VariantSection(res.product.variants, selected)
-
-            DescriptionSection(res.product!!.bodyHtml)
+            DescriptionSection(singleProductDetail.product!!.bodyHtml)
 
 
         }
@@ -190,22 +181,47 @@ private fun productInfo(
             if (selected.value!!.inventoryQuantity!! < 1) {
                 Toast.makeText(NavController.context, "Out of stock", Toast.LENGTH_SHORT).show()
             } else {
-                if (viewModel.userMail == null) { //this is bullshit but i'll change it later
+                if (isLoggedIn.value!= AuthState.Authenticated) { //this is bullshit but i'll change it later
                     Toast.makeText(
                         NavController.context,
                         "Please login to add to cart",
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
-                    viewModel.getDraftOrder(res, selected.value!!, true)
-                    Toast.makeText(NavController.context, "Added to cart", Toast.LENGTH_SHORT)
-                        .show()
+                    viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
+                    Toast.makeText(NavController.context, "Added to cart", Toast.LENGTH_SHORT).show()
                 }
             }
         }, onClickFav = {
-            viewModel.getDraftOrder(res, selected.value!!, false)
-            Toast.makeText(NavController.context, "Added to favorites", Toast.LENGTH_SHORT).show()
-        })
+            if (isLoggedIn.value!= AuthState.Authenticated) {
+                Toast.makeText(NavController.context, "Please login to add to favorites", Toast.LENGTH_SHORT).show()
+            } else {
+                viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
+                if (!isFav)
+                Toast.makeText(NavController.context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                else
+                    Toast.makeText(NavController.context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+            }
+        },
+            buttonColors = if (isFav) {
+                ButtonDefaults.buttonColors(
+                    containerColor = Color.Red,
+                    contentColor = Color.Yellow,
+                    disabledContentColor = Color.Gray,
+                    disabledContainerColor = Color(0xFF000000),
+                )
+
+            } else {
+                ButtonDefaults.buttonColors(
+                    containerColor = Color.Gray,
+                    contentColor = Color.White,
+                    disabledContentColor = Color.Gray,
+                    disabledContainerColor = Color(0xFF000000),
+                )
+            }
+
+        )
+
 
     }
 }
@@ -225,7 +241,7 @@ private fun StockAndPrice(selected: MutableState<VariantsItem?>, selectedCurrenc
     ) {
         Text(
             text = (selected.value!!.inventoryQuantity).toString() + " item left",
-            fontSize = 20.sp,
+            fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
             color = if (selected.value!!.inventoryQuantity!! > 10) Color.Gray else Color.Red
         )
@@ -305,18 +321,19 @@ fun ReviewSection() {
             //change those to use local vector for laterrr
             imageVectorEmpty = Icons.Default.StarOutline,
             imageVectorFFilled = Icons.Default.StarRate,
-            tintEmpty = Color.Black,
-            tintFilled = Purple40,
-            itemSize = 25.dp,
+            tintEmpty = Color.Gray,
+            //tintFilled = Purple40,
+            itemSize = 30.dp,
             gestureEnabled = false,
             animationEnabled = true,
             shimmer = Shimmer(
-                color = Purple40,
+              //  color = Color(0xffA1887F),
                 animationSpec = infiniteRepeatable(
                     animation = tween(durationMillis = 5000, easing = LinearEasing),
                     repeatMode = RepeatMode.Restart
                 ),
                 drawBorder = false,
+
             ),
         )
         Text(
@@ -396,12 +413,10 @@ fun ReviewItem(reviews: List<Reviews>) {
                     imageVectorEmpty = Icons.Default.StarOutline,
                     imageVectorFFilled = Icons.Default.StarRate,
                     tintEmpty = Color.Black,
-                    tintFilled = Purple40,
                     itemSize = 25.dp,
                     gestureEnabled = false,
                     animationEnabled = true,
                     shimmer = Shimmer(
-                        color = Purple40,
                         animationSpec = infiniteRepeatable(
                             animation = tween(durationMillis = 10000, easing = LinearEasing),
                             repeatMode = RepeatMode.Restart
@@ -496,7 +511,7 @@ fun VariantSection(variants: List<VariantsItem?>?, selected: MutableState<Varian
 }
 
 @Composable
-fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit) {
+fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit, buttonColors: ButtonColors) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -531,14 +546,7 @@ fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit) {
         //favorite button
         Button(
             onClick = onClickFav,
-
-            colors = ButtonColors(
-                containerColor = Color.Gray,
-                //those are placeholders
-                contentColor = Color.White,
-                disabledContentColor = Color.Gray,
-                disabledContainerColor = Color(0xFF000000)
-            ),
+            colors = buttonColors,
             modifier = Modifier
                 .padding(horizontal = 10.dp)
                 .weight(1f)
@@ -569,7 +577,7 @@ private fun colorSetter(
         "yellow" -> return Color.Yellow
         "beige" -> return Color(0xFFF5F5DC)
         "light_brown" -> return Color(0xFFC4A484)
-        "burgandy" -> return Color(0x800020)
+        "burgandy" -> return Color(0xFF800020)
         else -> return Color.Transparent
     }
 }
