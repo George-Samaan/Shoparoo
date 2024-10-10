@@ -74,7 +74,6 @@ fun OrderScreen(
         when (ordersState) {
             is ApiState.Loading -> {
                 LoadingIndicator()
-                Log.d("OrdersScreen", "Loading orders...")
             }
 
             is ApiState.Success -> {

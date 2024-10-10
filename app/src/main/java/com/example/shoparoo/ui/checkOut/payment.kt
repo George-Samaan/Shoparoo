@@ -330,7 +330,9 @@ fun CheckoutButtonCheck(
 
         if (orderId != null) {
             paymentViewModel.addToCompleteOrder(orderId.toString())
-            paymentViewModel.deleteOrderFromDraft(orderId.toString())
+            paymentViewModel.let {
+                it.deleteOrderFromDraft(orderId.toString())
+            }
         } else {
             Log.d("CheckoutButtonCheck", "Order ID is null")
         }
