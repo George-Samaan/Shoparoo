@@ -68,8 +68,12 @@ import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ImagesItem
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
+
 import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
+
+import com.example.shoparoo.ui.theme.Purple40
+
 import com.example.shoparoo.ui.theme.primary
 import com.smarttoolfactory.ratingbar.RatingBar
 import com.smarttoolfactory.ratingbar.model.Shimmer
@@ -77,6 +81,11 @@ import kotlin.random.Random
 
 @Composable
 fun ProductDetails(id: String, navController: NavHostController) {
+
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+
 
     val viewModel: ProductDetailsViewModel = viewModel(
         factory = ProductDetailsViewModelFactory(
@@ -89,7 +98,7 @@ fun ProductDetails(id: String, navController: NavHostController) {
     var isFav = viewModel.isFav.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getSingleProductDetail(id)
+        viewModel.getSingleProductDetail(id, selectedCurrency,context)
     }
     //will change this later
     when (ui.value) {
@@ -146,6 +155,7 @@ private fun productInfo(
         Column(
             modifier = Modifier.padding(start = 25.dp, end = 25.dp, bottom = 25.dp)
         ) {
+
 //            Text(
 //                text = res.product.title!!.capitalizeWords(),
 //                fontSize = 23.sp,
@@ -158,6 +168,7 @@ private fun productInfo(
             Spacer(modifier = Modifier.height(5.dp))
             Text(
                 text = singleProductDetail.product.title!!,
+
                 fontSize = 25.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -168,9 +179,11 @@ private fun productInfo(
 
             StockAndPrice(selected, selectedCurrency, conversionRate)
 
+
             VariantSection(singleProductDetail.product.variants, selected)
 
             DescriptionSection(singleProductDetail.product!!.bodyHtml)
+
 
 
         }
@@ -247,7 +260,7 @@ private fun StockAndPrice(selected: MutableState<VariantsItem?>, selectedCurrenc
         )
         Spacer(Modifier.weight(1f))
         Text(
-            text = "${currencySymbols[selectedCurrency] ?: "$"}${"%.2f".format(price)}",
+            text = "${"%.2f".format(price)} ${currencySymbols[selectedCurrency] ?: " $"}",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
         )

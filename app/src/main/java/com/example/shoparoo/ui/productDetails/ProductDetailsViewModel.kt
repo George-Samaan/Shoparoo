@@ -1,10 +1,12 @@
 package com.example.shoparoo.ui.productDetails
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.shoparoo.data.network.ApiState
+import com.example.shoparoo.data.network.currencyApi
 import com.example.shoparoo.data.repository.Repository
 import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
@@ -13,13 +15,20 @@ import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.model.Property
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
+import com.example.shoparoo.ui.settingsScreen.updatePrices
+import com.example.shoparoo.utils.Constants
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class ProductDetailsViewModel(private val repository: Repository) : ViewModel() {
+    private var conversionRate: Double = 1.0 // Default conversion rate
+
+
     private val _singleProductDetail = MutableStateFlow<ApiState>(ApiState.Loading)
     val singleProductDetail = _singleProductDetail.asStateFlow()
 
@@ -33,7 +42,9 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         FirebaseAuth.getInstance().currentUser?.email
     }
 
-    fun getSingleProductDetail(productId: String) {
+
+
+    fun getSingleProductDetail(productId: String, selectedCurrency: String, context: Context) {
         viewModelScope.launch {
             _singleProductDetail.value = ApiState.Loading
             repository.getSingleProductFromId(productId).catch {
@@ -41,8 +52,13 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
                 Log.i("ProductDetailsviewModel", "Error ${it.message}")
             }.collect {
                 _singleProductDetail.value = ApiState.Success(it)
+
                 Log.i("ProductDetailsviewModel", "Success ${it.product!!.bodyHtml}")
                 getDraftOrder(it, it.product.variants!![0]!!, false, true)
+
+                Log.i("ProductDetailsssss", "Success ${it.product!!.bodyHtml}")
+                fetchConversionRate(context, selectedCurrency)
+
 
             }
         }
@@ -79,12 +95,14 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         Log.i("ProductDetailsviewModel", "filter by user ${userMail}")
         var user: DraftOrderDetails? = null
         var check: Boolean = false
+
         if (isCart) {
             for (draftOrder in draftOrdersResponse.draft_orders!!) {
                 if (draftOrder.email == userMail) {
                     // filterByItem(id, draftOrder)
                     Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
                     Log.i("ProductDetailsviewModel", "Draft Order Found ${draftOrder}")
+
                     user = draftOrder
                     check = true
                 }
@@ -113,6 +131,7 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
 
                 */
 
+
         if (check) {
             if (isCart)
                 filterByItem(user!!, varient, theSingleProduct, isCart)
@@ -135,6 +154,7 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
                 item = draftOrderDetails //item already exists in the favourites
             myLineItem = line_item
         }
+
         if (infav && item != null) {
             _isFav.value = true
         } else if (infav && item == null) {
@@ -172,6 +192,7 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
             Log.i("xoxoxoxoxox", "add draft order")
             draftOrderDetails.line_items.add(setLineItem(theSingleProduct, varient))
             _isFav.value = true
+
             viewModelScope.launch {
                 val order = DraftOrderRequest(draftOrderDetails)
                 repository.updateDraftOrder(order)
@@ -222,21 +243,15 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
             if (line_item.variant_id == varient.id.toString())
                 exists = true
         }
-        if (exists) { //update count
+        if (exists) {
             updateDraftOrderItemCount(draftOrder)
-        } else {  // add new item
+        } else {
             updateDraftOrder(draftOrder, varient, theSingleProduct)
         }
     }
 
-    private fun updateDraftOrder(
-        draftOrder: DraftOrderDetails,
-        varient: VariantsItem,
-        theSingleProduct: SingleProduct
-    ) {
-        draftOrder.line_items.add(
-            setLineItem(theSingleProduct, varient)
-        )
+    private fun updateDraftOrder(draftOrder: DraftOrderDetails, varient: VariantsItem, theSingleProduct: SingleProduct) {
+        draftOrder.line_items.add(setLineItem(theSingleProduct, varient))
         viewModelScope.launch {
             val order = DraftOrderRequest(draftOrder)
             repository.updateDraftOrder(order)
@@ -251,50 +266,59 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         }
     }
 
-
     fun createDraftOrder(theSingleProduct: SingleProduct, varient: VariantsItem, isCart: Boolean) {
         Log.i("ProductDetailsviewModel", "createDraftOrder")
         if (!isCart)
             _isFav.value = true
         val mail = if (isCart) userMail else "FAV_" + userMail
         viewModelScope.launch {
-            var order = DraftOrderRequest(
+            val order = DraftOrderRequest(
                 DraftOrderDetails(
-                    line_items = mutableListOf(
-                        setLineItem(theSingleProduct, varient)
-                    ),
+                    line_items = mutableListOf(setLineItem(theSingleProduct, varient)),
                     email = mail!!,
                     note = "Order",
                 )
             )
             repository.createDraftOrder(order)
-
         }
-
     }
 
-    private fun setLineItem(
-        theSingleProduct: SingleProduct,
-        varient: VariantsItem,
-    ) = LineItem(
+    fun fetchConversionRate(context: Context, selectedCurrency: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = currencyApi.getRates(Constants.currencyApi)
+                if (response.isSuccessful) {
+                    val rates = response.body()?.rates
+                    rates?.let {
+                        conversionRate = it[selectedCurrency] ?: 1.0
+                        updatePrices(context, conversionRate)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun updatePrices(context: Context, conversionRate: Double) {
+        val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putFloat("conversionRate", conversionRate.toFloat()).apply()
+
+        CoroutineScope(Dispatchers.Main).launch {
+            // Call necessary composables to update UI
+        }
+    }
+
+    private fun setLineItem(theSingleProduct: SingleProduct, varient: VariantsItem, ) = LineItem(
         title = theSingleProduct.product!!.title!!,
-        price = varient.price!!,
+        price = (varient.price?.toFloatOrNull()?.times(conversionRate)).toString(),
         quantity = 1,
         variant_id = varient.id.toString(),
         product_id = theSingleProduct.product.id!!,
         properties = listOf(
-            Property(
-                "imageUrl",
-                theSingleProduct.product.images!![0]!!.src!!
-            ),
-            Property(
-                "Color",
-                varient.option1!!
-            ),
-            Property(
-                "Size",
-                varient.option2!!
-            )
+            Property("imageUrl", theSingleProduct.product.images!![0]!!.src!!),
+            Property("Color", varient.option1!!),
+            Property("Size", varient.option2!!)
         )
     )
 }
@@ -306,6 +330,5 @@ class ProductDetailsViewModelFactory(private val repository: Repository) :
             return ProductDetailsViewModel(repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
-
     }
 }

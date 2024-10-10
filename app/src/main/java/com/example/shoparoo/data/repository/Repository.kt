@@ -1,12 +1,9 @@
 package com.example.shoparoo.data.repository
 
 
-import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
-
 import com.example.shoparoo.model.OrderResponse
-
 import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
@@ -37,6 +34,11 @@ interface Repository {
     suspend fun deleteDraftOrder(id: Long)
     //orders
     fun getOrders(): Flow<OrderResponse>
+    suspend fun addToCompleteOrder(id: String)
+
+    //delete draft order
+    suspend fun deleteDraftOrder(draftOrderId: String)
+
 
 
 }

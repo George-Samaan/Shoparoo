@@ -46,10 +46,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.Order
 import com.example.shoparoo.ui.ordersScreen.viewModel.OrdersViewModel
+import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.productScreen.view.TopBar
 import com.example.shoparoo.ui.theme.primary
 import java.text.SimpleDateFormat
@@ -72,6 +73,7 @@ fun OrderScreen(
 
         when (ordersState) {
             is ApiState.Loading -> {
+                LoadingIndicator()
                 Log.d("OrdersScreen", "Loading orders...")
             }
 
@@ -146,7 +148,7 @@ fun OrderItem(order: Order) {
                     horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "${order.current_total_price} USD",
+                        text = "${order.current_total_price} ${order.currency}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = primary
@@ -215,7 +217,7 @@ fun OrderItem(order: Order) {
                                 if (property.name == "imageUrl") {
                                     item {
                                         Image(
-                                            painter = rememberImagePainter(data = property.value),
+                                            painter = rememberAsyncImagePainter(model = property.value),
                                             contentDescription = null,
                                             modifier = Modifier
                                                 .size(60.dp)

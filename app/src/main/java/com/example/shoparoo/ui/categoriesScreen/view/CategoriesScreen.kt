@@ -51,19 +51,17 @@ import com.example.shoparoo.ui.productScreen.view.PriceSlider
 import com.example.shoparoo.ui.productScreen.view.ProductGrid
 import com.example.shoparoo.ui.productScreen.view.ProductInfoMessage
 import com.example.shoparoo.ui.productScreen.view.SearchBar
-import com.example.shoparoo.ui.theme.Purple40
 import com.example.shoparoo.ui.theme.bg
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
 import networkListener
-import kotlin.math.roundToInt
 
 @Composable
 fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("Men") } // Default filter
     var sliderValue by remember { mutableIntStateOf(0) }
-    var maxPrice by remember { mutableIntStateOf(2500) }
+    var maxPrice by remember { mutableIntStateOf(0) }
     var isReady by remember { mutableStateOf(false) }
     var isFilteringComplete by remember { mutableStateOf(false) }
     var products by remember { mutableStateOf<List<ProductsItem>>(emptyList()) }
@@ -71,8 +69,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
 
     var showProductTypeMenu by remember { mutableStateOf(false) }
     var selectedProductType by remember { mutableStateOf("Shoes") } // Default product type
-    //var conversionRate by remember { mutableStateOf(1.0f) } // Default conversion rate (USD to
-    // USD)
 
     // Collecting states from ViewModel
     val womenProductsState = viewModel.womenProducts.collectAsState()
@@ -86,7 +82,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
     // Get saved currency and conversion rate from SharedPreferences
     val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
-
 
     val currencySymbols = mapOf(
         "USD" to "$ ",
@@ -127,23 +122,24 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
 
             when (val state = allProducts) {
                 is ApiState.Success -> {
-                    products = (state.data as? List<ProductsItem>) ?: emptyList()
+                    products = (state.data as? List<ProductsItem>)?.filter { product ->
+                        product.productType?.equals(selectedProductType, ignoreCase = true) == true
+                    } ?: emptyList()
+
+                    // Calculate the max price based on the filtered products
                     maxPrice = products.map {
                         (it.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f) * conversionRate
-                    }.maxOrNull()?.toInt() ?: 2500
-
-
-
+                    }.maxOrNull()?.let { kotlin.math.ceil(it.toDouble()).toInt() } ?: 2500
                     sliderValue = maxPrice
+
                     isReady = true
-                    filteredProducts =
-                        filterProductsByType(
-                            products,
-                            selectedProductType,
-                            searchQuery,
-                            sliderValue,
-                            conversionRate
-                        )
+                    filteredProducts = filterProductsByType(
+                        products,
+                        selectedProductType,
+                        searchQuery,
+                        sliderValue,
+                        conversionRate
+                    )
                     isFilteringComplete = true
                 }
 
@@ -159,20 +155,17 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                 else -> {}
             }
         }
-        val maxPriceWithSymbol = "${currencySymbols[selectedCurrency]}$maxPrice"
-
 
         LaunchedEffect(searchQuery, sliderValue, selectedProductType) {
             isFilteringComplete = false
             delay(300)
-            filteredProducts =
-                filterProductsByType(
-                    products,
-                    selectedProductType,
-                    searchQuery,
-                    sliderValue,
-                    conversionRate
-                )
+            filteredProducts = filterProductsByType(
+                products,
+                selectedProductType,
+                searchQuery,
+                sliderValue,
+                conversionRate
+            )
             isFilteringComplete = true
         }
 
@@ -182,26 +175,28 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                     searchQuery = searchQuery,
                     onSearchQueryChange = { query -> searchQuery = query },
                 )
-
                 FilterBar(selectedFilter) { filter ->
                     selectedFilter = filter
                 }
 
-
-
                 if (!isReady) {
                     LoadingIndicator()
                 } else {
-                    currencySymbols[selectedCurrency]?.let {
-                        PriceSlider(
-                            sliderValue, maxPrice, maxPriceWithSymbol, conversionRate, it
-                        )
-                        { newValue -> sliderValue = newValue }
+                    // Only show the price slider if there are products available
+                    if (products.isNotEmpty()) {
+                        currencySymbols[selectedCurrency]?.let {
+                            PriceSlider(
+                                sliderValue, maxPrice, it
+                            ) { newValue ->
+                                sliderValue = newValue
+                            }
+                        }
                     }
+
                     AnimatedContent(targetState = filteredProducts.isEmpty()) { isEmpty ->
                         ProductInfoMessage(
                             isEmpty = isEmpty,
-                            convertedSliderValue = (sliderValue * conversionRate).roundToInt(),
+                            convertedSliderValue = sliderValue,
                             currencySymbol = currencySymbols[selectedCurrency] ?: "$"
                         )
                     }
@@ -256,7 +251,6 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
             }
         }
     }
-
 }
 
 
@@ -268,7 +262,6 @@ fun FilterTypeFABs(
 ) {
     val productTypes = listOf("Shoes", "Accessories", "T-Shirts")
 
-    // Column layout for FABs to display vertically
     Column(
         modifier = modifier
             .padding(top = 70.dp)
@@ -278,7 +271,7 @@ fun FilterTypeFABs(
         productTypes.forEach { type ->
             FloatingActionButton(
                 onClick = { onProductTypeSelected(type) },
-                containerColor = if (type == selectedProductType) Purple40 else Color.LightGray,
+                containerColor = if (type == selectedProductType) Color.Red else Color.LightGray,
                 contentColor = Color.White,
                 modifier = Modifier.size(56.dp)
             ) {
@@ -321,16 +314,12 @@ fun filterProductsByType(
         val withinPriceRange = productPrice <= sliderValue
         val matchesProductType =
             product.productType?.equals(productType, ignoreCase = true) ?: false
-
         matchesSearch && withinPriceRange && matchesProductType
     }
 }
 
 @Composable
-fun FilterBar(
-    selectedFilter: String?,
-    onFilterSelected: (String) -> Unit
-) {
+fun FilterBar(selectedFilter: String?, onFilterSelected: (String) -> Unit) {
     val filters = listOf("Men", "Women", "Kids", "Sale")
 
     Row(

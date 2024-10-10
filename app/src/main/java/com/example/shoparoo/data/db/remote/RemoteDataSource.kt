@@ -1,12 +1,9 @@
 package com.example.shoparoo.data.db.remote
 
 
-import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
-
 import com.example.shoparoo.model.OrderResponse
-
 import com.example.shoparoo.model.Product
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
@@ -32,7 +29,14 @@ interface RemoteDataSource {
 
     //orders section
     fun getOrders(): Flow<OrderResponse>
+
     suspend fun deleteDraftOrder(id: Long)
 
+
+  
+    //delete draft order
+    suspend fun deleteDraftOrder(draftOrderId: String)
+
+    suspend fun addToCompleteOrder(id: String)
 
 }

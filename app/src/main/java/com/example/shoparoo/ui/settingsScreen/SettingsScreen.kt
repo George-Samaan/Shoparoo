@@ -72,6 +72,7 @@ import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.nav.BottomNav
+import com.example.shoparoo.utils.Constants
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -527,7 +528,7 @@ fun Currency(selectedCurrency: String, onCurrencySelected: (String) -> Unit) {
 fun fetchConversionRate(context: Context, selectedCurrency: String) {
     CoroutineScope(Dispatchers.IO).launch {
         try {
-            val response = currencyApi.getRates("db5f5601837148c482888a4cdf945326")
+            val response = currencyApi.getRates(Constants.currencyApi)
             if (response.isSuccessful) {
                 val rates = response.body()?.rates
                 rates?.let {

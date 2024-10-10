@@ -85,7 +85,9 @@ import com.example.shoparoo.ui.productScreen.view.ProductsScreen
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModel
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModelFactory
 import com.example.shoparoo.ui.settingsScreen.ProfileScreen
-import com.example.shoparoo.ui.shoppingCart.ShoppingCartScreen
+import com.example.shoparoo.ui.shoppingCart.view.ShoppingCartScreen
+import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
+import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModelFactory
 import com.example.shoparoo.ui.theme.primary
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -482,6 +484,7 @@ fun ProductCard(
 }
 
 
+
 fun String.capitalizeWords(): String {
     return this.split(" ")
         .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
@@ -497,6 +500,14 @@ fun MainScreen(
     val navControllerBottom = rememberNavController()
     val viewModel: HomeViewModel = viewModel(
         factory = HomeViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+
+    val shoppingCartViewModel : ShoppingCartViewModel = viewModel(
+        factory = ShoppingCartViewModelFactory(
             repository = RepositoryImpl(
                 remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
             )
@@ -565,7 +576,7 @@ fun MainScreen(
 
             }
             composable(BottomNav.Cart.route) {
-                ShoppingCartScreen(navControllerBottom)
+                ShoppingCartScreen(navControllerBottom,shoppingCartViewModel)
             }
             composable(BottomNav.orders.route) {
                 Text(text = "Orders Screen")
@@ -581,13 +592,13 @@ fun MainScreen(
 //            composable("settings") { SettingsScreen(navControllerBottom) }
             composable("login") { LoginScreen(navControllerBottom) }
             composable(BottomNav.Profile.route) {
-                ProfileScreen(navControllerBottom)
+                ProfileScreen(navController)
             }
 //            composable("settings") {
 //                SettingsScreen(navControllerBottom)
 //            }
             composable("checkout") {
-                CheckoutScreen(navControllerBottom)
+                CheckoutScreen(navControllerBottom, shoppingCartViewModel)
             }
             composable("brand/{brandId}/{brandTitle}") { backStackEntry ->
                 val brandId =
