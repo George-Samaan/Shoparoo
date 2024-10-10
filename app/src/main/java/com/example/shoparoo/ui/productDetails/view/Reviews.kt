@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.productDetails
+package com.example.shoparoo.ui.productDetails.view
 
 import com.example.shoparoo.R
 import kotlin.random.Random

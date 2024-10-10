@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.productDetails
+package com.example.shoparoo.ui.productDetails.view
 
 import android.content.Context
 import android.util.Log
@@ -71,8 +71,8 @@ import com.example.shoparoo.model.VariantsItem
 
 import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
-
-import com.example.shoparoo.ui.theme.Purple40
+import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModel
+import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModelFactory
 
 import com.example.shoparoo.ui.theme.primary
 import com.smarttoolfactory.ratingbar.RatingBar

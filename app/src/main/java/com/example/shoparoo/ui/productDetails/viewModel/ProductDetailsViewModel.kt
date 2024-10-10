@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.productDetails
+package com.example.shoparoo.ui.productDetails.viewModel
 
 import android.content.Context
 import android.util.Log
