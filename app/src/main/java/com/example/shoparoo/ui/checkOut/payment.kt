@@ -296,10 +296,10 @@ fun CreditCardItem() {
 @Composable
 fun CheckoutButtonCheck(
     selectedPaymentMethod: String,
-    cardHolderName: String,
-    cardNumber: String,
-    expirationMonth: String,
-    expirationYear: String,
+    cardHolderName: String = null.toString(),
+    cardNumber: String = null.toString(),
+    expirationMonth: String = null.toString(),
+    expirationYear: String = null.toString(),
 ) {
     val shoppingCartViewModel: ShoppingCartViewModel = viewModel(
         factory = ShoppingCartViewModelFactory(

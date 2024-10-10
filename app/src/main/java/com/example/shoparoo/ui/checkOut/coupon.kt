@@ -19,33 +19,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.shoparoo.model.AppliedDiscount
-import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.example.shoparoo.ui.theme.primary
 
 @Composable
 fun ApplyCoupons(
-    productList: List<LineItem>,
     viewModel: ShoppingCartViewModel,
     draftOrderId: Long,
-    appliedDiscount: AppliedDiscount?, // Add this parameter to check if coupon is applied
+    appliedDiscount: AppliedDiscount?,
     onApplyCoupon: (Double) -> Unit
 ) {
     val couponText = remember { mutableStateOf("") }
     val context = LocalContext.current
-    var totalDiscount: Double
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 5.dp, bottom = 5.dp),
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // EditText for Coupon Code
         OutlinedTextField(
             value = couponText.value,
             onValueChange = { couponText.value = it },
-            label = { Text(text = "Enter Coupon Code", color = primary) },
+            label = { Text("Enter Coupon Code") },
             shape = RoundedCornerShape(25.dp),
             modifier = Modifier
                 .weight(1f)
@@ -61,26 +57,26 @@ fun ApplyCoupons(
                     return@Button
                 }
 
-                val discountValue = if (couponText.value.isNotEmpty() && couponText.value == "Shoparoo20") {
-                    0.20 // 20% discount
-                } else {
-                    0.0
-                }
+                val discountValue =
+                    if (couponText.value.isNotEmpty() && couponText.value == "Shoparoo20") {
+                        0.20 // 20% discount
+                    } else {
+                        0.0
+                    }
 
                 if (discountValue > 0.0) {
-                    totalDiscount = discountValue * calculateSubtotal(productList)
-                    onApplyCoupon(totalDiscount)
-
-                    // Apply discount to the draft order
                     val discount = AppliedDiscount(
                         value = discountValue * 100,
                         value_type = "percentage",
-                        amount = totalDiscount
+                        amount = discountValue
                     )
-
                     viewModel.applyDiscountToDraftOrder(draftOrderId, discount)
 
-                    Toast.makeText(context, "Coupon Applied: ${couponText.value}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Coupon Applied: ${couponText.value}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
                     Toast.makeText(context, "Invalid Coupon Code", Toast.LENGTH_SHORT).show()
                     onApplyCoupon(0.0)
@@ -95,12 +91,3 @@ fun ApplyCoupons(
         }
     }
 }
-
-
-fun calculateSubtotal(cartItems: List<LineItem>): Double {
-    return cartItems.sumOf { lineItem ->
-        lineItem.price.toDoubleOrNull()?.times(lineItem.quantity) ?: 0.0
-    }
-}
-
-
