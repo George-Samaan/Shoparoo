@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui
+package com.example.shoparoo.ui.search
 
 import android.util.Log
 import androidx.compose.foundation.layout.Column

@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.productDetails
+package com.example.shoparoo.ui.productDetails.viewModel
 
 import android.content.Context
 import android.util.Log
@@ -15,7 +15,6 @@ import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.model.Property
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
-import com.example.shoparoo.ui.settingsScreen.updatePrices
 import com.example.shoparoo.utils.Constants
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
@@ -150,8 +149,8 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         var item: DraftOrderDetails? = null
         var myLineItem: LineItem? = null
         for (line_item in draftOrderDetails.line_items) {
-            if (line_item.product_id == varient.productId)
-                item = draftOrderDetails //item already exists in the favourites
+            if (line_item.product_id == varient.productId && line_item.variant_id == varient.id.toString())
+                item = draftOrderDetails        //item already exists in the favourites
             myLineItem = line_item
         }
 
@@ -200,36 +199,40 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         }
     }
 
-//    private fun UpdateFavDraftOrder(draftOrderDetails: DraftOrderDetails, item: DraftOrderDetails?, myLineItem: LineItem?, theSingleProduct: SingleProduct, varient: VariantsItem
-//    ) {
-//        if (item != null) {
-//            // If the item already exists in favorites, remove it
-//            Log.i("xoxoxoxoxox", "Update draft order - removing from favorites")
-//            _isFav.value = false
-//            draftOrderDetails.line_items.remove(myLineItem)
-//
-//            if (draftOrderDetails.line_items.isEmpty()) {
-//                viewModelScope.launch {
-//                    repository.deleteDraftOrder(draftOrderDetails.id!!)
-//                }
-//            } else {
-//                // Otherwise, update the draft order without the removed item
-//                viewModelScope.launch {
-//                    val order = DraftOrderRequest(draftOrderDetails)
-//                    repository.updateDraftOrder(order)
-//                }
-//            }
-//        } else {
-//            // If the item does not exist, add it to favorites
-//            Log.i("xoxoxoxoxox", "Adding item to favorites")
-//            draftOrderDetails.line_items.add(setLineItem(theSingleProduct, varient))
-//            _isFav.value = true
-//            viewModelScope.launch {
-//                val order = DraftOrderRequest(draftOrderDetails)
-//                repository.updateDraftOrder(order)
-//            }
-//        }
-//    }
+
+/*
+
+    private fun UpdateFavDraftOrder(draftOrderDetails: DraftOrderDetails, item: DraftOrderDetails?, myLineItem: LineItem?, theSingleProduct: SingleProduct, varient: VariantsItem
+    ) {
+        if (item != null) {
+            // If the item already exists in favorites, remove it
+            Log.i("xoxoxoxoxox", "Update draft order - removing from favorites")
+            _isFav.value = false
+            draftOrderDetails.line_items.remove(myLineItem)
+
+            if (draftOrderDetails.line_items.isEmpty()) {
+                viewModelScope.launch {
+                    repository.deleteDraftOrder(draftOrderDetails.id!!)
+                }
+            } else {
+                // Otherwise, update the draft order without the removed item
+                viewModelScope.launch {
+                    val order = DraftOrderRequest(draftOrderDetails)
+                    repository.updateDraftOrder(order)
+                }
+            }
+        } else {
+            // If the item does not exist, add it to favorites
+            Log.i("xoxoxoxoxox", "Adding item to favorites")
+            draftOrderDetails.line_items.add(setLineItem(theSingleProduct, varient))
+            _isFav.value = true
+            viewModelScope.launch {
+                val order = DraftOrderRequest(draftOrderDetails)
+                repository.updateDraftOrder(order)
+            }
+        }
+    }
+*/
 
 
     fun filterByItem(
@@ -239,12 +242,17 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         inCart: Boolean
     ) {
         var exists = false
+        var line: LineItem? = null
         for (line_item in draftOrder.line_items) {
-            if (line_item.variant_id == varient.id.toString())
+            if (line_item.variant_id == varient.id.toString()){
                 exists = true
+                line = line_item
+                break
+            }
+
         }
         if (exists) {
-            updateDraftOrderItemCount(draftOrder)
+            updateDraftOrderItemCount(draftOrder,line!!)
         } else {
             updateDraftOrder(draftOrder, varient, theSingleProduct)
         }
@@ -258,8 +266,8 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         }
     }
 
-    fun updateDraftOrderItemCount(draftOrder: DraftOrderDetails) {
-        draftOrder.line_items[0].quantity += 1
+    fun updateDraftOrderItemCount(draftOrder: DraftOrderDetails, line: LineItem) {
+        draftOrder.line_items.find { it.variant_id == line.variant_id }?.quantity = line.quantity + 1
         viewModelScope.launch {
             val order = DraftOrderRequest(draftOrder)
             repository.updateDraftOrder(order)
