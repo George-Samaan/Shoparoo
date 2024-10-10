@@ -7,7 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.shoparoo.ui.Favourites.Favourites
-import com.example.shoparoo.ui.Search
+import com.example.shoparoo.ui.search.Search
 import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.auth.view.Signup
 import com.example.shoparoo.ui.homeScreen.view.MainScreen
