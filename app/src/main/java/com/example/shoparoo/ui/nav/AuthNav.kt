@@ -22,7 +22,7 @@ fun Navigation() {
     NavHost(navController, startDestination = "login") {
         composable("login") { LoginScreen(navController = navController) }
         composable("signup") { Signup(navController = navController) }
-        composable("home") { MainScreen({}, query = TextFieldValue(""), onQueryChange = {},navController = navController) }
+        composable("home") { MainScreen(navController = navController) }
 
         composable("productDetails/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: ""

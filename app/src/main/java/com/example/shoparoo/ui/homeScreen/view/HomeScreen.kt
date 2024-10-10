@@ -97,14 +97,11 @@ import networkListener
 fun HomeScreenDesign(
     userName: String,
     onFavouriteClick: () -> Unit,
-    query: TextFieldValue,
-    onQueryChange: (TextFieldValue) -> Unit,
     smartCollectionsState: ApiState,
     forYouProductsState: ApiState,
     onRefresh: () -> Unit = {},
     bottomNavController: NavController,
     navController: NavController,
-    viewModel: HomeViewModel
 
 ) {
     val isNetworkAvailable = networkListener()
@@ -222,9 +219,10 @@ fun Header(userName: String, onFavouriteClick: () -> Unit, onSearchClick: () -> 
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+      //  horizontalArrangement = Arrangement.SpaceBetween
     ) {
         ProfileSection(userName)
+        Spacer(modifier = Modifier.weight(1f))
         FavouriteButton(onFavouriteClick)
         SearchButton(onSearchClick = onSearchClick)
     }
@@ -234,7 +232,7 @@ fun Header(userName: String, onFavouriteClick: () -> Unit, onSearchClick: () -> 
 fun ProfileSection(userName: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Image(
-            painter = painterResource(id = R.drawable.profile),
+            painter = painterResource(id = R.drawable.user3),
             contentDescription = null,
             modifier = Modifier
                 .size(48.dp)
@@ -492,9 +490,6 @@ fun String.capitalizeWords(): String {
 
 @Composable
 fun MainScreen(
-    onFavouriteClick: () -> Unit,
-    query: TextFieldValue,
-    onQueryChange: (TextFieldValue) -> Unit,
     navController: NavController
 ) {
     val navControllerBottom = rememberNavController()
@@ -558,8 +553,7 @@ fun MainScreen(
                 HomeScreenDesign(
                     if (isLoading) "" else userName ?: "Guest",
                     {navController.navigate("favourites")},
-                    query,
-                    onQueryChange,
+
                     smartCollectionsState,
                     forYouProductsState,
                     onRefresh = {
@@ -567,7 +561,6 @@ fun MainScreen(
                     },
                     navControllerBottom,
                     navController,
-                    viewModel
                 )
             }
             composable(BottomNav.Categories.route) {

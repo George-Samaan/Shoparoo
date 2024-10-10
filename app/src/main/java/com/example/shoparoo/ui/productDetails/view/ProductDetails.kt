@@ -3,10 +3,16 @@ package com.example.shoparoo.ui.productDetails.view
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +25,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,6 +36,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.StarOutline
@@ -40,16 +48,21 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -58,6 +71,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.shoparoo.R
@@ -77,15 +91,14 @@ import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModelF
 import com.example.shoparoo.ui.theme.primary
 import com.smarttoolfactory.ratingbar.RatingBar
 import com.smarttoolfactory.ratingbar.model.Shimmer
+import kotlinx.coroutines.delay
 import kotlin.random.Random
 
 @Composable
 fun ProductDetails(id: String, navController: NavHostController) {
-
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
     val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
-
 
     val viewModel: ProductDetailsViewModel = viewModel(
         factory = ProductDetailsViewModelFactory(
@@ -94,13 +107,13 @@ fun ProductDetails(id: String, navController: NavHostController) {
             )
         )
     )
-    var  ui = viewModel.singleProductDetail.collectAsState()
-    var isFav = viewModel.isFav.collectAsState()
+    val ui = viewModel.singleProductDetail.collectAsState()
+    val isFav = viewModel.isFav.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getSingleProductDetail(id, selectedCurrency,context)
+        viewModel.getSingleProductDetail(id, selectedCurrency, context)
     }
-    //will change this later
+
     when (ui.value) {
         is ApiState.Loading -> {
             Log.i("ProductDetails", "Loading")
@@ -112,63 +125,49 @@ fun ProductDetails(id: String, navController: NavHostController) {
 
         is ApiState.Success -> {
             val data = ui.value as ApiState.Success
-            productInfo(data.data as SingleProduct, navController, viewModel, isFav.value )
+            productInfo(data.data as SingleProduct, navController, viewModel, isFav.value)
         }
     }
-
 }
 
 @Composable
-
 private fun productInfo(
     singleProductDetail: SingleProduct,
-    NavController: NavHostController,
+    navController: NavHostController,
     viewModel: ProductDetailsViewModel,
     isFav: Boolean,
-    ) {
-
+) {
     val context = LocalContext.current
-
-
-    // Get saved currency and conversion rate from SharedPreferences
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
     val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
+    val selected = remember { mutableStateOf(singleProductDetail.product!!.variants!![0]) }
+    val isLoggedIn = AuthViewModel().authState.collectAsState()
+    val descriptionVisible = remember { mutableStateOf(false) }
 
-    Log.i("ProductDetails", "Success ${singleProductDetail.product!!.variants!![0]!!.price}")
-    val selected = remember { mutableStateOf(singleProductDetail.product.variants!![0]) }
-    val isLoggedIn =AuthViewModel().authState.collectAsState()
+    // Trigger the animation when the product info is loaded
+    LaunchedEffect(singleProductDetail) {
+        descriptionVisible.value = true
+    }
+
     Column(
         Modifier
-            .padding(top = 50.dp)
             .fillMaxSize()
-            .verticalScroll(
-                state = rememberScrollState(),
-                enabled = true
-            ),
+            .verticalScroll(state = rememberScrollState(), enabled = true),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ProductImg(onClick = { NavController.popBackStack() }, images = singleProductDetail.product.images)
-
+        ProductImg(
+            onClick = { navController.popBackStack() },
+            images = singleProductDetail.product!!.images
+        )
 
         Column(
             modifier = Modifier.padding(start = 25.dp, end = 25.dp, bottom = 25.dp)
         ) {
-
-//            Text(
-//                text = res.product.title!!.capitalizeWords(),
-//                fontSize = 23.sp,
-//                fontWeight = FontWeight.Bold,
-//                modifier = Modifier
-//                    .align(Alignment.Start)
-//                    .padding(top = 10.dp)
-//            )
-
             Spacer(modifier = Modifier.height(5.dp))
             Text(
-                text = singleProductDetail.product.title!!,
-
+                text = singleProductDetail.product!!.title!!,
                 fontSize = 25.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -176,46 +175,41 @@ private fun productInfo(
                     .padding(start = 5.dp)
             )
             ReviewSection()
-
             StockAndPrice(selected, selectedCurrency, conversionRate)
+            VariantSection(singleProductDetail.product!!.variants, selected)
 
-
-            VariantSection(singleProductDetail.product.variants, selected)
-
-            DescriptionSection(singleProductDetail.product!!.bodyHtml)
-
-
-
-        }
-        Spacer(modifier = Modifier.weight(1f))
-
-
-        BottomSection(onClickCart = {
-            if (selected.value!!.inventoryQuantity!! < 1) {
-                Toast.makeText(NavController.context, "Out of stock", Toast.LENGTH_SHORT).show()
-            } else {
-                if (isLoggedIn.value!= AuthState.Authenticated) { //this is bullshit but i'll change it later
-                    Toast.makeText(
-                        NavController.context,
-                        "Please login to add to cart",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
-                    Toast.makeText(NavController.context, "Added to cart", Toast.LENGTH_SHORT).show()
-                }
+            // Animated Description Section
+            AnimatedVisibility(
+                visible = descriptionVisible.value,
+                enter = slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn(),
+                exit = fadeOut()
+            ) {
+                DescriptionSection(singleProductDetail.product!!.bodyHtml)
             }
-        }, onClickFav = {
-            if (isLoggedIn.value!= AuthState.Authenticated) {
-                Toast.makeText(NavController.context, "Please login to add to favorites", Toast.LENGTH_SHORT).show()
-            } else {
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+        BottomSection(
+            onClickCart = {
+                if (selected.value!!.inventoryQuantity!! < 1) {
+                    Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
+                } else {
+                    if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
+                        Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
+                        Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            },
+            onClickFav = {
                 viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
                 if (!isFav)
-                Toast.makeText(NavController.context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
                 else
-                    Toast.makeText(NavController.context, "Removed from favorites", Toast.LENGTH_SHORT).show()
-            }
-        },
+                    Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+            },
             buttonColors = if (isFav) {
                 ButtonDefaults.buttonColors(
                     containerColor = Color.Red,
@@ -223,7 +217,6 @@ private fun productInfo(
                     disabledContentColor = Color.Gray,
                     disabledContainerColor = Color(0xFF000000),
                 )
-
             } else {
                 ButtonDefaults.buttonColors(
                     containerColor = Color.Gray,
@@ -231,72 +224,56 @@ private fun productInfo(
                     disabledContentColor = Color.Gray,
                     disabledContainerColor = Color(0xFF000000),
                 )
-            }
-
+            },
+            isFav = isFav
         )
-
 
     }
+
+
 }
 
-@Composable
-private fun StockAndPrice(selected: MutableState<VariantsItem?>, selectedCurrency: String, conversionRate: Float) {
-    val currencySymbols = mapOf(
-        "USD" to "$ ",
-        "EGP" to "EGP "
-    )
-    val price = selected.value?.price?.toFloatOrNull()?.times(conversionRate) ?: 0f
-
-    Row(
-        modifier = Modifier
-            .padding(10.dp)
-            .fillMaxWidth()
-    ) {
-        Text(
-            text = (selected.value!!.inventoryQuantity).toString() + " item left",
-            fontSize = 17.sp,
-            fontWeight = FontWeight.Bold,
-            color = if (selected.value!!.inventoryQuantity!! > 10) Color.Gray else Color.Red
-        )
-        Spacer(Modifier.weight(1f))
-        Text(
-            text = "${"%.2f".format(price)} ${currencySymbols[selectedCurrency] ?: " $"}",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-        )
-    }
-}
 
 @Composable
 fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
+    val imageVisible = remember { mutableStateOf(false) }
+
+    // Trigger the animation when the ProductImg is loaded
+    LaunchedEffect(Unit) {
+        imageVisible.value = true
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp)
             .padding(top = 30.dp, start = 5.dp)
     ) {
-        LazyRow(Modifier.fillMaxWidth()) {
-            items(images!!.size) { index ->
-                //Log.i("ProductDetails", "Success ${images[index]!!.src}")
-                Image(
-                    painter = rememberAsyncImagePainter(model = images[index]!!.src),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(300.dp)
-                        .clip(
-                            RoundedCornerShape(
-                                bottomEnd = 20.dp,
-                                bottomStart = 20.dp
-                            )
-                        ),
-                )
-
-            }
-
-        }
-        IconButton(
-            onClick, // navController.popBackStack // ()
+        // Animated Visibility to slide in from the right
+        AnimatedVisibility(
+            visible = imageVisible.value,
+            enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(),
+            exit = fadeOut()
         ) {
+            LazyRow(Modifier.fillMaxWidth()) {
+                items(images!!.size) { index ->
+                    Image(
+                        painter = rememberAsyncImagePainter(model = images[index]!!.src),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(300.dp)
+                            .clip(
+                                RoundedCornerShape(
+                                    bottomEnd = 20.dp,
+                                    bottomStart = 20.dp
+                                )
+                            ),
+                    )
+                }
+            }
+        }
+
+        IconButton(onClick = onClick) {
             Box(
                 modifier = Modifier
                     .size(50.dp)
@@ -307,12 +284,10 @@ fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_back),
                     contentDescription = stringResource(R.string.back),
-                    modifier = Modifier
-                        .size(24.dp)
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
-
     }
 }
 
@@ -321,73 +296,193 @@ fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
 fun ReviewSection() {
     val showContactUsSheet = remember { mutableStateOf(false) }
     val reviews = remember { getRandomReviews(Random.nextInt(2, 22)) }
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(5.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    val reviewVisible = remember { mutableStateOf(false) }
+
+    // Trigger the animation when the ReviewSection is loaded
+    LaunchedEffect(Unit) {
+        reviewVisible.value = true
+    }
+
+    // Animate the review section sliding in from the right
+    AnimatedVisibility(
+        visible = reviewVisible.value,
+        enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(),
+        exit = fadeOut()
     ) {
-
-        RatingBar(
-            rating = reviews.second.toFloat(),
-            space = 2.dp,
-            //change those to use local vector for laterrr
-            imageVectorEmpty = Icons.Default.StarOutline,
-            imageVectorFFilled = Icons.Default.StarRate,
-            tintEmpty = Color.Gray,
-            //tintFilled = Purple40,
-            itemSize = 30.dp,
-            gestureEnabled = false,
-            animationEnabled = true,
-            shimmer = Shimmer(
-              //  color = Color(0xffA1887F),
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 5000, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            RatingBar(
+                rating = reviews.second.toFloat(),
+                space = 2.dp,
+                imageVectorEmpty = Icons.Default.StarOutline,
+                imageVectorFFilled = Icons.Default.StarRate,
+                tintEmpty = Color.Gray,
+                itemSize = 30.dp,
+                gestureEnabled = false,
+                animationEnabled = true,
+                shimmer = Shimmer(
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(durationMillis = 5000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Restart
+                    ),
+                    drawBorder = false,
                 ),
-                drawBorder = false,
+            )
+            Text(
+                text = reviews.second.toString(),
+                fontSize = 20.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(start = 10.dp)
+            )
 
-            ),
-        )
-        Text(
-            text = reviews.second.toString(),
-            fontSize = 20.sp,
-            color = Color.Gray,
-            modifier = Modifier.padding(start = 10.dp)
-        )
+            Text(
+                text = "(${reviews.first.size} reviews)",
+                fontSize = 18.sp,
+                color = Color.Gray,
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .clickable { showContactUsSheet.value = true }
+            )
 
-        Text(
-            text = "(${reviews.first.size} reviews)",
-            fontSize = 18.sp,
-            color = Color.Gray,
-            modifier = Modifier
-                .padding(start = 10.dp)
-                .clickable { showContactUsSheet.value = true }
-        )
-
-        if (showContactUsSheet.value) {
-            ModalBottomSheet(onDismissRequest = { showContactUsSheet.value = false }) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Reviews",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(5.dp)
-                    )
-                    ReviewItem(reviews.first)
+            if (showContactUsSheet.value) {
+                ModalBottomSheet(onDismissRequest = { showContactUsSheet.value = false }) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Reviews",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(5.dp)
+                        )
+                        ReviewItem(reviews.first)
+                    }
                 }
             }
-
+            Spacer(modifier = Modifier.weight(1f))
         }
-        Spacer(modifier = Modifier.weight(1f))
     }
 }
+
+@Composable
+private fun StockAndPrice(
+    selected: MutableState<VariantsItem?>,
+    selectedCurrency: String,
+    conversionRate: Float
+) {
+    val currencySymbols = mapOf(
+        "USD" to "$ ",
+        "EGP" to "EGP "
+    )
+    val price = selected.value?.price?.toFloatOrNull()?.times(conversionRate) ?: 0f
+
+    val stockPriceVisible = remember { mutableStateOf(false) }
+
+    // Trigger the animation when StockAndPrice is loaded
+    LaunchedEffect(Unit) {
+        stockPriceVisible.value = true
+    }
+
+    // Animate the stock and price section sliding in from the right
+    AnimatedVisibility(
+        visible = stockPriceVisible.value,
+        enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(),
+        exit = fadeOut()
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = (selected.value!!.inventoryQuantity).toString() + " item left",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (selected.value!!.inventoryQuantity!! > 10) Color.Gray else Color.Red
+            )
+            Spacer(Modifier.weight(1f))
+            Text(
+                text = "${"%.2f".format(price)} ${currencySymbols[selectedCurrency] ?: " $"}",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+    }
+}
+
+@Composable
+fun VariantSection(variants: List<VariantsItem?>?, selected: MutableState<VariantsItem?>) {
+    val scrollState = rememberScrollState()
+    val variantSectionVisible = remember { mutableStateOf(false) }
+
+    // Trigger the animation when VariantSection is loaded
+    LaunchedEffect(Unit) {
+        variantSectionVisible.value = true
+    }
+
+    // Animate the variant section sliding in from the right
+    AnimatedVisibility(
+        visible = variantSectionVisible.value,
+        enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(),
+        exit = fadeOut()
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 5.dp)
+                .horizontalScroll(scrollState),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Sizes Available : ",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 5.dp)
+            )
+            Spacer(modifier = Modifier.width(5.dp))
+
+            for (variant in variants!!) {
+                Row(
+                    modifier = Modifier
+                        .background(
+                            if (selected.value == variant) Color(0xFFEFEFEF) else Color.Transparent,
+                            RoundedCornerShape(40.dp)
+                        )
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                        .clickable {
+                            selected.value = variant
+                        },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val color = colorSetter(variant)
+                    Box(
+                        modifier = Modifier
+                            .size(17.dp)
+                            .clip(RoundedCornerShape(7.dp))
+                            .background(color)
+                    )
+                    Text(
+                        text = " " + variant!!.option1!!,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        modifier = Modifier.padding(start = 2.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(5.dp))
+            }
+        }
+    }
+}
+
 
 @Composable
 fun ReviewItem(reviews: List<Reviews>) {
@@ -449,16 +544,22 @@ fun ReviewItem(reviews: List<Reviews>) {
 
 @Composable
 fun DescriptionSection(bodyHtml: String?) {
-    Column(Modifier.fillMaxWidth()) {
+    // Animate the offset from the left
+    val offsetX by animateDpAsState(targetValue = if (bodyHtml != null) 0.dp else -100.dp)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .offset(x = offsetX)
+    ) {
         Text(
             text = "Description",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 5.dp, top = 5.dp, bottom = 15.dp)
-
         )
         Text(
-            text = bodyHtml!!,
+            text = bodyHtml ?: "",
             fontSize = 18.sp,
             color = MaterialTheme.colorScheme.onSurface,
             lineHeight = 28.sp,
@@ -470,60 +571,8 @@ fun DescriptionSection(bodyHtml: String?) {
     }
 }
 
-@Composable
-fun VariantSection(variants: List<VariantsItem?>?, selected: MutableState<VariantsItem?>) {
-    val scrollState = rememberScrollState()
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(vertical = 5.dp)
-            .horizontalScroll(scrollState),
-        verticalAlignment = Alignment.CenterVertically,
 
-        ) {
-        Text(
-            text = "Sizes Available : ",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 5.dp)
-        )
-        Spacer(modifier = Modifier.width(5.dp))
-
-        for (variant in variants!!) {
-            Row(
-                modifier = Modifier
-                    .background(
-                        if (selected.value == variant) Color(0xFFEFEFEF) else Color.Transparent,
-                        RoundedCornerShape(40.dp)
-                    )
-                    .padding(horizontal = 10.dp, vertical = 5.dp)
-                    .clickable {
-                        selected.value = variant
-                    },
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-
-                val color = colorSetter(variant)
-                Box(
-                    modifier = Modifier
-                        .size(17.dp)
-                        .clip(RoundedCornerShape(7.dp))
-                        .background(color)
-                )
-                Text(
-                    text = " " + variant!!.option1!!,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier.padding(start = 2.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(5.dp))
-        }
-    }
-}
-
-@Composable
+/*@Composable
 fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit, buttonColors: ButtonColors) {
     Row(
         Modifier
@@ -574,13 +623,103 @@ fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit, buttonColors:
                 )
         }
     }
+}*/
+
+@Composable
+fun BottomSection(
+    onClickCart: () -> Unit,
+    onClickFav: () -> Unit,
+    buttonColors: ButtonColors,
+    isFav: Boolean // Pass isFav to determine filled state
+) {
+    var isAnimatingFav by remember { mutableStateOf(false) }
+
+    // Trigger the animation when the button is clicked
+    val iconScale by animateFloatAsState(targetValue = if (isAnimatingFav) 1.5f else 1f)
+    val iconTint = if (isFav) Color.White else Color.White // Fill color when favorited
+
+    // Reset the animation state after a delay when animating
+    if (isAnimatingFav) {
+        LaunchedEffect(Unit) {
+            delay(300) // Duration of the animation
+            isAnimatingFav = false
+        }
+    }
+    var isAnimating by remember { mutableStateOf(false) }
+
+    // Trigger the animation when the button is clicked
+    val iconOffset by animateFloatAsState(targetValue = if (isAnimating) 70f else 0f)
+    val textVisibility by animateFloatAsState(targetValue = if (isAnimating) 0f else 1f)
+    val buttonHeight by animateDpAsState(targetValue = if (isAnimating) 40.dp else 50.dp) // Change the height here
+
+    // Reset the animation state after a delay when animating
+    if (isAnimating) {
+        LaunchedEffect(Unit) {
+            delay(1000) // Duration of the animation
+            isAnimating = false
+        }
+    }
+
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(bottom = 15.dp, top = 15.dp, start = 25.dp, end = 25.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.Bottom
+    ) {
+        // Add to Cart button
+        Button(
+            onClick = {
+                isAnimating = true
+                onClickCart()
+            },
+            colors = ButtonDefaults.buttonColors(primary),
+            modifier = Modifier
+                .weight(3f)
+                .height(buttonHeight) // Use the animated height here
+        ) {
+            Icon(
+                imageVector = Icons.Filled.ShoppingCart,
+                contentDescription = "Add to Cart",
+                tint = Color.White,
+                modifier = Modifier.offset(x = iconOffset.dp)
+            )
+
+            AnimatedVisibility(visible = textVisibility > 0) {
+                Text(
+                    text = "Add to Cart",
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .alpha(textVisibility),
+                    fontSize = 20.sp
+                )
+            }
+        }
+        // Favorite button
+        Button(
+            onClick = {
+                isAnimatingFav = true
+                onClickFav()
+            },
+            colors = buttonColors,
+            modifier = Modifier
+                .padding(horizontal = 10.dp)
+                .weight(1f)
+        ) {
+            Icon(
+                imageVector = if (isFav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                contentDescription = "Add to Favorites",
+                tint = iconTint,
+                modifier = Modifier.scale(iconScale) // Apply scale animation
+            )
+        }
+    }
 }
 
 
 @Composable
-private fun colorSetter(
-    variant: VariantsItem?
-): Color {
+private fun colorSetter(variant: VariantsItem?): Color {
     when (variant!!.option2) {
         "black" -> return Color.Black
         "blue" -> return Color.Blue
