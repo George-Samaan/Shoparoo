@@ -2,6 +2,7 @@
 
 package com.example.shoparoo.ui.checkOut
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,7 +39,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shoparoo.R
+import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
+import com.example.shoparoo.data.network.ApiClient
+import com.example.shoparoo.data.repository.RepositoryImpl
+import com.example.shoparoo.ui.checkOut.viewModel.PaymentViewModel
+import com.example.shoparoo.ui.checkOut.viewModel.PaymentViewModelFactory
+import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
+import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModelFactory
 import kotlinx.coroutines.delay
 import java.util.Calendar
 
@@ -171,10 +181,11 @@ fun CreditCardItem() {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Card Number Field
-        OutlinedTextField(value = cardNumber, onValueChange = {
-            cardNumber = it
-            isCardNumberValid = it.length == 16 && it.all { char -> char.isDigit() }
-        },
+        OutlinedTextField(
+            value = cardNumber, onValueChange = {
+                cardNumber = it
+                isCardNumberValid = it.length == 16 && it.all { char -> char.isDigit() }
+            },
             label = { Text("Card number") },
             shape = RoundedCornerShape(25.dp),
             modifier = Modifier.fillMaxWidth(),
@@ -194,10 +205,11 @@ fun CreditCardItem() {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Cvv Number Field
-        OutlinedTextField(value = cvv, onValueChange = {
-            cvv = it
-            isCvvValid = it.length == 3 && it.all { char -> char.isDigit() }
-        },
+        OutlinedTextField(
+            value = cvv, onValueChange = {
+                cvv = it
+                isCvvValid = it.length == 3 && it.all { char -> char.isDigit() }
+            },
             label = { Text("CVV number") },
             shape = RoundedCornerShape(25.dp),
             modifier = Modifier.fillMaxWidth(),
@@ -284,14 +296,45 @@ fun CreditCardItem() {
 @Composable
 fun CheckoutButtonCheck(
     selectedPaymentMethod: String,
-    cardHolderName: String,
-    cardNumber: String,
-    expirationMonth: String,
-    expirationYear: String
+    cardHolderName: String = null.toString(),
+    cardNumber: String = null.toString(),
+    expirationMonth: String = null.toString(),
+    expirationYear: String = null.toString(),
 ) {
+    val shoppingCartViewModel: ShoppingCartViewModel = viewModel(
+        factory = ShoppingCartViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val paymentViewModel: PaymentViewModel = viewModel(
+        factory = PaymentViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
     val context = LocalContext.current
     var isProcessing by remember { mutableStateOf(false) } // Track payment process state
     var paymentSuccess by remember { mutableStateOf(false) } // Track if payment was successful
+
+    val draftOrderDetails by shoppingCartViewModel.draftOrderDetails.collectAsState()
+    LaunchedEffect(Unit) {
+        Log.d("CheckoutButtonCheck", "LaunchedEffect triggered")
+        shoppingCartViewModel.getDraftOrderDetails()
+    }
+    fun completeOrderIfPossible() {
+        val orderId = draftOrderDetails?.id
+        Log.d("checkID", "$orderId")
+
+        if (orderId != null) {
+            paymentViewModel.addToCompleteOrder(orderId.toString())
+            paymentViewModel.deleteOrderFromDraft(orderId.toString())
+        } else {
+            Log.d("CheckoutButtonCheck", "Order ID is null")
+        }
+    }
 
     if (isProcessing) {
         // Show a circular progress indicator while processing the payment
@@ -307,9 +350,17 @@ fun CheckoutButtonCheck(
             isProcessing = false
             paymentSuccess = true
             if (selectedPaymentMethod == "cash") {
-                Toast.makeText(context, "Order placed with Cash on Delivery", Toast.LENGTH_SHORT).show()
-            } else if (selectedPaymentMethod == "card" && validateCardDetails(cardHolderName, cardNumber, expirationMonth, expirationYear)) {
-                Toast.makeText(context, "Order placed with Credit/Debit Card", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Order placed with Cash on Delivery", Toast.LENGTH_SHORT)
+                    .show()
+            } else if (selectedPaymentMethod == "card" && validateCardDetails(
+                    cardHolderName,
+                    cardNumber,
+                    expirationMonth,
+                    expirationYear
+                )
+            ) {
+                Toast.makeText(context, "Order placed with Credit/Debit Card", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     } else {
@@ -318,10 +369,18 @@ fun CheckoutButtonCheck(
                 if (selectedPaymentMethod == "cash") {
                     // Start processing for cash on delivery
                     isProcessing = true
+                    completeOrderIfPossible()
                 } else if (selectedPaymentMethod == "card") {
                     // Validate card and start processing if valid
-                    if (validateCardDetails(cardHolderName, cardNumber, expirationMonth, expirationYear)) {
+                    if (validateCardDetails(
+                            cardHolderName,
+                            cardNumber,
+                            expirationMonth,
+                            expirationYear
+                        )
+                    ) {
                         isProcessing = true
+                        completeOrderIfPossible()
                     } else {
                         Toast.makeText(context, "Invalid Card Details", Toast.LENGTH_SHORT).show()
                     }
@@ -353,8 +412,6 @@ fun validateCardDetails(
             expirationMonth.length == 2 && expirationMonth.toIntOrNull() in 1..12 &&
             expirationYear.length == 2 && expirationYear.toIntOrNull() != null
 }
-
-
 
 
 /*/*
