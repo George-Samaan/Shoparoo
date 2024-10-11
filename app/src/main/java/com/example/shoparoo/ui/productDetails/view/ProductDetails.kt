@@ -94,8 +94,6 @@ import kotlin.random.Random
 fun ProductDetails(id: String, navController: NavHostController) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
-
     val viewModel: ProductDetailsViewModel = viewModel(
         factory = ProductDetailsViewModelFactory(
             repository = RepositoryImpl(
@@ -135,7 +133,7 @@ private fun productInfo(
 ) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
     val selected = remember { mutableStateOf(singleProductDetail.product!!.variants!![0]) }
     val isLoggedIn = AuthViewModel().authState.collectAsState()

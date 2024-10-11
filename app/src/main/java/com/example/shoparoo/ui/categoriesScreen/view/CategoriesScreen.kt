@@ -80,7 +80,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
     // Get saved currency and conversion rate from SharedPreferences
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
     val currencySymbols = mapOf(
