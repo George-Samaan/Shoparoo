@@ -1,7 +1,6 @@
 package com.example.shoparoo.ui.auth.view
 
 
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RawRes
 import androidx.compose.animation.animateContentSize
@@ -32,7 +31,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -55,14 +53,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -72,10 +67,8 @@ import com.example.shoparoo.R
 import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.theme.primary
-import com.stevdzasan.onetap.GoogleButtonTheme
-import com.stevdzasan.onetap.OneTapGoogleButton
-import com.stevdzasan.onetap.OneTapSignInWithGoogle
-import com.stevdzasan.onetap.rememberOneTapSignInState
+import kotlinx.coroutines.delay
+
 @Composable
 fun LoginScreen(navController: NavHostController) {
     val context = LocalContext.current
@@ -333,7 +326,6 @@ fun ReusableLottie(
                 modifier = Modifier.fillMaxSize()
             )
         }
-
 
         // Lottie Animation
         LottieAnimation(

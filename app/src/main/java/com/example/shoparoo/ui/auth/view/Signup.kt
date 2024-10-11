@@ -88,21 +88,6 @@ fun Signup(navController: NavHostController) {
             AuthState.UnAuthenticated -> isLoading = false
         }
 
-        /*
-        //        viewModel.authState.collect {
-        //            when (it) {
-        //                is AuthState.Success -> {
-        //                    Toast.makeText(context, "Sign up successful", Toast.LENGTH_SHORT).show()
-        //                    navController.navigate("login")
-        //                }
-        //                is AuthState.Failed -> {
-        //                    Toast.makeText(context, "Sign up failed", Toast.LENGTH_SHORT).show()
-        //                }
-        //
-        //                AuthState.Authenticated -> TODO()
-        //                AuthState.Loading -> Unit
-        //            }
-        //        }*/
     }
 
     val nameValue = remember { mutableStateOf("") }
