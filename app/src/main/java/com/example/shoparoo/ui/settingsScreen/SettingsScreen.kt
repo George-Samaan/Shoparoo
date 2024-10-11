@@ -13,7 +13,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -73,13 +72,11 @@ import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
-import com.example.shoparoo.ui.nav.BottomNav
 import com.example.shoparoo.utils.Constants
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
 
 
 @Composable
@@ -96,7 +93,8 @@ fun ProfileScreen(navController: NavController) {
 
     Column(
         modifier = Modifier
-            .fillMaxSize().verticalScroll(rememberScrollState())
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .background(Color(0xFFF7F7F7))
     ) {
         // Profile Header with background
@@ -252,7 +250,7 @@ fun SignOutConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
             }
         },
         containerColor = Color.White,
-     //   shape = RoundedCornerShape(16.dp)
+        //   shape = RoundedCornerShape(16.dp)
     )
 }
 
@@ -499,9 +497,11 @@ fun Language() {
 fun Currency(selectedCurrency: String, onCurrencySelected: (String) -> Unit) {
     val context = LocalContext.current
     val currencies = listOf(
-        Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8"),
-        Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC")
+        Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC"),
+        Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8")
     )
+
+
 
 
     LazyColumn {
@@ -546,7 +546,7 @@ fun fetchConversionRate(context: Context, selectedCurrency: String) {
 fun updatePrices(context: Context, conversionRate: Double) {
     //store the conversion rate in SharedPreferences and update product prices across the app
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    var cc = 1/ conversionRate
+    var cc = 1 / conversionRate
     sharedPreferences.edit().putFloat("conversionRate", cc.toFloat()).apply()
 
     CoroutineScope(Dispatchers.Main).launch {
@@ -561,5 +561,5 @@ fun saveCurrencyPreference(context: Context, currency: String) {
 
 fun getCurrencyPreference(context: Context): String {
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    return sharedPreferences.getString("currency", "USD") ?: "USD"  // Default to USD
+    return sharedPreferences.getString("currency", "EGP") ?: "EGP"  // Default to USD
 }

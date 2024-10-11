@@ -1,23 +1,13 @@
 package com.example.shoparoo.ui.Favourites
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,9 +22,7 @@ import com.example.shoparoo.R
 import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.repository.RepositoryImpl
-import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.ui.auth.view.ReusableLottie
-import com.example.shoparoo.ui.homeScreen.view.ProductCard
 import com.example.shoparoo.ui.productScreen.view.ProductGrid
 import com.example.shoparoo.ui.productScreen.view.TopBar
 
@@ -83,7 +71,7 @@ fun Favourites(navController: NavController) {
         val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
         // Get saved currency and conversion rate from SharedPreferences
-        val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+        val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
         val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
 

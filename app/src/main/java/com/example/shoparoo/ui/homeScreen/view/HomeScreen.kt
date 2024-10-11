@@ -119,12 +119,12 @@ fun HomeScreenDesign(
         val context = LocalContext.current
         val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
-        val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+        val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
         val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
         val currencySymbols = mapOf(
-            "USD" to "$ ",
-            "EGP" to "EGP "
+            "EGP" to "$ ",
+            "USD" to "EGP "
         )
 
         val isRefreshing = remember { mutableStateOf(false) }
