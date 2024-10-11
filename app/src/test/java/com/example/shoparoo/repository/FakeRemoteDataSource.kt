@@ -1,6 +1,6 @@
-package com.example.shoparoo.ui.homeScreen.viewModel
+package com.example.shoparoo.repository
 
-import com.example.shoparoo.data.repository.Repository
+import com.example.shoparoo.data.db.remote.RemoteDataSource
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
 import com.example.shoparoo.model.OrderResponse
@@ -14,33 +14,18 @@ import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testSmartCollection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class FakeRepository : Repository {
-    private var shouldReturnEmpty = false
-
-    fun setEmptyData() {
-        shouldReturnEmpty = true
-    }
+class FakeRemoteDataSource : RemoteDataSource {
 
     private val testForYouProduct = Product(
         products = listOf(testProduct1, testProduct2, testProduct3)
     )
 
-    override fun getSmartCollections(): Flow<SmartCollections> {
-        return flow {
-            emit(testSmartCollectionProduct)
-        }
+    override fun getSmartCollections(): Flow<SmartCollections> = flow {
+        emit(testSmartCollectionProduct)
     }
 
-    override fun getForYouProducts(): Flow<Product> {
-        if (shouldReturnEmpty) {
-            return flow {
-                emit(Product(products = emptyList()))
-            }
-        }
-
-        return flow {
-            emit(testForYouProduct)
-        }
+    override fun getForYouProducts(): Flow<Product> = flow {
+        emit(testForYouProduct)
     }
 
     override fun getProductsFromBrandsId(collectionId: String): Flow<Product> {
@@ -67,14 +52,6 @@ class FakeRepository : Repository {
         TODO("Not yet implemented")
     }
 
-    override fun saveCurrencyPreference(currency: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getCurrencyPreference(): String {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun createDraftOrder(createDraftOrder: DraftOrderRequest) {
         TODO("Not yet implemented")
     }
@@ -87,6 +64,10 @@ class FakeRepository : Repository {
         TODO("Not yet implemented")
     }
 
+    override fun getOrders(): Flow<OrderResponse> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun deleteDraftOrder(id: Long) {
         TODO("Not yet implemented")
     }
@@ -95,13 +76,7 @@ class FakeRepository : Repository {
         TODO("Not yet implemented")
     }
 
-    override fun getOrders(): Flow<OrderResponse> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun addToCompleteOrder(id: String) {
         TODO("Not yet implemented")
     }
 }
-
-

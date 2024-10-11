@@ -58,7 +58,6 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
                 Log.i("ProductDetailsssss", "Success ${it.product!!.bodyHtml}")
                 fetchConversionRate(context, selectedCurrency)
 
-
             }
         }
     }
