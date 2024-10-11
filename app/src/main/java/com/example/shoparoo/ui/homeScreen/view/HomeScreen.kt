@@ -479,7 +479,7 @@ fun ProductCard(
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
                         .size(24.dp)
-                        .clickable {onClickDeleteFav() }
+                        .clickable {showDialog = true }
                 )
             }
             /* Row( modifier = Modifier.align(Alignment.TopEnd)) {
