@@ -58,7 +58,7 @@ fun Favourites(navController: NavController) {
             Text(text = "No Favourites Found", fontSize = 35.sp, fontWeight = FontWeight.Bold)
         }
     }
-    TopBar(navController = navController, title = "Favourites")
+    TopBar(navController = navController, title = "Favourites", top = 50.dp)
     Column(
         Modifier
             .padding(top = 100.dp)

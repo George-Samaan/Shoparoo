@@ -334,7 +334,7 @@ fun FilterBar(selectedFilter: String?, onFilterSelected: (String) -> Unit) {
         filters.forEach { filter ->
             Text(
                 text = filter,
-                fontSize = 16.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = if (filter == selectedFilter) primary else Color.Black,
                 modifier = Modifier

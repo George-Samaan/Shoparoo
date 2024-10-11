@@ -66,12 +66,12 @@ fun OrderScreen(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp, start = 55.dp)
+                .padding(top = 10.dp, start = 55.dp)
         ) {
             Text(
                 text = "Orders",
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
+                fontSize = 22.sp,
                 color = primary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -152,7 +152,7 @@ fun OrderItem(order: Order) {
                     val formattedDate = changeDateFormat(order.created_at.toString())
                     Text(
                         text = formattedDate,
-                        fontSize = 14.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -162,7 +162,7 @@ fun OrderItem(order: Order) {
                 ) {
                     Text(
                         text = "${order.current_total_price} ${order.currency}",
-                        fontSize = 16.sp,
+                        fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
                         color = primary
                     )
@@ -185,14 +185,14 @@ fun OrderItem(order: Order) {
             ) {
                 Text(
                     text = "${order.line_items?.size} Items",
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.Gray
                 )
 
                 Text(
                     text = order.name.toString(),
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.White,
                     modifier = Modifier
@@ -218,7 +218,7 @@ fun OrderItem(order: Order) {
                     // Email
                     Text(
                         text = order.email.toString(),
-                        fontSize = 14.sp,
+                        fontSize = 15.sp,
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                         color = Color.Gray
                     )
@@ -233,7 +233,7 @@ fun OrderItem(order: Order) {
                                             painter = rememberAsyncImagePainter(model = property.value),
                                             contentDescription = null,
                                             modifier = Modifier
-                                                .size(60.dp)
+                                                .size(80.dp)
                                                 .padding(end = 8.dp)
                                         )
                                     }

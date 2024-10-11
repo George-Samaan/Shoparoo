@@ -225,8 +225,8 @@ fun Header(userName: String, onFavouriteClick: () -> Unit, onSearchClick: () -> 
     ) {
         ProfileSection(userName)
         Spacer(modifier = Modifier.weight(1f))
-        FavouriteButton(onFavouriteClick)
         SearchButton(onSearchClick = onSearchClick)
+        FavouriteButton(onFavouriteClick)
     }
 }
 
@@ -265,7 +265,7 @@ fun FavouriteButton(onFavouriteClick: () -> Unit) {
 fun SearchButton(onSearchClick: () -> Unit) {
     IconButton(
         onClick = onSearchClick,
-        modifier = Modifier.size(70.dp)
+        modifier = Modifier.size(50.dp)
     ) {
         Image(
             painter = painterResource(id = R.drawable.baseline_search_24),
@@ -292,7 +292,7 @@ fun BrandsSection(navController: NavController, smartCollections: List<SmartColl
         Text(
             text = "Brands",
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
+            fontSize = 21.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -353,7 +353,7 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
             text = brandName.capitalizeWords(),
             color = primary,
             fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
+            fontSize = 17.sp,
             modifier = Modifier.padding(top = 8.dp)
         )
     }
@@ -382,7 +382,7 @@ fun ForYouSection(
         Text(
             text = "For You",
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
+            fontSize = 21.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         AnimatedVisibility(
@@ -463,7 +463,7 @@ fun ProductCard(
                     text = productName.capitalizeWords(),
                     color = primary,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    fontSize = 17.sp,
                     modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

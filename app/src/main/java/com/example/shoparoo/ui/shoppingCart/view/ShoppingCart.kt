@@ -46,6 +46,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.shoparoo.R
 import com.example.shoparoo.model.LineItem
+import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
 import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.example.shoparoo.ui.theme.primary
@@ -119,12 +120,12 @@ fun ShoppingCartScreen(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 20.dp, start = 55.dp)
+                            .padding(top = 10.dp, start = 55.dp)
                     ) {
                         Text(
                             text = "Cart",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
+                            fontSize = 22.sp,
                             color = primary,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
@@ -163,8 +164,8 @@ fun ProductList(
 
             ProductItem(
                 imageUrl = imageUrl,
-                productName = lineItem.title,
-                productBrand = lineItem.vendor ?: "Unknown Brand",
+                productName = lineItem.title.capitalizeWords(),
+                productBrand = lineItem.vendor?.capitalizeWords() ?: "Unknown Brand",
                 price = "$${lineItem.price}",
                 quantity = lineItem.quantity,
                 onIncrement = {
