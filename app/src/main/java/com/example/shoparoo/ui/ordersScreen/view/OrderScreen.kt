@@ -43,15 +43,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.Order
 import com.example.shoparoo.ui.ordersScreen.viewModel.OrdersViewModel
 import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
-import com.example.shoparoo.ui.productScreen.view.TopBar
 import com.example.shoparoo.ui.theme.primary
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -59,11 +58,26 @@ import java.util.Locale
 @Composable
 fun OrderScreen(
     orderViewModel: OrdersViewModel,
-    navController: NavController
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
 
-        TopBar(navController, title = "Orders")
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 30.dp, start = 55.dp)
+        ) {
+            Text(
+                text = "Orders",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(end = 50.dp)
+            )
+        }
         Spacer(modifier = Modifier.size(16.dp))
         LaunchedEffect(Unit) {
             orderViewModel.getOrders()

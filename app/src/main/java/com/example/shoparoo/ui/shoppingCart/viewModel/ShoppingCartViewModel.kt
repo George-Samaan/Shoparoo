@@ -27,7 +27,6 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
     private val _draftOrderDetails = MutableStateFlow<DraftOrderDetails?>(null)
     val draftOrderDetails = _draftOrderDetails.asStateFlow()
 
-
     fun getDraftOrderDetails() {
         viewModelScope.launch {
             repository.getDraftOrder()
@@ -71,6 +70,12 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
             }
         }
     }
+
+    fun clearCart() {
+        // Implement logic to clear cart items, e.g., update the LiveData or MutableState holding cart items
+        _cartItems.value = emptyList() // Assuming cartItems is MutableState<List<LineItem>>
+    }
+
 
 
     fun increaseQuantity(lineItem: LineItem) {
@@ -165,4 +170,3 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
 
 
 }
-
