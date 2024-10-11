@@ -50,6 +50,7 @@ import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModelFactory
 import kotlinx.coroutines.delay
 import java.util.Calendar
+import kotlin.concurrent.thread
 
 
 @Composable
@@ -329,9 +330,11 @@ fun CheckoutButtonCheck(
         Log.d("checkID", "$orderId")
 
         if (orderId != null) {
-            paymentViewModel.addToCompleteOrder(orderId.toString())
             paymentViewModel.let {
-                it.deleteOrderFromDraft(orderId.toString())
+                thread {
+                    it.addToCompleteOrder(orderId.toString())
+                    it.deleteOrderFromDraft(orderId.toString())
+                }
             }
         } else {
             Log.d("CheckoutButtonCheck", "Order ID is null")
