@@ -315,7 +315,7 @@ fun TopBar(navController: NavController, title: String) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 5.dp)
+            .padding(top = 60.dp, start = 5.dp)
     ) {
         Box(
             modifier = Modifier

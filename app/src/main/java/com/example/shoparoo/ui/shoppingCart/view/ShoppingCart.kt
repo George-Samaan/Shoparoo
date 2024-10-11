@@ -119,7 +119,7 @@ fun ShoppingCartScreen(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 30.dp, start = 55.dp)
+                            .padding(top = 20.dp, start = 55.dp)
                     ) {
                         Text(
                             text = "Cart",
