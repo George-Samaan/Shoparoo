@@ -87,7 +87,7 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
                         selectedPaymentMethod = method
                         showAddCreditCardScreen = method == "card"
                     },
-                    showAddCreditCardScreen = showAddCreditCardScreen
+                    showAddCreditCardScreen = showAddCreditCardScreen,
                 )
             }
 

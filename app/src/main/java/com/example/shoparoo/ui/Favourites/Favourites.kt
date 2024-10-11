@@ -83,7 +83,7 @@ fun Favourites(navController: NavController) {
         val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
         // Get saved currency and conversion rate from SharedPreferences
-        val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+        val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
         val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
 

@@ -10,6 +10,7 @@ import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.LineItem
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
@@ -26,7 +27,6 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
 
     private val _draftOrderDetails = MutableStateFlow<DraftOrderDetails?>(null)
     val draftOrderDetails = _draftOrderDetails.asStateFlow()
-
 
     fun getDraftOrderDetails() {
         viewModelScope.launch {
@@ -71,6 +71,12 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
             }
         }
     }
+
+    fun clearCart() {
+        // Implement logic to clear cart items, e.g., update the LiveData or MutableState holding cart items
+        _cartItems.value = emptyList() // Assuming cartItems is MutableState<List<LineItem>>
+    }
+
 
 
     fun increaseQuantity(lineItem: LineItem) {

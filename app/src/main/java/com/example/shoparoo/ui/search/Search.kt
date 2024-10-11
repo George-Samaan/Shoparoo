@@ -1,5 +1,6 @@
 package com.example.shoparoo.ui.search
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -107,6 +109,17 @@ fun Search(navController: NavController) {
 
 @Composable
 fun filterItems(products: List<ProductsItem>, query: String, navController: NavController) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    // Get saved currency and conversion rate from SharedPreferences
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
+    val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
+
+
+    val currencySymbols = mapOf(
+        "USD" to "$ ",
+        "EGP" to "EGP "
+    )
     var filteredProducts: MutableList<ProductsItem> = mutableListOf()
     for (product in products) {
         if (product.title!!.contains(query, ignoreCase = true)) {
@@ -115,5 +128,5 @@ fun filterItems(products: List<ProductsItem>, query: String, navController: NavC
            Log.i("SearchFilter", "Filtered products: $filteredProducts")
         }
     }
-    ProductGrid(filteredProducts, navController, "gg", 1.0f, emptyMap(), false)
+    ProductGrid(filteredProducts, navController, selectedCurrency, conversionRate, currencySymbols, false)
 }

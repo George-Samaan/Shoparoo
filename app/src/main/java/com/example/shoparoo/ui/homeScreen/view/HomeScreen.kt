@@ -114,13 +114,16 @@ fun HomeScreenDesign(
         val context = LocalContext.current
         val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
-        val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+        val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
         val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
         val currencySymbols = mapOf(
-            "USD" to "$ ",
-            "EGP" to "EGP "
+            "EGP" to "EGP ",
+            "USD" to "$ "
+
         )
+
+
 
         val isRefreshing = remember { mutableStateOf(false) }
         isRefreshing.value =
@@ -395,15 +398,20 @@ fun ForYouSection(
             ) {
                 items(randomProducts.size) { index ->
                     val product = randomProducts[index]
-                    val priceInUSD = product.variants?.get(0)?.price?.toDoubleOrNull() ?: 0.0
-                    val convertedPrice = priceInUSD * conversionRate
+                    val priceInEGP = product.variants?.get(0)?.price?.toDoubleOrNull() ?: 0.0
+                    val convertedPrice = if (selectedCurrency == "USD") {
+                        priceInEGP / conversionRate
+                    } else {
+                        priceInEGP
+                    }
                     val formattedPrice = String.format("%.2f", convertedPrice)
+
                     ProductCard(
                         productName = product.title.toString(),
                         productPrice = formattedPrice,
                         productImage = product.images?.get(0)?.src,
                         onClick = { navController.navigate("productDetails/${product.id}") },
-                        currencySymbol = currencySymbols[selectedCurrency] ?: "$"
+                        currencySymbol = currencySymbols[selectedCurrency] ?: "$ "
                     )
                 }
             }

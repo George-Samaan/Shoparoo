@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.shoparoo.R
 import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
@@ -319,10 +320,12 @@ fun CheckoutButtonCheck(
     var isProcessing by remember { mutableStateOf(false) } // Track payment process state
     var paymentSuccess by remember { mutableStateOf(false) } // Track if payment was successful
 
+
     val draftOrderDetails by shoppingCartViewModel.draftOrderDetails.collectAsState()
     LaunchedEffect(Unit) {
         Log.d("CheckoutButtonCheck", "LaunchedEffect triggered")
         shoppingCartViewModel.getDraftOrderDetails()
+
     }
     fun completeOrderIfPossible() {
         val orderId = draftOrderDetails?.id
@@ -330,9 +333,8 @@ fun CheckoutButtonCheck(
 
         if (orderId != null) {
             paymentViewModel.addToCompleteOrder(orderId.toString())
-            paymentViewModel.let {
-                it.deleteOrderFromDraft(orderId.toString())
-            }
+            paymentViewModel.let { it.deleteOrderFromDraft(orderId.toString()) }
+
         } else {
             Log.d("CheckoutButtonCheck", "Order ID is null")
         }
@@ -361,8 +363,7 @@ fun CheckoutButtonCheck(
                     expirationYear
                 )
             ) {
-                Toast.makeText(context, "Order placed with Credit/Debit Card", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(context, "Order placed with Credit/Debit Card", Toast.LENGTH_SHORT).show()
             }
         }
     } else {
@@ -372,6 +373,7 @@ fun CheckoutButtonCheck(
                     // Start processing for cash on delivery
                     isProcessing = true
                     completeOrderIfPossible()
+
                 } else if (selectedPaymentMethod == "card") {
                     // Validate card and start processing if valid
                     if (validateCardDetails(
@@ -414,6 +416,8 @@ fun validateCardDetails(
             expirationMonth.length == 2 && expirationMonth.toIntOrNull() in 1..12 &&
             expirationYear.length == 2 && expirationYear.toIntOrNull() != null
 }
+
+
 
 
 /*/*

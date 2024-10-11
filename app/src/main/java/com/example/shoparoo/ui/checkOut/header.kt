@@ -21,8 +21,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.shoparoo.R
+import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
+import com.example.shoparoo.data.network.ApiClient
+import com.example.shoparoo.data.repository.RepositoryImpl
+import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
+import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModelFactory
 import com.example.shoparoo.ui.theme.primary
 
 // Header for the checkout screen
@@ -39,7 +45,8 @@ fun AppHeader(navController: NavController, title: String) {
                 .size(50.dp)
                 .clip(CircleShape)
                 .background(Color(0xFFF5F5F5))
-                .clickable { navController.popBackStack() },
+                .clickable {
+                    navController.popBackStack() },
             contentAlignment = Alignment.Center
         ) {
             Image(

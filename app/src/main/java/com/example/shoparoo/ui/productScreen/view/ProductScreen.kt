@@ -92,7 +92,7 @@ fun ProductsScreen(
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
     // Get saved currency and conversion rate from SharedPreferences
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
     val currencySymbols = mapOf(
@@ -154,8 +154,8 @@ fun ProductsScreen(
             isFilteringComplete = false
             delay(300)
 
-            if (selectedCurrency == "EGP") {
-                sliderValue / conversionRate // Convert EGP to USD for filtering
+            if (selectedCurrency == "USD") {
+                sliderValue / conversionRate // Convert USD to EGP for filtering
             } else {
                 sliderValue.toFloat()
             }
@@ -164,8 +164,8 @@ fun ProductsScreen(
                 val productPriceInUSD =
                     product.variants?.firstOrNull()?.price?.toFloatOrNull() ?: 0f
                 // Convert product price to the selected currency for comparison
-                val productPriceInSelectedCurrency = if (selectedCurrency == "EGP") {
-                    productPriceInUSD * conversionRate
+                val productPriceInSelectedCurrency = if (selectedCurrency == "USD") {
+                    productPriceInUSD / conversionRate
                 } else {
                     productPriceInUSD
                 }
@@ -203,7 +203,7 @@ fun ProductsScreen(
                     ProductInfoMessage(
                         isEmpty = isEmpty,
                         convertedSliderValue = (sliderValue),
-                        currencySymbol = currencySymbols[selectedCurrency] ?: "$"
+                        currencySymbol = currencySymbols[selectedCurrency] ?: "EGP"
                     )
                 }
 
@@ -247,8 +247,13 @@ fun ProductGrid(
             val product = filteredProducts[index]
             val fullTitle = product.title ?: "Unknown"
             val productName = fullTitle.split("|").getOrNull(1)?.trim() ?: fullTitle
-            val priceInUSD = product.variants?.get(0)?.price?.toDoubleOrNull() ?: 0.0
-            val convertedPrice = priceInUSD * conversionRate
+            val priceInEGP = product.variants?.get(0)?.price?.toDoubleOrNull() ?: 0.0
+
+            val convertedPrice = if (selectedCurrency == "USD") {
+                priceInEGP / conversionRate
+            } else {
+                priceInEGP
+            }
             val formattedPrice = String.format("%.2f", convertedPrice)
 
             ProductCard(
@@ -258,7 +263,7 @@ fun ProductGrid(
                 onClick = {
                     navController!!.navigate("productDetails/${product.id}")
                 },
-                currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$"),
+                currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "EGP"),
                 inFav = inFav, onClickDeleteFav =  {
                     viewModel!!.getFavourites(true, product.id!!)
                 }

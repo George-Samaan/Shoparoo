@@ -143,6 +143,9 @@ fun ProfileScreen(navController: NavController) {
                         Toast.makeText(context, "Currency changed to $currency", Toast.LENGTH_SHORT)
                             .show()
                         showCurrencySheet = false
+                    },
+                    onConversionRateFetched = { conversionRate ->
+                        updateUIWithNewConversionRate(conversionRate)
                     }
                 )
             }
@@ -183,6 +186,10 @@ fun ProfileScreen(navController: NavController) {
             )
         }
     }
+}
+
+fun updateUIWithNewConversionRate(conversionRate: Float) {
+
 }
 
 @Composable
@@ -447,6 +454,69 @@ fun BottomSheet(onDismiss: () -> Unit, content: @Composable () -> Unit) {
 }
 
 @Composable
+fun Currency(selectedCurrency: String, onCurrencySelected: (String) -> Unit, onConversionRateFetched: (Float) -> Unit) {
+    val context = LocalContext.current
+    val currencies = listOf(
+        Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC"),
+        Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8"),
+
+    )
+
+
+    LazyColumn {
+        items(currencies) { (currency, flag) ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp, horizontal = 20.dp)
+                    .clickable {
+                        // Trigger currency conversion
+                        onCurrencySelected(currency)
+                        fetchConversionRate(context, currency, onConversionRateFetched)
+                    }
+            ) {
+                Text(
+                    text = flag,
+                    modifier = Modifier.padding(end = 20.dp)
+                )
+                Text(text = currency)
+            }
+        }
+    }
+}
+
+fun fetchConversionRate(context: Context, selectedCurrency: String, updateConversionRate: (Float) -> Unit) {
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val response = currencyApi.getRates(Constants.currencyApi)
+            if (response.isSuccessful) {
+                val rates = response.body()?.rates
+                rates?.let {
+                    val conversionRate = it[selectedCurrency] ?: 1.0
+                    updateConversionRate(conversionRate.toFloat())
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+}
+
+
+fun saveCurrencyPreference(context: Context, currency: String) {
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    sharedPreferences.edit().putString("currency", currency).apply()
+}
+
+
+fun getCurrencyPreference(context: Context): String {
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    return sharedPreferences.getString("currency", "EGP") ?: "EGP"
+}
+
+
+
+@Composable
 fun AboutUs() {
     val names = listOf(
         "George Michel Louis",
@@ -494,70 +564,3 @@ fun Language() {
     }
 }
 
-@Composable
-fun Currency(selectedCurrency: String, onCurrencySelected: (String) -> Unit) {
-    val context = LocalContext.current
-    val currencies = listOf(
-        Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8"),
-        Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC")
-    )
-
-
-    LazyColumn {
-        items(currencies) { (currency, flag) ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp, horizontal = 20.dp)
-                    .clickable {
-                        // Trigger currency conversion
-                        onCurrencySelected(currency)
-                        fetchConversionRate(context, currency)
-                    }
-            ) {
-                Text(
-                    text = flag,
-                    modifier = Modifier.padding(end = 20.dp)
-                )
-                Text(text = currency)
-            }
-        }
-    }
-}
-
-fun fetchConversionRate(context: Context, selectedCurrency: String) {
-    CoroutineScope(Dispatchers.IO).launch {
-        try {
-            val response = currencyApi.getRates(Constants.currencyApi)
-            if (response.isSuccessful) {
-                val rates = response.body()?.rates
-                rates?.let {
-                    val conversionRate = it[selectedCurrency] ?: 1.0
-                    updatePrices(context, conversionRate)
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-}
-
-fun updatePrices(context: Context, conversionRate: Double) {
-    //store the conversion rate in SharedPreferences and update product prices across the app
-    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    sharedPreferences.edit().putFloat("conversionRate", conversionRate.toFloat()).apply()
-
-    CoroutineScope(Dispatchers.Main).launch {
-        // Call necessary composables to update UI
-    }
-}
-
-fun saveCurrencyPreference(context: Context, currency: String) {
-    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    sharedPreferences.edit().putString("currency", currency).apply()
-}
-
-fun getCurrencyPreference(context: Context): String {
-    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    return sharedPreferences.getString("currency", "USD") ?: "USD"  // Default to USD
-}

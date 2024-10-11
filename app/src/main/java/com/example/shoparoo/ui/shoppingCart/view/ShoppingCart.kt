@@ -64,11 +64,13 @@ fun ShoppingCartScreen(
     val showDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        isLoading.value = true
         viewModel.getCartItems()
         delay(1500)
         isLoading.value = false
 
-        if (cartItems.isEmpty()) {
+        // Check if the cart is empty and show the dialog
+        if (cartItems.isEmpty() && !isLoading.value) {
             showDialog.value = true
         }
     }
@@ -120,7 +122,7 @@ fun ShoppingCartScreen(
                 if (cartItems.isNotEmpty()) {
                     item {
                         val totalItems = cartItems.sumOf { it.quantity }
-                        CheckoutButton(navControllerBottom, totalItems)
+                        CheckoutButton(navControllerBottom, totalItems, viewModel)
                     }
                 }
             }
@@ -267,9 +269,12 @@ fun QuantitySelector(quantity: Int, onIncrement: () -> Unit, onDecrement: () -> 
 
 
 @Composable
-fun CheckoutButton(navController: NavController, totalItems: Int) {
+fun CheckoutButton(navController: NavController, totalItems: Int, viewModel: ShoppingCartViewModel) {
     Button(
-        onClick = { navController.navigate("checkout") },
+        onClick = {
+            viewModel.clearCart() // Clear the cart items
+            navController.navigate("checkout")
+                  },
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)

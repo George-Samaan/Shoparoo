@@ -98,7 +98,7 @@ import kotlin.random.Random
 fun ProductDetails(id: String, navController: NavHostController) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
 
     val viewModel: ProductDetailsViewModel = viewModel(
         factory = ProductDetailsViewModelFactory(
@@ -139,7 +139,7 @@ private fun productInfo(
 ) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
     val selected = remember { mutableStateOf(singleProductDetail.product!!.variants!![0]) }
     val isLoggedIn = AuthViewModel().authState.collectAsState()
@@ -379,10 +379,12 @@ private fun StockAndPrice(
     conversionRate: Float
 ) {
     val currencySymbols = mapOf(
-        "USD" to "$ ",
-        "EGP" to "EGP "
+        "EGP" to "EGP ",
+        "USD" to "$ "
+
     )
-    val price = selected.value?.price?.toFloatOrNull()?.times(conversionRate) ?: 0f
+
+    val price = selected.value?.price?.toFloatOrNull()?.div(conversionRate) ?: 1.0f
 
     val stockPriceVisible = remember { mutableStateOf(false) }
 
