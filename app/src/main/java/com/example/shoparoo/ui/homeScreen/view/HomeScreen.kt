@@ -27,12 +27,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -93,6 +92,7 @@ import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModelFacto
 import com.example.shoparoo.ui.theme.primary
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import kotlinx.coroutines.delay
 import networkListener
 
 @Composable
@@ -425,10 +425,19 @@ fun ProductCard(
     currencySymbol: String,
     onClick: () -> Unit,
     inFav: Boolean = false,
-    onClickDeleteFav: () -> Unit = {},// Callback for the delete icon
+    onClickDeleteFav: () -> Unit = {}, // Callback for the delete icon
     onClickAddFav: () -> Unit = {} // Callback for the add to favorites icon
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+
+    if (isLoading) {
+        LaunchedEffect(isLoading) {
+            delay(700)
+            showDialog = false
+            isLoading = false
+        }
+    }
 
     Card(
         modifier = Modifier
@@ -479,68 +488,33 @@ fun ProductCard(
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
                         .size(24.dp)
-                        .clickable {showDialog = true }
+                        .clickable { showDialog = true }
                 )
             }
-            /* Row( modifier = Modifier.align(Alignment.TopEnd)) {
-                 Icon(
-                     imageVector = Icons.Default.AddShoppingCart,
-                     contentDescription = "Delete",
-                     tint = Color.Black,
-                     modifier = Modifier
-                       //  .align(Alignment.TopEnd)
-                         .padding(8.dp)
-                         .size(24.dp)
-                         .clickable {//showDialog = true
-
-
-                         }
-                 )
-               //  Spacer(modifier = Modifier.height(5.dp))
-                 // Conditional delete icon on top right corner
-                 if (inFav) {
-                     Icon(
-                         imageVector = Icons.Default.Delete,
-                         contentDescription = "Delete",
-                         tint = Color.Red,
-                         modifier = Modifier
-                            // .align(Alignment.TopEnd)
-                             .padding(8.dp)
-                             .size(24.dp)
-                             .clickable {showDialog = true }
-                     )
-                 }
-                 else{
-                     Icon(
-                         imageVector = Icons.Default.Favorite,
-                         contentDescription = "Delete",
-                         tint = Color.Black,
-                         modifier = Modifier
-                           //  .align(Alignment.TopEnd)
-                             .padding(8.dp)
-                             .size(24.dp)
-                             .clickable {//showDialog = true
-
-
-                                  }
-                     )
-                 }
-
-             }*/
-
         }
     }
+
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
             title = { Text("Remove from Favorites", fontWeight = FontWeight.Bold) },
             text = { Text("Are you sure you want to remove $productName from favorites?") },
             confirmButton = {
-                TextButton(onClick = {
-                    onClickDeleteFav()
-                    showDialog = false
-                }) {
-                    Text("Yes", color = Color.Black)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(30.dp)
+                            .padding(top = 15.dp, end = 12.dp),
+                        strokeWidth = 2.dp,
+                        color = Color.Gray
+                    )
+                } else {
+                    TextButton(onClick = {
+                        onClickDeleteFav()
+                        isLoading = true // Set loading state to true
+                    }) {
+                        Text("Yes", color = Color.Black)
+                    }
                 }
             },
             dismissButton = {
