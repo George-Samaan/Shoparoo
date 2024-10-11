@@ -82,8 +82,10 @@ import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
 import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
+import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
 import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModel
 import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModelFactory
+import com.example.shoparoo.ui.theme.darkGreen
 import com.example.shoparoo.ui.theme.primary
 import com.smarttoolfactory.ratingbar.RatingBar
 import com.smarttoolfactory.ratingbar.model.Shimmer
@@ -159,10 +161,10 @@ private fun productInfo(
         Column(
             modifier = Modifier.padding(start = 25.dp, end = 25.dp, bottom = 25.dp)
         ) {
-            Spacer(modifier = Modifier.height(5.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = singleProductDetail.product!!.title!!,
-                fontSize = 25.sp,
+                text = singleProductDetail.product.title!!.capitalizeWords(),
+                fontSize = 27.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .align(Alignment.Start)
@@ -170,7 +172,7 @@ private fun productInfo(
             )
             ReviewSection()
             StockAndPrice(selected, selectedCurrency, conversionRate)
-            VariantSection(singleProductDetail.product!!.variants, selected)
+            VariantSection(singleProductDetail.product.variants, selected)
 
 
             AnimatedVisibility(
@@ -178,7 +180,7 @@ private fun productInfo(
                 enter = slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn(),
                 exit = fadeOut()
             ) {
-                DescriptionSection(singleProductDetail.product!!.bodyHtml)
+                DescriptionSection(singleProductDetail.product.bodyHtml)
             }
         }
 
@@ -190,7 +192,11 @@ private fun productInfo(
                         Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
                     } else {
                         if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
-                            Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT)
+                            Toast.makeText(
+                                context,
+                                "Please login to add to cart",
+                                Toast.LENGTH_SHORT
+                            )
                                 .show()
                         } else {
                             viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
@@ -222,11 +228,10 @@ private fun productInfo(
                 },
                 isFav = isFav
             )
-        }
-        else{
+        } else {
             Button(onClick = {
-                navController.navigate("login"){
-                    popUpTo("productDetails"){
+                navController.navigate("login") {
+                    popUpTo("productDetails") {
                         inclusive = true
                     }
                 }
@@ -408,6 +413,7 @@ private fun StockAndPrice(
         exit = fadeOut()
     ) {
         Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .padding(10.dp)
                 .fillMaxWidth()
@@ -415,13 +421,13 @@ private fun StockAndPrice(
             Text(
                 text = (selected.value!!.inventoryQuantity).toString() + " item left",
                 fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (selected.value!!.inventoryQuantity!! > 10) Color.Gray else Color.Red
+                fontWeight = FontWeight.SemiBold,
+                color = if (selected.value!!.inventoryQuantity!! > 6) darkGreen else Color.Red
             )
             Spacer(Modifier.weight(1f))
             Text(
-                text =  formattedPrice +" "+ currencySymbols[selectedCurrency] ?: " $", //"${"%.2f".format(price)} ${currencySymbols[selectedCurrency] ?: " $"}",
-                fontSize = 18.sp,
+                text = formattedPrice + " " + currencySymbols[selectedCurrency],
+                fontSize = 19.sp,
                 fontWeight = FontWeight.Bold,
             )
         }
@@ -563,21 +569,23 @@ fun DescriptionSection(bodyHtml: String?) {
             .offset(x = offsetX)
     ) {
         Text(
-            text = "Description",
+            text = "Description:",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 5.dp, top = 5.dp, bottom = 15.dp)
         )
         Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFEFEFEF), RoundedCornerShape(8.dp))
+                .padding(12.dp),
             text = bodyHtml ?: "",
             fontSize = 18.sp,
             color = MaterialTheme.colorScheme.onSurface,
             lineHeight = 28.sp,
             fontWeight = FontWeight.Normal,
-            modifier = Modifier
-                .background(Color(0xFFEFEFEF), RoundedCornerShape(8.dp))
-                .padding(12.dp)
-        )
+
+            )
     }
 }
 
@@ -661,6 +669,7 @@ fun BottomSection(
             colors = buttonColors,
             modifier = Modifier
                 .padding(horizontal = 10.dp)
+                .size(50.dp)
                 .weight(1f)
         ) {
             Icon(
