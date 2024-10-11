@@ -259,7 +259,8 @@ private fun NameFields(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 45.dp, vertical = 10.dp),
-            isError = Validation
+            isError = Validation,
+            singleLine = true
         )
     }
     if (nameValue.value.isEmpty() && Validation)
@@ -304,7 +305,8 @@ fun PasswordField(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 45.dp, vertical = 10.dp),
-        isError = Validation
+        isError = Validation,
+        singleLine = true
 
     )
     if (textValue.value.isEmpty() && Validation)

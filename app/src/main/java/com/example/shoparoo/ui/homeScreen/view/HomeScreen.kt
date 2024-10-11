@@ -27,7 +27,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -103,7 +105,7 @@ fun HomeScreenDesign(
     bottomNavController: NavController,
     navController: NavController,
 
-) {
+    ) {
     val isNetworkAvailable = networkListener()
     if (!isNetworkAvailable.value) {
         // Show No Internet connection message
@@ -145,7 +147,7 @@ fun HomeScreenDesign(
                     })
                 }
                 item {
-                   // SearchBar(query, onQueryChange,navController,viewModel)
+                    // SearchBar(query, onQueryChange,navController,viewModel)
                 }
                 item {
                     CouponsSliderWithIndicator(
@@ -219,7 +221,7 @@ fun Header(userName: String, onFavouriteClick: () -> Unit, onSearchClick: () -> 
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
-      //  horizontalArrangement = Arrangement.SpaceBetween
+        //  horizontalArrangement = Arrangement.SpaceBetween
     ) {
         ProfileSection(userName)
         Spacer(modifier = Modifier.weight(1f))
@@ -423,7 +425,8 @@ fun ProductCard(
     currencySymbol: String,
     onClick: () -> Unit,
     inFav: Boolean = false,
-    onClickDeleteFav: () -> Unit = {}// Callback for the delete icon
+    onClickDeleteFav: () -> Unit = {},// Callback for the delete icon
+    onClickAddFav: () -> Unit = {} // Callback for the add to favorites icon
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -476,9 +479,55 @@ fun ProductCard(
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
                         .size(24.dp)
-                        .clickable {showDialog = true}
+                        .clickable {onClickDeleteFav() }
                 )
             }
+            /* Row( modifier = Modifier.align(Alignment.TopEnd)) {
+                 Icon(
+                     imageVector = Icons.Default.AddShoppingCart,
+                     contentDescription = "Delete",
+                     tint = Color.Black,
+                     modifier = Modifier
+                       //  .align(Alignment.TopEnd)
+                         .padding(8.dp)
+                         .size(24.dp)
+                         .clickable {//showDialog = true
+
+
+                         }
+                 )
+               //  Spacer(modifier = Modifier.height(5.dp))
+                 // Conditional delete icon on top right corner
+                 if (inFav) {
+                     Icon(
+                         imageVector = Icons.Default.Delete,
+                         contentDescription = "Delete",
+                         tint = Color.Red,
+                         modifier = Modifier
+                            // .align(Alignment.TopEnd)
+                             .padding(8.dp)
+                             .size(24.dp)
+                             .clickable {showDialog = true }
+                     )
+                 }
+                 else{
+                     Icon(
+                         imageVector = Icons.Default.Favorite,
+                         contentDescription = "Delete",
+                         tint = Color.Black,
+                         modifier = Modifier
+                           //  .align(Alignment.TopEnd)
+                             .padding(8.dp)
+                             .size(24.dp)
+                             .clickable {//showDialog = true
+
+
+                                  }
+                     )
+                 }
+
+             }*/
+
         }
     }
     if (showDialog) {
@@ -505,8 +554,6 @@ fun ProductCard(
 }
 
 
-
-
 fun String.capitalizeWords(): String {
     return this.split(" ")
         .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
@@ -525,7 +572,7 @@ fun MainScreen(
         )
     )
 
-    val shoppingCartViewModel : ShoppingCartViewModel = viewModel(
+    val shoppingCartViewModel: ShoppingCartViewModel = viewModel(
         factory = ShoppingCartViewModelFactory(
             repository = RepositoryImpl(
                 remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
@@ -601,7 +648,7 @@ fun MainScreen(
 
             }
             composable(BottomNav.Cart.route) {
-                ShoppingCartScreen(navControllerBottom,shoppingCartViewModel,navController)
+                ShoppingCartScreen(navControllerBottom, shoppingCartViewModel, navController)
             }
             composable(BottomNav.orders.route) {
                 Text(text = "Orders Screen")

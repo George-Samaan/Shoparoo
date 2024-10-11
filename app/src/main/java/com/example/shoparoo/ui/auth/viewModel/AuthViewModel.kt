@@ -23,7 +23,7 @@ class AuthViewModel : ViewModel() {
         checkUser()
     }
 
-     fun checkUser() {
+     private fun checkUser() {
         if (firebaseAuth.currentUser != null) {
             // _authState.value = AuthState.Authenticated
             if (firebaseAuth.currentUser!!.isEmailVerified) {
@@ -98,6 +98,16 @@ class AuthViewModel : ViewModel() {
     fun signOut() {
         firebaseAuth.signOut()
         _authState.value = AuthState.Loading
+    }
+
+    fun refreshVerification() {
+        firebaseAuth.currentUser!!.reload().addOnCompleteListener {
+            if (firebaseAuth.currentUser!!.isEmailVerified) {
+                _authState.value = AuthState.Authenticated
+            } else {
+                _authState.value = AuthState.UnVerified
+            }
+        }
     }
 }
 

@@ -1,7 +1,6 @@
 package com.example.shoparoo.ui.auth.view
 
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,9 +23,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.shoparoo.R
-
+import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 
 
 @Composable
@@ -43,6 +43,7 @@ fun UnVerified(navController: NavHostController) {
         )
 
         val context = LocalContext.current
+        val viewModel = viewModel<AuthViewModel>()
 
 
         Box(
@@ -94,6 +95,7 @@ fun UnVerified(navController: NavHostController) {
                     )
                 )
                 .clickable {
+                    viewModel.refreshVerification()
                     navController.navigate("home") {
                         popUpTo("splash") { inclusive = true }
                     }

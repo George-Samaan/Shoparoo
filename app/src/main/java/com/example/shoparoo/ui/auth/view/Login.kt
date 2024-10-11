@@ -149,6 +149,7 @@ fun LoginScreen(navController: NavHostController) {
                     .fillMaxWidth()
                     .padding(horizontal = 45.dp, vertical = 10.dp),
                 isError = emailValidation,
+                singleLine = true
             )
             if (emailValidation)
                 Row("Don't leave your email empty")
@@ -181,7 +182,8 @@ fun LoginScreen(navController: NavHostController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 45.dp, vertical = 10.dp),
-                isError = passValidation
+                isError = passValidation,
+                singleLine = true
             )
             if (passValidation)
                 Row("Don't leave your password empty")
