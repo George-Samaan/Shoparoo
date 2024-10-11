@@ -8,5 +8,5 @@ object Constants {
         "https://$SHOPAROO_APIKEY:$ADMIN_API_ACCESS_TOKEN@$STORE_URL/admin/api/2024-07/"
     const val SHOPAROO_STOREFRONT_ACCESS_TOKE = "e258d860a3c906bc1707787f854d0da5"
     const val SHOPAROO_API_SECRETKEY = "d9a8cef03f1d37490cd6c6f2d83a07ce"
-    const val currencyApi = "db5f5601837148c482888a4cdf945326"
+    const val currencyApi = "a84130eca27f46bcb284d41b0fd5cc2b"
 }
