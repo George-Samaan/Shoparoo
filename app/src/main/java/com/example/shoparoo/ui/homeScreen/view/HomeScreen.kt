@@ -471,7 +471,7 @@ fun ProductCard(
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
                         .size(24.dp)
-                        .clickable {onClickDeleteFav() }
+                        .clickable { onClickDeleteFav() }
                 )
             }
         }
@@ -534,6 +534,7 @@ fun MainScreen(
     val isLoading by viewModel.isLoading.collectAsState()
 
     LaunchedEffect(Unit) {
+        viewModel.getName()
         viewModel.getSmartCollections()
         viewModel.getForYouProducts()
     }
