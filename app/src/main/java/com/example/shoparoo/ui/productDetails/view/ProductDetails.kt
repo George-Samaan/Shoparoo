@@ -105,7 +105,6 @@ fun ProductDetails(id: String, navController: NavHostController) {
     )
     val ui = viewModel.singleProductDetail.collectAsState()
     val isFav = viewModel.isFav.collectAsState()
-    val isLoggedIn = AuthViewModel().authState.collectAsState()
     LaunchedEffect(Unit) {
         viewModel.getSingleProductDetail(id)
     }
@@ -185,19 +184,15 @@ private fun productInfo(
         }
 
         Spacer(modifier = Modifier.weight(1f))
-        if (isLoggedIn.value == AuthState.Authenticated) {
+
             BottomSection(
                 onClickCart = {
                     if (selected.value!!.inventoryQuantity!! < 1) {
                         Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
                     } else {
                         if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
-                            Toast.makeText(
-                                context,
-                                "Please login to add to cart",
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
+                            Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT).show()
+                            navController.navigate("login")
                         } else {
                             viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
                             Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
@@ -205,11 +200,17 @@ private fun productInfo(
                     }
                 },
                 onClickFav = {
-                    viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
-                    if (!isFav)
-                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
-                    else
-                        Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                    if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
+                        Toast.makeText(context, "Please login to favourites", Toast.LENGTH_SHORT).show()
+                        navController.navigate("login")
+                    } else {
+                        viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
+                        if (!isFav)
+                            Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                        else
+                            Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT)
+                                .show()
+                    }
                 },
                 buttonColors = if (isFav) {
                     ButtonDefaults.buttonColors(
@@ -228,17 +229,6 @@ private fun productInfo(
                 },
                 isFav = isFav
             )
-        } else {
-            Button(onClick = {
-                navController.navigate("login") {
-                    popUpTo("productDetails") {
-                        inclusive = true
-                    }
-                }
-            }) {
-                Text("Login to add to cart")
-            }
-        }
 
     }
 

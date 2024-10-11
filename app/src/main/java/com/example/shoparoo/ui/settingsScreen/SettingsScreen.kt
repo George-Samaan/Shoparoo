@@ -69,6 +69,8 @@ import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.currencyApi
 import com.example.shoparoo.data.repository.RepositoryImpl
+import com.example.shoparoo.ui.auth.view.ReusableLottie
+import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
@@ -90,14 +92,19 @@ fun ProfileScreen(navController: NavController) {
     val savedCurrency = getCurrencyPreference(context)
     var selectedCurrency by remember { mutableStateOf(savedCurrency) }
     val showSignOutDialog = remember { mutableStateOf(false) }
-
+    val isLoggedin = AuthViewModel().authState.collectAsState().value
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            //  .verticalScroll(rememberScrollState())
             .background(Color(0xFFF7F7F7))
     ) {
         // Profile Header with background
+        if (isLoggedin == AuthState.UnAuthenticated) {
+            Toast.makeText(context, "Please login first", Toast.LENGTH_SHORT).show()
+            navController.navigate("login")
+        }
+        else{
         ProfileHeader()
 
         Column(
@@ -139,7 +146,7 @@ fun ProfileScreen(navController: NavController) {
                     onCurrencySelected = { currency ->
                         selectedCurrency = currency
                         saveCurrencyPreference(context, currency)
-                     //   Toast.makeText(context, "Currency changed to $currency", Toast.LENGTH_SHORT).show()
+                        //   Toast.makeText(context, "Currency changed to $currency", Toast.LENGTH_SHORT).show()
                         showCurrencySheet = false
                     }
                 )
@@ -181,6 +188,7 @@ fun ProfileScreen(navController: NavController) {
             )
         }
     }
+}
 }
 
 @Composable
@@ -496,8 +504,8 @@ fun Language() {
 fun Currency(selectedCurrency: String, onCurrencySelected: (String) -> Unit) {
     val context = LocalContext.current
     val currencies = listOf(
-      //  Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC" ),
-      //  Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8" ),
+        //  Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC" ),
+        //  Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8" ),
 
 
         Triple("EGP", "\uD83C\uDDEA\uD83C\uDDEC", "USD"),
