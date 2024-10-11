@@ -33,19 +33,19 @@ interface ApiServices {
     ): Response<SingleProduct>
 
     //women's products
-    @GET("products.json?collection_id=281653805155")
+    @GET("products.json?collection_id=282184351843")
     suspend fun getWomenProducts(): Response<Product>
 
     //sales products
-    @GET("products.json?collection_id=281653870691")
+    @GET("products.json?collection_id=282184417379")
     suspend fun getSalesProducts(): Response<Product>
 
     //mens products
-    @GET("products.json?collection_id=281653772387")
+    @GET("products.json?collection_id=282184319075")
     suspend fun getMensProducts(): Response<Product>
 
     // kids products
-    @GET("products.json?collection_id=281653837923")
+    @GET("products.json?collection_id=282184384611")
     suspend fun getKidsProducts(): Response<Product>
 
     //post draft order

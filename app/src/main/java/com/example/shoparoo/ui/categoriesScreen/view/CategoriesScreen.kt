@@ -207,8 +207,11 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                         exit = scaleOut(animationSpec = tween(durationMillis = 600))
                     ) {
                         ProductGrid(
-                            filteredProducts, navController = navController, selectedCurrency,
-                            conversionRate, currencySymbols
+                            filteredProducts,
+                            navController,
+                            selectedCurrency,
+                            conversionRate,
+                            currencySymbols
                         )
                     }
                 }
