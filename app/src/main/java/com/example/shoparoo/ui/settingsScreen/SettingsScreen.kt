@@ -24,7 +24,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -94,41 +96,40 @@ fun ProfileScreen(navController: NavController) {
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxSize().verticalScroll(rememberScrollState())
             .background(Color(0xFFF7F7F7))
     ) {
         // Profile Header with background
         ProfileHeader()
-        // Settings Items as Cards
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp)
+
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            item {
-                SettingsCardItem(
-                    title = stringResource(R.string.currency),
-                    icon = R.drawable.ic_currency,
-                    onClick = { showCurrencySheet = !showCurrencySheet }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                SettingsCardItem(
-                    title = stringResource(R.string.language),
-                    icon = R.drawable.ic_language,
-                    onClick = { showLanguageSheet = !showLanguageSheet }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                SettingsCardItem(
-                    title = stringResource(R.string.about_us),
-                    icon = R.drawable.ic_about_us,
-                    onClick = { showAboutUsSheet = !showAboutUsSheet }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                SettingsCardItem(
-                    title = stringResource(R.string.contact_us),
-                    icon = R.drawable.ic_contact_us,
-                    onClick = { showContactUsSheet.value = !showContactUsSheet.value }
-                )
-            }
+            SettingsCardItem(
+                title = stringResource(R.string.currency),
+                icon = R.drawable.ic_currency,
+                onClick = { showCurrencySheet = !showCurrencySheet }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            SettingsCardItem(
+                title = stringResource(R.string.language),
+                icon = R.drawable.ic_language,
+                onClick = { showLanguageSheet = !showLanguageSheet }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            SettingsCardItem(
+                title = stringResource(R.string.about_us),
+                icon = R.drawable.ic_about_us,
+                onClick = { showAboutUsSheet = !showAboutUsSheet }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            SettingsCardItem(
+                title = stringResource(R.string.contact_us),
+                icon = R.drawable.ic_contact_us,
+                onClick = { showContactUsSheet.value = !showContactUsSheet.value }
+            )
         }
+
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -251,7 +252,7 @@ fun SignOutConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
             }
         },
         containerColor = Color.White,
-        shape = RoundedCornerShape(16.dp)
+     //   shape = RoundedCornerShape(16.dp)
     )
 }
 

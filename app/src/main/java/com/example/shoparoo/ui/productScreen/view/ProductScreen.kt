@@ -259,9 +259,10 @@ fun ProductGrid(
                     navController!!.navigate("productDetails/${product.id}")
                 },
                 currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$"),
-                inFav = inFav, onClickDeleteFav =  {
-                    viewModel!!.getFavourites(true, product.id!!)
-                }
+                inFav = inFav,
+                onClickDeleteFav =  { viewModel!!.getFavourites(true, product.id!!) },
+              //  onClickAddFav = {  }
+
 
             )
         }
