@@ -94,7 +94,7 @@ import kotlin.random.Random
 fun ProductDetails(id: String, navController: NavHostController) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
 
     val viewModel: ProductDetailsViewModel = viewModel(
         factory = ProductDetailsViewModelFactory(
@@ -107,7 +107,7 @@ fun ProductDetails(id: String, navController: NavHostController) {
     val isFav = viewModel.isFav.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getSingleProductDetail(id, selectedCurrency, context)
+        viewModel.getSingleProductDetail(id)
     }
 
     when (ui.value) {
@@ -135,7 +135,7 @@ private fun productInfo(
 ) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
     val selected = remember { mutableStateOf(singleProductDetail.product!!.variants!![0]) }
     val isLoggedIn = AuthViewModel().authState.collectAsState()
@@ -375,10 +375,13 @@ private fun StockAndPrice(
     conversionRate: Float
 ) {
     val currencySymbols = mapOf(
-        "USD" to "$ ",
-        "EGP" to "EGP "
+        "EGP" to "$ ",
+        "USD" to "EGP "
     )
-    val price = selected.value?.price?.toFloatOrNull()?.times(conversionRate) ?: 0f
+    val priceInUSD = selected.value?.price?.toFloatOrNull() ?: 0f
+    val convertedPrice = priceInUSD * conversionRate
+    val formattedPrice = String.format("%.2f", convertedPrice)
+
 
     val stockPriceVisible = remember { mutableStateOf(false) }
 
@@ -406,7 +409,7 @@ private fun StockAndPrice(
             )
             Spacer(Modifier.weight(1f))
             Text(
-                text = "${"%.2f".format(price)} ${currencySymbols[selectedCurrency] ?: " $"}",
+                text =  formattedPrice +" "+ currencySymbols[selectedCurrency] ?: " $", //"${"%.2f".format(price)} ${currencySymbols[selectedCurrency] ?: " $"}",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
             )

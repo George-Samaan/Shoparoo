@@ -92,12 +92,12 @@ fun ProductsScreen(
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
     // Get saved currency and conversion rate from SharedPreferences
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
     val currencySymbols = mapOf(
-        "USD" to "$ ",
-        "EGP" to "EGP "
+        "EGP" to "$ ",
+        "USD" to "EGP "
     )
     val isNetworkAvailable = networkListener()
     if (!isNetworkAvailable.value) {
@@ -234,7 +234,7 @@ fun ProductGrid(
     conversionRate: Float,
     currencySymbols: Map<String, String>,
     inFav : Boolean = false,
-   viewModel: FavouritesViewModel? = null
+    viewModel: FavouritesViewModel? = null
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -261,7 +261,7 @@ fun ProductGrid(
                 currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$"),
                 inFav = inFav,
                 onClickDeleteFav =  { viewModel!!.getFavourites(true, product.id!!) },
-              //  onClickAddFav = {  }
+                //  onClickAddFav = {  }
 
 
             )

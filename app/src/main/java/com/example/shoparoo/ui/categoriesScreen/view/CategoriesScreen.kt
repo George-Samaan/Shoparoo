@@ -80,12 +80,12 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
     // Get saved currency and conversion rate from SharedPreferences
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
     val currencySymbols = mapOf(
-        "USD" to "$ ",
-        "EGP" to "EGP "
+        "EGP" to "$ ",
+        "USD" to "EGP "
     )
 
     val isNetworkAvailable = networkListener()
@@ -207,8 +207,11 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                         exit = scaleOut(animationSpec = tween(durationMillis = 600))
                     ) {
                         ProductGrid(
-                            filteredProducts, navController = navController, selectedCurrency,
-                            conversionRate, currencySymbols
+                            filteredProducts,
+                            navController,
+                            selectedCurrency,
+                            conversionRate,
+                            currencySymbols
                         )
                     }
                 }
