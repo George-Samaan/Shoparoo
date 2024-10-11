@@ -69,8 +69,6 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.shoparoo.R
 import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
-import com.example.shoparoo.ui.settingsScreen.SignOutButton
-import com.example.shoparoo.ui.settingsScreen.SignOutConfirmationDialog
 import com.example.shoparoo.ui.theme.primary
 
 @Composable

@@ -252,7 +252,7 @@ fun SignOutConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
             }
         },
         containerColor = Color.White,
-        shape = RoundedCornerShape(16.dp)
+     //   shape = RoundedCornerShape(16.dp)
     )
 }
 
