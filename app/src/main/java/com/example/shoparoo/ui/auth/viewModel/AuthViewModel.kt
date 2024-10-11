@@ -12,7 +12,8 @@ import kotlinx.coroutines.launch
 
 
 class AuthViewModel : ViewModel() {
-    private var _authState: MutableStateFlow<AuthState> = MutableStateFlow(AuthState.UnAuthenticated)
+    private var _authState: MutableStateFlow<AuthState> =
+        MutableStateFlow(AuthState.UnAuthenticated)
     val authState: MutableStateFlow<AuthState> = _authState
 
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -22,9 +23,9 @@ class AuthViewModel : ViewModel() {
         checkUser()
     }
 
-    private fun checkUser() {
+     fun checkUser() {
         if (firebaseAuth.currentUser != null) {
-           // _authState.value = AuthState.Authenticated
+            // _authState.value = AuthState.Authenticated
             if (firebaseAuth.currentUser!!.isEmailVerified) {
                 _authState.value = AuthState.Authenticated
             } else {
@@ -76,6 +77,14 @@ class AuthViewModel : ViewModel() {
                         _authState.value = AuthState.Authenticated
                     } else {
                         _authState.value = AuthState.UnVerified
+                        val user = firebaseAuth.currentUser
+                        user!!.sendEmailVerification()
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Log.d(TAG, "Email sent.")
+                                    _authState.value = AuthState.Authenticated
+                                }
+                            }
                     }
 
                 } else {
@@ -96,5 +105,5 @@ sealed class AuthState {
     object Loading : AuthState()
     object Authenticated : AuthState()
     object UnAuthenticated : AuthState()
-    object UnVerified  : AuthState()
+    object UnVerified : AuthState()
 }

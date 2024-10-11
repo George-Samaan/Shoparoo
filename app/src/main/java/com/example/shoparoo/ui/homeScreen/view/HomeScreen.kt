@@ -549,7 +549,15 @@ fun MainScreen(
             composable(BottomNav.Home.route) {
                 HomeScreenDesign(
                     if (isLoading) "" else userName ?: "Guest",
-                    {navController.navigate("favourites")},
+                    {
+                        if (userName != null) {
+                            navController.navigate("favourites")
+                        } else {
+                            navController.navigate("login")
+                        }
+                        //navController.navigate("favourites")
+
+                    },
 
                     smartCollectionsState,
                     forYouProductsState,

@@ -37,7 +37,7 @@ fun Navigation() {
             Search(navController = navController)
         }
         composable("UnVerified") {
-            UnVerified()
+            UnVerified(navController = navController)
         }
     }
 }

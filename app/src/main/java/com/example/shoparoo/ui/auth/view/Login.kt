@@ -3,7 +3,6 @@ package com.example.shoparoo.ui.auth.view
 
 import android.content.Intent
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RawRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
@@ -46,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -69,6 +69,8 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.shoparoo.R
 import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
+import com.example.shoparoo.ui.settingsScreen.SignOutButton
+import com.example.shoparoo.ui.settingsScreen.SignOutConfirmationDialog
 import com.example.shoparoo.ui.theme.primary
 
 @Composable
@@ -82,12 +84,12 @@ fun LoginScreen(navController: NavHostController) {
             is AuthState.Authenticated -> {
                 navController.navigate("home")
                 isLoading = false
-                Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
+             //   Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
 
             }
 
             is AuthState.UnAuthenticated -> {
-                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+              //  Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
                 isLoading = false
             }
 
@@ -333,33 +335,5 @@ fun ReusableLottie(
             progress = progress,
             modifier = Modifier.fillMaxSize()
         )
-    }
-}
-
-
-@Composable
-fun UnVerified() {
-    Column(
-        Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        ReusableLottie(R.raw.confrim, null, size = 222.dp)
-        Text("Please verify your email", fontSize = 30.sp , fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 20.dp))
-
-        val context = LocalContext.current
-        Button(onClick = {
-            val intent = Intent(Intent.ACTION_MAIN).apply {
-                addCategory(Intent.CATEGORY_APP_EMAIL)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                // data = Uri.parse("mailto:")
-            }
-                startActivity(context, intent, null)
-        },
-            colors = ButtonDefaults.buttonColors(Color.Black),
-            ) {
-            Text("Open mail")
-        }
     }
 }

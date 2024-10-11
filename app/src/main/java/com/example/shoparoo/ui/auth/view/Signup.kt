@@ -73,13 +73,13 @@ fun Signup(navController: NavHostController) {
     LaunchedEffect(item.value) {
         when (item.value) {
             is AuthState.Authenticated -> {
-                Toast.makeText(context, "Successful sign up, Confirm your email", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(context, "Successful sign up, Confirm your email", Toast.LENGTH_SHORT).show()
                 navController.navigate("login")
                 isLoading = false
             }
 
             is AuthState.UnAuthenticated -> {
-                Toast.makeText(context, "Sign up failed", Toast.LENGTH_SHORT).show()
+               // Toast.makeText(context, "Sign up failed", Toast.LENGTH_SHORT).show()
                 isLoading = false
             }
 
