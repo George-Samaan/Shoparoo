@@ -36,7 +36,6 @@ fun Splash(navController: NavController) {
     ) {
         ReusableLottie(R.raw.splash, null, size = 400.dp)
     }
-    val context = LocalContext.current
     val viewModel = viewModel<AuthViewModel>()
     var item = viewModel.authState.collectAsState()
 
@@ -44,20 +43,12 @@ fun Splash(navController: NavController) {
     LaunchedEffect(showSplash) {
         if (!showSplash) {
             when (item.value) {
-                is AuthState.Success -> {
+                is AuthState.Authenticated -> {
                     navController.navigate("home") {
                         popUpTo("splash") { inclusive = true }
                     }
-                    Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
+                   // Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
                 }
-
-                AuthState.Authenticated -> {
-                    navController.navigate("home"){
-                        popUpTo("splash") { inclusive = true }
-                    }
-                    Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
-                }
-
                 else -> {
                     navController.navigate("login"){
                         popUpTo("splash") { inclusive = true }

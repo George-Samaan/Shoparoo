@@ -1,7 +1,9 @@
 package com.example.shoparoo.ui.auth.view
 
 
+import android.content.Intent
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RawRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
@@ -56,6 +58,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieAnimation
@@ -67,7 +70,6 @@ import com.example.shoparoo.R
 import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.theme.primary
-import kotlinx.coroutines.delay
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
@@ -77,25 +79,23 @@ fun LoginScreen(navController: NavHostController) {
     var isLoading by remember { mutableStateOf(false) }
     LaunchedEffect(item.value) {
         when (item.value) {
-            is AuthState.Success -> {
-                Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
+            is AuthState.Authenticated -> {
                 navController.navigate("home")
                 isLoading = false
+                Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
+
             }
 
-            is AuthState.Failed -> {
+            is AuthState.UnAuthenticated -> {
                 Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
                 isLoading = false
             }
 
-            AuthState.Authenticated -> {
-                navController.navigate("home")
-                Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
+            AuthState.Loading -> isLoading = true
+            AuthState.UnVerified -> {
+                navController.navigate("UnVerified")
                 isLoading = false
             }
-
-            AuthState.Loading -> isLoading = true
-            AuthState.UnAuthenticated -> Unit
         }
     }
     Column(
@@ -333,5 +333,33 @@ fun ReusableLottie(
             progress = progress,
             modifier = Modifier.fillMaxSize()
         )
+    }
+}
+
+
+@Composable
+fun UnVerified() {
+    Column(
+        Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        ReusableLottie(R.raw.confrim, null, size = 222.dp)
+        Text("Please verify your email", fontSize = 30.sp , fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 20.dp))
+
+        val context = LocalContext.current
+        Button(onClick = {
+            val intent = Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_APP_EMAIL)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                // data = Uri.parse("mailto:")
+            }
+                startActivity(context, intent, null)
+        },
+            colors = ButtonDefaults.buttonColors(Color.Black),
+            ) {
+            Text("Open mail")
+        }
     }
 }

@@ -48,7 +48,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -71,7 +70,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.shoparoo.R
@@ -82,12 +80,10 @@ import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ImagesItem
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
-
 import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModel
 import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModelFactory
-
 import com.example.shoparoo.ui.theme.primary
 import com.smarttoolfactory.ratingbar.RatingBar
 import com.smarttoolfactory.ratingbar.model.Shimmer
@@ -570,60 +566,6 @@ fun DescriptionSection(bodyHtml: String?) {
         )
     }
 }
-
-
-/*@Composable
-fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit, buttonColors: ButtonColors) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(bottom = 15.dp, top = 15.dp, start = 25.dp, end = 25.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.Bottom
-    ) {
-        //add to cart button
-        Button(
-
-            onClick = onClickCart,
-
-            colors = ButtonDefaults.buttonColors(primary),
-
-            modifier = Modifier.weight(3f)
-
-        ) {
-            Text(
-                text = "Add to Cart",
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                fontSize = 20.sp,
-            )
-
-            Icon(
-                imageVector = Icons.Filled.ShoppingCart,
-                contentDescription = "Add to Cart",
-                tint = Color.White
-            )
-        }
-
-        //  Spacer(modifier = Modifier.weight(1f))
-        //favorite button
-        Button(
-            onClick = onClickFav,
-            colors = buttonColors,
-            modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .weight(1f)
-        ) {
-
-            Icon(
-                imageVector = Icons.Filled.FavoriteBorder,
-                contentDescription = "Add to Cart",
-                tint = Color.White,
-                modifier = Modifier.padding(vertical = 5.dp),
-
-                )
-        }
-    }
-}*/
 
 @Composable
 fun BottomSection(
