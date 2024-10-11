@@ -43,7 +43,7 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
 
 
 
-    fun getSingleProductDetail(productId: String, selectedCurrency: String, context: Context) {
+    fun getSingleProductDetail(productId: String) {
         viewModelScope.launch {
             _singleProductDetail.value = ApiState.Loading
             repository.getSingleProductFromId(productId).catch {
@@ -54,10 +54,6 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
 
                 Log.i("ProductDetailsviewModel", "Success ${it.product!!.bodyHtml}")
                 getDraftOrder(it, it.product.variants!![0]!!, false, true)
-
-                Log.i("ProductDetailsssss", "Success ${it.product!!.bodyHtml}")
-                fetchConversionRate(context, selectedCurrency)
-
 
             }
         }

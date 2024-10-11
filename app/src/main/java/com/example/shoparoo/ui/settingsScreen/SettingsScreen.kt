@@ -139,8 +139,7 @@ fun ProfileScreen(navController: NavController) {
                     onCurrencySelected = { currency ->
                         selectedCurrency = currency
                         saveCurrencyPreference(context, currency)
-                        Toast.makeText(context, "Currency changed to $currency", Toast.LENGTH_SHORT)
-                            .show()
+                     //   Toast.makeText(context, "Currency changed to $currency", Toast.LENGTH_SHORT).show()
                         showCurrencySheet = false
                     }
                 )
@@ -497,23 +496,28 @@ fun Language() {
 fun Currency(selectedCurrency: String, onCurrencySelected: (String) -> Unit) {
     val context = LocalContext.current
     val currencies = listOf(
-        Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC"),
-        Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8")
+      //  Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC" ),
+      //  Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8" ),
+
+
+        Triple("EGP", "\uD83C\uDDEA\uD83C\uDDEC", "USD"),
+        Triple("USD", "\uD83C\uDDFA\uD83C\uDDF8", "EGP")
     )
 
 
 
 
     LazyColumn {
-        items(currencies) { (currency, flag) ->
+        items(currencies) { (currency, flag,actual ) ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 10.dp, horizontal = 20.dp)
                     .clickable {
                         // Trigger currency conversion
-                        onCurrencySelected(currency)
-                        fetchConversionRate(context, currency)
+                        onCurrencySelected(actual)
+                        fetchConversionRate(context, actual)
+
                     }
             ) {
                 Text(
