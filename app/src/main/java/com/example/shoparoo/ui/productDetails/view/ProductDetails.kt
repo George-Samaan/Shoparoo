@@ -103,7 +103,7 @@ fun ProductDetails(id: String, navController: NavHostController) {
     )
     val ui = viewModel.singleProductDetail.collectAsState()
     val isFav = viewModel.isFav.collectAsState()
-
+    val isLoggedIn = AuthViewModel().authState.collectAsState()
     LaunchedEffect(Unit) {
         viewModel.getSingleProductDetail(id)
     }
@@ -172,7 +172,7 @@ private fun productInfo(
             StockAndPrice(selected, selectedCurrency, conversionRate)
             VariantSection(singleProductDetail.product!!.variants, selected)
 
-            // Animated Description Section
+
             AnimatedVisibility(
                 visible = descriptionVisible.value,
                 enter = slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn(),
@@ -183,44 +183,57 @@ private fun productInfo(
         }
 
         Spacer(modifier = Modifier.weight(1f))
-        BottomSection(
-            onClickCart = {
-                if (selected.value!!.inventoryQuantity!! < 1) {
-                    Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
-                } else {
-                    if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
-                        Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT)
-                            .show()
+        if (isLoggedIn.value == AuthState.Authenticated) {
+            BottomSection(
+                onClickCart = {
+                    if (selected.value!!.inventoryQuantity!! < 1) {
+                        Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
                     } else {
-                        viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
-                        Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
+                        if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
+                            Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
+                            Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                },
+                onClickFav = {
+                    viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
+                    if (!isFav)
+                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                    else
+                        Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                },
+                buttonColors = if (isFav) {
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color.Red,
+                        contentColor = Color.Yellow,
+                        disabledContentColor = Color.Gray,
+                        disabledContainerColor = Color(0xFF000000),
+                    )
+                } else {
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color.Gray,
+                        contentColor = Color.White,
+                        disabledContentColor = Color.Gray,
+                        disabledContainerColor = Color(0xFF000000),
+                    )
+                },
+                isFav = isFav
+            )
+        }
+        else{
+            Button(onClick = {
+                navController.navigate("login"){
+                    popUpTo("productDetails"){
+                        inclusive = true
                     }
                 }
-            },
-            onClickFav = {
-                viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
-                if (!isFav)
-                    Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
-                else
-                    Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
-            },
-            buttonColors = if (isFav) {
-                ButtonDefaults.buttonColors(
-                    containerColor = Color.Red,
-                    contentColor = Color.Yellow,
-                    disabledContentColor = Color.Gray,
-                    disabledContainerColor = Color(0xFF000000),
-                )
-            } else {
-                ButtonDefaults.buttonColors(
-                    containerColor = Color.Gray,
-                    contentColor = Color.White,
-                    disabledContentColor = Color.Gray,
-                    disabledContainerColor = Color(0xFF000000),
-                )
-            },
-            isFav = isFav
-        )
+            }) {
+                Text("Login to add to cart")
+            }
+        }
 
     }
 
@@ -232,7 +245,7 @@ private fun productInfo(
 fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
     val imageVisible = remember { mutableStateOf(false) }
 
-    // Trigger the animation when the ProductImg is loaded
+
     LaunchedEffect(Unit) {
         imageVisible.value = true
     }
@@ -243,7 +256,7 @@ fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
             .height(300.dp)
             .padding(top = 30.dp, start = 5.dp)
     ) {
-        // Animated Visibility to slide in from the right
+
         AnimatedVisibility(
             visible = imageVisible.value,
             enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(),
@@ -292,12 +305,12 @@ fun ReviewSection() {
     val reviews = remember { getRandomReviews(Random.nextInt(2, 22)) }
     val reviewVisible = remember { mutableStateOf(false) }
 
-    // Trigger the animation when the ReviewSection is loaded
+
     LaunchedEffect(Unit) {
         reviewVisible.value = true
     }
 
-    // Animate the review section sliding in from the right
+
     AnimatedVisibility(
         visible = reviewVisible.value,
         enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(),
@@ -573,7 +586,7 @@ fun BottomSection(
     onClickCart: () -> Unit,
     onClickFav: () -> Unit,
     buttonColors: ButtonColors,
-    isFav: Boolean // Pass isFav to determine filled state
+    isFav: Boolean
 ) {
     var isAnimatingFav by remember { mutableStateOf(false) }
 
