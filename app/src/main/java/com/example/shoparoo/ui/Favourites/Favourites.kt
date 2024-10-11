@@ -88,8 +88,8 @@ fun Favourites(navController: NavController) {
 
 
         val currencySymbols = mapOf(
-            "USD" to "$ ",
-            "EGP" to "EGP "
+            "USD" to "EGP ",
+            "EGP" to "$ "
         )
 
 

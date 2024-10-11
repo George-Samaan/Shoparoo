@@ -1,7 +1,6 @@
 package com.example.shoparoo.data.repository
 
 import com.example.shoparoo.data.db.remote.RemoteDataSource
-import com.example.shoparoo.data.db.sharedPrefs.SharedPreferences
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
 import com.example.shoparoo.model.OrderResponse
@@ -11,7 +10,7 @@ import com.example.shoparoo.model.SmartCollections
 import kotlinx.coroutines.flow.Flow
 
 class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repository {
-    lateinit var sharedPreferences: SharedPreferences
+   // lateinit var sharedPreferences: SharedPreferences
 
 
     // remote data source
@@ -49,11 +48,12 @@ class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repositor
 
     // local
     override fun saveCurrencyPreference(currency: String) {
-        return sharedPreferences.saveCurrencyPreference(currency)
+      //  return sharedPreferences.saveCurrencyPreference(currency)
     }
 
     override fun getCurrencyPreference(): String {
-        return sharedPreferences.getCurrencyPreference()
+       // return sharedPreferences.getCurrencyPreference()
+        return ""
     }
 
 

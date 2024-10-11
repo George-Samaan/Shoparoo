@@ -546,7 +546,8 @@ fun fetchConversionRate(context: Context, selectedCurrency: String) {
 fun updatePrices(context: Context, conversionRate: Double) {
     //store the conversion rate in SharedPreferences and update product prices across the app
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    sharedPreferences.edit().putFloat("conversionRate", conversionRate.toFloat()).apply()
+    var cc = 1/ conversionRate
+    sharedPreferences.edit().putFloat("conversionRate", cc.toFloat()).apply()
 
     CoroutineScope(Dispatchers.Main).launch {
         // Call necessary composables to update UI
