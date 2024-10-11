@@ -463,16 +463,16 @@ fun ProductCard(
                     text = productName.capitalizeWords(),
                     color = primary,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
                     modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = "$currencySymbol$productPrice",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
                 )
@@ -633,7 +633,7 @@ fun MainScreen(
                 )
             }
             composable(BottomNav.orders.route) {
-                OrderScreen(orderViewModel = orderViewModel, navController)
+                OrderScreen(orderViewModel = orderViewModel)
             }
 //            composable("settings") { SettingsScreen(navControllerBottom) }
             composable("login") { LoginScreen(navControllerBottom) }

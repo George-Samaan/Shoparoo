@@ -315,11 +315,11 @@ fun TopBar(navController: NavController, title: String) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 30.dp, start = 5.dp)
+            .padding(start = 5.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(50.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(Color(0xFFF5F5F5))
                 .clickable { navController.popBackStack() },
