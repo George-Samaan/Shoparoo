@@ -39,12 +39,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
-import com.example.shoparoo.R
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.type.LatLng
+
 import java.io.IOException
 import java.util.Locale
 
@@ -343,7 +343,10 @@ fun LocationPickerMap(onLocationPicked: (String) -> Unit) {
                     val addresses = geocoder.getFromLocationName(searchQuery, 1)
                     if (!addresses.isNullOrEmpty()) {
                         val location = addresses[0]
-                        val latLng = LatLng(location.latitude, location.longitude)
+                        val latLng = com.google.android.gms.maps.model.LatLng(
+                            location.latitude,
+                            location.longitude
+                        )
                         googleMap.clear()
                         googleMap.addMarker(MarkerOptions().position(latLng).title(location.getAddressLine(0)))
                         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
