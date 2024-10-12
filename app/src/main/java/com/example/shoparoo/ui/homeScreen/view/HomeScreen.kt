@@ -582,6 +582,7 @@ fun MainScreen(
     val isLoading by viewModel.isLoading.collectAsState()
 
     LaunchedEffect(Unit) {
+        viewModel.getName()
         viewModel.getSmartCollections()
         viewModel.getForYouProducts()
     }

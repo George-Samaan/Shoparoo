@@ -296,6 +296,9 @@ fun ProfileHeader() {
             )
         )
     )
+    LaunchedEffect(Unit) {
+        viewModel.getName()
+    }
     val userName by viewModel.userName.collectAsState()
     val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     val currentUser = firebaseAuth.currentUser?.email

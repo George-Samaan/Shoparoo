@@ -34,8 +34,7 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
     val isLoading: StateFlow<Boolean> get() = _isLoading // Expose it
 
 
-
-    init {
+    fun getName() {
         val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
         val db = Firebase.firestore
         db.collection("users").document(firebaseAuth.currentUser?.uid ?: "Guest")
@@ -70,7 +69,7 @@ class HomeViewModel(private val repository: Repository) : ViewModel() {
                     ApiState.Failure(exception.message ?: "Error fetching products")
             }.collect { products ->
                 _forYouProducts.value = ApiState.Success(products.products!!)
-             //   _allProducts.value = ApiState.Success(products.products)
+                //   _allProducts.value = ApiState.Success(products.products)
                 Log.i("HomeViewModellllllll", "List of products: ${products.products}")
             }
         }
