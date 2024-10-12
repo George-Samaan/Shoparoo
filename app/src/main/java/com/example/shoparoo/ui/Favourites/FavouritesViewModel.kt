@@ -20,7 +20,8 @@ import kotlinx.coroutines.launch
 
 class FavouritesViewModel(private val repository: Repository) : ViewModel() {
     private val _draftOrderFav = MutableStateFlow<ApiState>(ApiState.Loading)
-    //  val draftOrderFav = _draftOrderFav.asStateFlow()
+    val draftOrderFav = _draftOrderFav.asStateFlow()
+
 
     private val _productItems: MutableStateFlow<MutableList<ProductsItem>> =
         MutableStateFlow(mutableListOf())
