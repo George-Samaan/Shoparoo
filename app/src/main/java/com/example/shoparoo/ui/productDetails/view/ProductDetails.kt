@@ -77,6 +77,7 @@ import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
+import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.ImagesItem
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
@@ -85,6 +86,7 @@ import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
 import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModel
 import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModelFactory
+import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.theme.darkGreen
 import com.example.shoparoo.ui.theme.primary
 import com.smarttoolfactory.ratingbar.RatingBar
@@ -104,14 +106,19 @@ fun ProductDetails(id: String, navController: NavHostController) {
         )
     )
     val ui = viewModel.singleProductDetail.collectAsState()
+    val order = viewModel.userOrder.collectAsState()
     val isFav = viewModel.isFav.collectAsState()
     LaunchedEffect(Unit) {
         viewModel.getSingleProductDetail(id)
     }
 
+    var itemsIncart by remember { mutableStateOf(0) }
     when (ui.value) {
         is ApiState.Loading -> {
             Log.i("ProductDetails", "Loading")
+            Box (Modifier.padding(top = 25.dp)){
+                LoadingIndicator()
+            }
         }
 
         is ApiState.Failure -> {
@@ -120,9 +127,25 @@ fun ProductDetails(id: String, navController: NavHostController) {
 
         is ApiState.Success -> {
             val data = ui.value as ApiState.Success
-            productInfo(data.data as SingleProduct, navController, viewModel, isFav.value)
+            productInfo(data.data as SingleProduct, navController, viewModel, isFav.value,itemsIncart)
         }
     }
+
+    when(order.value){
+        is ApiState.Loading -> {
+            Log.i("ProductDetails", "Loading")
+        }
+        is ApiState.Failure -> {
+            Log.i("ProductDetails", "Error ${(order.value as ApiState.Failure).message}")
+        }
+        is ApiState.Success -> {
+            val gg = order.value as ApiState.Success
+            val data = gg.data as DraftOrderDetails
+           itemsIncart = data.line_items[0].quantity
+            Log.i("ProductDetailsUserOrderrrrrrrrr", "Success ${data.line_items.size}")
+        }
+    }
+
 }
 
 @Composable
@@ -131,7 +154,9 @@ private fun productInfo(
     navController: NavHostController,
     viewModel: ProductDetailsViewModel,
     isFav: Boolean,
-) {
+    itemsIncart: Int,
+
+    ) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
     val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
@@ -187,15 +212,19 @@ private fun productInfo(
 
             BottomSection(
                 onClickCart = {
-                    if (selected.value!!.inventoryQuantity!! < 1) {
+                    Log.i("ProductDetail", "Cartclickeddd   ${selected.value!!.inventoryQuantity}    $itemsIncart")
+                    if (selected.value!!.inventoryQuantity!! < 1 ) {
                         Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
-                    } else {
+                    } else if (itemsIncart == selected.value!!.inventoryQuantity!!) {
+                        Toast.makeText(context, "you've already added $itemsIncart ", Toast.LENGTH_SHORT).show()
+                    }
+                    else {
                         if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
                             Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT).show()
                             navController.navigate("login")
                         } else {
                             viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
-                            Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
+                         //   Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
                         }
                     }
                 },
@@ -205,11 +234,10 @@ private fun productInfo(
                         navController.navigate("login")
                     } else {
                         viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
-                        if (!isFav)
-                            Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
-                        else
-                            Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT)
-                                .show()
+//                        if (!isFav)
+//                         //   Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+//                        else
+//                         //   Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
                     }
                 },
                 buttonColors = if (isFav) {
