@@ -47,7 +47,6 @@ import coil.compose.AsyncImage
 import com.example.shoparoo.R
 import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.ui.auth.view.ReusableLottie
-import com.example.shoparoo.ui.checkOut.AppHeader
 import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
 import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
@@ -73,26 +72,6 @@ fun ShoppingCartScreen(
         isLoading.value = false
     }
 
-    Scaffold(
-        topBar = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp)
-            ) {
-                Text(
-                    text = "Cart",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp,
-                    color = primary,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        }
-    ) {
-
         if (isLoading.value) {
             Scaffold {
                 Box(
@@ -106,6 +85,22 @@ fun ShoppingCartScreen(
             }
         } else if (cartItems.isEmpty()) {
             Scaffold {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp)
+                    ) {
+                        Text(
+                            text = "Cart",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp,
+                            color = primary,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize().fillMaxWidth(),
@@ -166,7 +161,7 @@ fun ShoppingCartScreen(
                 }
             }
         }
-    }
+
 }
 
 @SuppressLint("DefaultLocale")
