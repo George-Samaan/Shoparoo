@@ -58,6 +58,7 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
     }
 
 
+
     fun getCartItems() {
         viewModelScope.launch {
             repository.getDraftOrder().catch {
@@ -72,8 +73,7 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
     }
 
     fun clearCart() {
-        // Implement logic to clear cart items, e.g., update the LiveData or MutableState holding cart items
-        _cartItems.value = emptyList() // Assuming cartItems is MutableState<List<LineItem>>
+        _cartItems.value = emptyList()
     }
 
 
