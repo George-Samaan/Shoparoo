@@ -28,6 +28,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,6 +38,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -69,8 +72,11 @@ import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
+import com.example.shoparoo.ui.Favourites.FavouritesViewModel
+import com.example.shoparoo.ui.Favourites.FavouritesViewModelFactory
 import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.auth.view.ReusableLottie
+import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.categoriesScreen.view.CategoriesScreen
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModel
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModelFactory
@@ -104,8 +110,23 @@ fun HomeScreenDesign(
     onRefresh: () -> Unit = {},
     bottomNavController: NavController,
     navController: NavController,
-
     ) {
+
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val fav by favViewModel.favProducts.collectAsState()
+
+    LaunchedEffect(fav) {
+        favViewModel.getFavourites()
+    }
+
+
+
     val isNetworkAvailable = networkListener()
     if (!isNetworkAvailable.value) {
         // Show No Internet connection message
@@ -113,13 +134,13 @@ fun HomeScreenDesign(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp, null)
+            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp)
         }
     } else {
         val context = LocalContext.current
         val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
-        val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+        val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
         val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
         val currencySymbols = mapOf(
@@ -145,9 +166,6 @@ fun HomeScreenDesign(
                     Header(userName, onFavouriteClick, onSearchClick = {
                         navController.navigate("search")
                     })
-                }
-                item {
-                    // SearchBar(query, onQueryChange,navController,viewModel)
                 }
                 item {
                     CouponsSliderWithIndicator(
@@ -225,8 +243,10 @@ fun Header(userName: String, onFavouriteClick: () -> Unit, onSearchClick: () -> 
     ) {
         ProfileSection(userName)
         Spacer(modifier = Modifier.weight(1f))
-        SearchButton(onSearchClick = onSearchClick)
+        if (userName != ""  && userName != "Guest") {
         FavouriteButton(onFavouriteClick)
+        }
+        SearchButton(onSearchClick = onSearchClick)
     }
 }
 
@@ -265,7 +285,7 @@ fun FavouriteButton(onFavouriteClick: () -> Unit) {
 fun SearchButton(onSearchClick: () -> Unit) {
     IconButton(
         onClick = onSearchClick,
-        modifier = Modifier.size(50.dp)
+        modifier = Modifier.size(70.dp)
     ) {
         Image(
             painter = painterResource(id = R.drawable.baseline_search_24),
@@ -292,7 +312,7 @@ fun BrandsSection(navController: NavController, smartCollections: List<SmartColl
         Text(
             text = "Brands",
             fontWeight = FontWeight.Bold,
-            fontSize = 21.sp,
+            fontSize = 20.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -353,7 +373,7 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
             text = brandName.capitalizeWords(),
             color = primary,
             fontWeight = FontWeight.Bold,
-            fontSize = 17.sp,
+            fontSize = 16.sp,
             modifier = Modifier.padding(top = 8.dp)
         )
     }
@@ -382,7 +402,7 @@ fun ForYouSection(
         Text(
             text = "For You",
             fontWeight = FontWeight.Bold,
-            fontSize = 21.sp,
+            fontSize = 20.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         AnimatedVisibility(
@@ -463,16 +483,16 @@ fun ProductCard(
                     text = productName.capitalizeWords(),
                     color = primary,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
+                    fontSize = 16.sp,
                     modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "$productPrice $currencySymbol",
+                    text = "$currencySymbol$productPrice",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
                 )
@@ -489,6 +509,20 @@ fun ProductCard(
                         .padding(8.dp)
                         .size(24.dp)
                         .clickable { showDialog = true }
+                )
+            }
+            else{
+                val isFav = true //handle this from the api and handle guest mode
+
+                Icon(
+                    if (isFav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    contentDescription = "Add to Favorites",
+                    tint = Color.Red,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(24.dp)
+                        .clickable { onClickAddFav() }
                 )
             }
         }
@@ -576,19 +610,23 @@ fun MainScreen(
         )
     )
 
+    val authViewModel: AuthViewModel = viewModel()
+
+
     val smartCollectionsState by viewModel.smartCollections.collectAsState()
     val forYouProductsState by viewModel.forYouProducts.collectAsState()
     val userName by viewModel.userName.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val isLogged = authViewModel.authState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getName()
         viewModel.getSmartCollections()
         viewModel.getForYouProducts()
+      //  favViewModel.getFavourites()
     }
 
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController = navControllerBottom) }
+        bottomBar = { BottomNavigationBar(navController = navControllerBottom,isLogged) }
     ) {
         NavHost(
             navController = navControllerBottom,
@@ -617,36 +655,41 @@ fun MainScreen(
                     navController,
                 )
             }
+
             composable(BottomNav.Categories.route) {
-
                 CategoriesScreen(categoryViewModel, navController)
+            }
 
-            }
             composable(BottomNav.Cart.route) {
-                ShoppingCartScreen(navControllerBottom, shoppingCartViewModel, navController)
+                    ShoppingCartScreen(navControllerBottom, shoppingCartViewModel, navController)
             }
+
             composable(BottomNav.orders.route) {
                 Text(text = "Orders Screen")
             }
+
             composable(BottomNav.Profile.route) {
                 ProfileScreen(
                     navControllerBottom,
                 )
             }
+
             composable(BottomNav.orders.route) {
-                OrderScreen(orderViewModel = orderViewModel)
+                OrderScreen(orderViewModel = orderViewModel, navController)
             }
+
 //            composable("settings") { SettingsScreen(navControllerBottom) }
+
             composable("login") { LoginScreen(navControllerBottom) }
+
             composable(BottomNav.Profile.route) {
                 ProfileScreen(navController)
             }
-//            composable("settings") {
-//                SettingsScreen(navControllerBottom)
-//            }
+
             composable("checkout") {
                 CheckoutScreen(navControllerBottom, shoppingCartViewModel)
             }
+
             composable("brand/{brandId}/{brandTitle}") { backStackEntry ->
                 val brandId =
                     backStackEntry.arguments?.getString("brandId") ?: return@composable
@@ -658,9 +701,29 @@ fun MainScreen(
                     navController
                 )
             }
+
         }
     }
 }
+
+
+@Composable
+fun MySnackBar(state : Boolean) {
+   var visible by remember { mutableStateOf(false) }
+        visible = state
+        Snackbar(
+            modifier = Modifier.fillMaxWidth(),
+            action = {
+                Text(text = "Dismiss", modifier = Modifier.fillMaxWidth())
+            }
+        ) {
+            Text("This is a SnackBar!")
+        }
+
+
+
+}
+
 
 //@Preview(showSystemUi = true)
 //@Composable
