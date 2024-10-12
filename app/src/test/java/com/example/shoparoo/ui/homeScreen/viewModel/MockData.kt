@@ -1,8 +1,15 @@
 package com.example.shoparoo.ui.homeScreen.viewModel
 
+import com.example.shoparoo.model.AppliedDiscount
+import com.example.shoparoo.model.DraftOrderDetails
+import com.example.shoparoo.model.DraftOrderRequest
+import com.example.shoparoo.model.DraftOrderResponse
 import com.example.shoparoo.model.Image
+import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.model.ProductsItem
+import com.example.shoparoo.model.Property
 import com.example.shoparoo.model.RulesItem
+import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
 import com.example.shoparoo.model.SmartCollectionsItem
 import com.example.shoparoo.model.VariantsItem
@@ -124,4 +131,139 @@ object MockData {
         )
 
     )
+}
+
+object mockData3 {
+    fun createMockDraftOrderResponse(): DraftOrderResponse {
+        val lineItem1 = LineItem(
+            id = 1L,
+            product_id = 101L,
+            title = "T-Shirt",
+            price = "19.99",
+            quantity = 2,
+            variant_id = "v1",
+            properties = listOf(
+                Property(name = "Size", value = "M"),
+                Property(name = "Color", value = "Blue")
+            ),
+            vendor = "Brand A"
+        )
+
+        val lineItem2 = LineItem(
+            id = 2L,
+            product_id = 102L,
+            title = "Jeans",
+            price = "49.99",
+            quantity = 1,
+            variant_id = "v2",
+            properties = listOf(
+                Property(name = "Size", value = "32"),
+                Property(name = "Color", value = "Black")
+            ),
+            vendor = "Brand B"
+        )
+
+        val appliedDiscount = AppliedDiscount(
+            value = 10.0,
+            value_type = "percentage",
+            amount = 5.0
+        )
+
+        val draftOrderDetails = DraftOrderDetails(
+            id = 1L,
+            line_items = mutableListOf(lineItem1, lineItem2),
+            email = "customer@example.com",
+            note = "Please deliver by next week.",
+            tags = "Summer Sale",
+            invoice_url = "http://example.com/invoice/1",
+            current_total_price = "64.98",
+            total_price = "59.98",
+            subtotal_price = "64.98",
+            total_tax = "0.00",
+            applied_discount = appliedDiscount
+        )
+
+        return DraftOrderResponse(draft_orders = listOf(draftOrderDetails))
+    }
+
+    val mockProductItem = SingleProduct(
+        product = ProductsItem(
+            id = 123,
+            title = "Sample Product",
+            vendor = "Example Vendor",
+            tags = "tag1, tag2",
+            createdAt = "2024-10-12T08:00:00Z",
+            status = "active"
+        )
+    )
+
+    val mockDraftOrderRequest = DraftOrderRequest(
+        draft_order = DraftOrderDetails(
+            line_items = mutableListOf(
+                LineItem(
+                    id = 1L,
+                    product_id = 101L,
+                    title = "T-Shirt",
+                    price = "19.99",
+                    quantity = 2,
+                    variant_id = "v1",
+                    properties = listOf(
+                        Property(name = "Size", value = "M"),
+                        Property(name = "Color", value = "Blue")
+                    ),
+                    vendor = "Brand A"
+                ),
+                LineItem(
+                    id = 2L,
+                    product_id = 102L,
+                    title = "Jeans",
+                    price = "49.99",
+                    quantity = 1,
+                    variant_id = "v2",
+                    properties = listOf(
+                        Property(name = "Size", value = "32"),
+                        Property(name = "Color", value = "Black")
+                    ),
+                    vendor = "Brand B"
+                )
+            ),
+            email = ""
+        )
+    )
+
+
+    var mockDraftOrderRequesttobeUpdated = DraftOrderRequest(
+        draft_order = DraftOrderDetails(
+            line_items = mutableListOf(
+                LineItem(
+                    id = 1L,
+                    product_id = 101L,
+                    title = "T-Shirt",
+                    price = "19.99",
+                    quantity = 2,
+                    variant_id = "v1",
+                    properties = listOf(
+                        Property(name = "Size", value = "M"),
+                        Property(name = "Color", value = "Blue")
+                    ),
+                    vendor = "Brand A"
+                ),
+                LineItem(
+                    id = 2L,
+                    product_id = 102L,
+                    title = "Jeans",
+                    price = "49.99",
+                    quantity = 1,
+                    variant_id = "v2",
+                    properties = listOf(
+                        Property(name = "Size", value = "32"),
+                        Property(name = "Color", value = "Black")
+                    ),
+                    vendor = "Brand B"
+                )
+            ),
+            email = ""
+        )
+    )
+
 }

@@ -10,8 +10,6 @@ import com.example.shoparoo.model.SmartCollections
 import kotlinx.coroutines.flow.Flow
 
 class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repository {
-   // lateinit var sharedPreferences: SharedPreferences
-
 
     // remote data source
     override fun getSmartCollections(): Flow<SmartCollections> {
@@ -83,7 +81,4 @@ class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repositor
     override suspend fun addToCompleteOrder(id: String) {
         remoteDataSource.addToCompleteOrder(id)
     }
-
-
-
 }
