@@ -87,7 +87,6 @@ fun Favourites(navController: NavController) {
                     isGridVisible = favProducts.value.isNotEmpty()
                 }
 
-                // Animation for showing/hiding the grid
                 AnimatedVisibility(
                     visible = isGridVisible,
                     enter = scaleIn(animationSpec = tween(durationMillis = 800)),
