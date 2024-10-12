@@ -48,7 +48,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -71,7 +70,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.shoparoo.R
@@ -82,12 +80,12 @@ import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ImagesItem
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
-
 import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
+import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
 import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModel
 import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModelFactory
-
+import com.example.shoparoo.ui.theme.darkGreen
 import com.example.shoparoo.ui.theme.primary
 import com.smarttoolfactory.ratingbar.RatingBar
 import com.smarttoolfactory.ratingbar.model.Shimmer
@@ -98,8 +96,6 @@ import kotlin.random.Random
 fun ProductDetails(id: String, navController: NavHostController) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
-
     val viewModel: ProductDetailsViewModel = viewModel(
         factory = ProductDetailsViewModelFactory(
             repository = RepositoryImpl(
@@ -109,9 +105,8 @@ fun ProductDetails(id: String, navController: NavHostController) {
     )
     val ui = viewModel.singleProductDetail.collectAsState()
     val isFav = viewModel.isFav.collectAsState()
-
     LaunchedEffect(Unit) {
-        viewModel.getSingleProductDetail(id, selectedCurrency, context)
+        viewModel.getSingleProductDetail(id)
     }
 
     when (ui.value) {
@@ -165,10 +160,10 @@ private fun productInfo(
         Column(
             modifier = Modifier.padding(start = 25.dp, end = 25.dp, bottom = 25.dp)
         ) {
-            Spacer(modifier = Modifier.height(5.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = singleProductDetail.product!!.title!!,
-                fontSize = 25.sp,
+                text = singleProductDetail.product.title!!.capitalizeWords(),
+                fontSize = 27.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .align(Alignment.Start)
@@ -176,57 +171,64 @@ private fun productInfo(
             )
             ReviewSection()
             StockAndPrice(selected, selectedCurrency, conversionRate)
-            VariantSection(singleProductDetail.product!!.variants, selected)
+            VariantSection(singleProductDetail.product.variants, selected)
 
-            // Animated Description Section
+
             AnimatedVisibility(
                 visible = descriptionVisible.value,
                 enter = slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn(),
                 exit = fadeOut()
             ) {
-                DescriptionSection(singleProductDetail.product!!.bodyHtml)
+                DescriptionSection(singleProductDetail.product.bodyHtml)
             }
         }
 
         Spacer(modifier = Modifier.weight(1f))
-        BottomSection(
-            onClickCart = {
-                if (selected.value!!.inventoryQuantity!! < 1) {
-                    Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
-                } else {
-                    if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
-                        Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT)
-                            .show()
+
+            BottomSection(
+                onClickCart = {
+                    if (selected.value!!.inventoryQuantity!! < 1) {
+                        Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
                     } else {
-                        viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
-                        Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
+                        if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
+                            Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT).show()
+                            navController.navigate("login")
+                        } else {
+                            viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
+                            Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
+                        }
                     }
-                }
-            },
-            onClickFav = {
-                viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
-                if (!isFav)
-                    Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
-                else
-                    Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
-            },
-            buttonColors = if (isFav) {
-                ButtonDefaults.buttonColors(
-                    containerColor = Color.Red,
-                    contentColor = Color.Yellow,
-                    disabledContentColor = Color.Gray,
-                    disabledContainerColor = Color(0xFF000000),
-                )
-            } else {
-                ButtonDefaults.buttonColors(
-                    containerColor = Color.Gray,
-                    contentColor = Color.White,
-                    disabledContentColor = Color.Gray,
-                    disabledContainerColor = Color(0xFF000000),
-                )
-            },
-            isFav = isFav
-        )
+                },
+                onClickFav = {
+                    if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
+                        Toast.makeText(context, "Please login to favourites", Toast.LENGTH_SHORT).show()
+                        navController.navigate("login")
+                    } else {
+                        viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
+                        if (!isFav)
+                            Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                        else
+                            Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT)
+                                .show()
+                    }
+                },
+                buttonColors = if (isFav) {
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color.Red,
+                        contentColor = Color.Yellow,
+                        disabledContentColor = Color.Gray,
+                        disabledContainerColor = Color(0xFF000000),
+                    )
+                } else {
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color.Gray,
+                        contentColor = Color.White,
+                        disabledContentColor = Color.Gray,
+                        disabledContainerColor = Color(0xFF000000),
+                    )
+                },
+                isFav = isFav
+            )
 
     }
 
@@ -238,7 +240,7 @@ private fun productInfo(
 fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
     val imageVisible = remember { mutableStateOf(false) }
 
-    // Trigger the animation when the ProductImg is loaded
+
     LaunchedEffect(Unit) {
         imageVisible.value = true
     }
@@ -249,7 +251,7 @@ fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
             .height(300.dp)
             .padding(top = 30.dp, start = 5.dp)
     ) {
-        // Animated Visibility to slide in from the right
+
         AnimatedVisibility(
             visible = imageVisible.value,
             enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(),
@@ -298,12 +300,12 @@ fun ReviewSection() {
     val reviews = remember { getRandomReviews(Random.nextInt(2, 22)) }
     val reviewVisible = remember { mutableStateOf(false) }
 
-    // Trigger the animation when the ReviewSection is loaded
+
     LaunchedEffect(Unit) {
         reviewVisible.value = true
     }
 
-    // Animate the review section sliding in from the right
+
     AnimatedVisibility(
         visible = reviewVisible.value,
         enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(),
@@ -379,10 +381,13 @@ private fun StockAndPrice(
     conversionRate: Float
 ) {
     val currencySymbols = mapOf(
-        "USD" to "$ ",
-        "EGP" to "EGP "
+        "EGP" to "$ ",
+        "USD" to "EGP "
     )
-    val price = selected.value?.price?.toFloatOrNull()?.times(conversionRate) ?: 0f
+    val priceInUSD = selected.value?.price?.toFloatOrNull() ?: 0f
+    val convertedPrice = priceInUSD * conversionRate
+    val formattedPrice = String.format("%.2f", convertedPrice)
+
 
     val stockPriceVisible = remember { mutableStateOf(false) }
 
@@ -398,6 +403,7 @@ private fun StockAndPrice(
         exit = fadeOut()
     ) {
         Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .padding(10.dp)
                 .fillMaxWidth()
@@ -405,13 +411,13 @@ private fun StockAndPrice(
             Text(
                 text = (selected.value!!.inventoryQuantity).toString() + " item left",
                 fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (selected.value!!.inventoryQuantity!! > 10) Color.Gray else Color.Red
+                fontWeight = FontWeight.SemiBold,
+                color = if (selected.value!!.inventoryQuantity!! > 6) darkGreen else Color.Red
             )
             Spacer(Modifier.weight(1f))
             Text(
-                text = "${"%.2f".format(price)} ${currencySymbols[selectedCurrency] ?: " $"}",
-                fontSize = 18.sp,
+                text = formattedPrice + " " + currencySymbols[selectedCurrency],
+                fontSize = 19.sp,
                 fontWeight = FontWeight.Bold,
             )
         }
@@ -553,84 +559,32 @@ fun DescriptionSection(bodyHtml: String?) {
             .offset(x = offsetX)
     ) {
         Text(
-            text = "Description",
+            text = "Description:",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 5.dp, top = 5.dp, bottom = 15.dp)
         )
         Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFEFEFEF), RoundedCornerShape(8.dp))
+                .padding(12.dp),
             text = bodyHtml ?: "",
             fontSize = 18.sp,
             color = MaterialTheme.colorScheme.onSurface,
             lineHeight = 28.sp,
             fontWeight = FontWeight.Normal,
-            modifier = Modifier
-                .background(Color(0xFFEFEFEF), RoundedCornerShape(8.dp))
-                .padding(12.dp)
-        )
+
+            )
     }
 }
-
-
-/*@Composable
-fun BottomSection(onClickCart: () -> Unit, onClickFav: () -> Unit, buttonColors: ButtonColors) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(bottom = 15.dp, top = 15.dp, start = 25.dp, end = 25.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.Bottom
-    ) {
-        //add to cart button
-        Button(
-
-            onClick = onClickCart,
-
-            colors = ButtonDefaults.buttonColors(primary),
-
-            modifier = Modifier.weight(3f)
-
-        ) {
-            Text(
-                text = "Add to Cart",
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                fontSize = 20.sp,
-            )
-
-            Icon(
-                imageVector = Icons.Filled.ShoppingCart,
-                contentDescription = "Add to Cart",
-                tint = Color.White
-            )
-        }
-
-        //  Spacer(modifier = Modifier.weight(1f))
-        //favorite button
-        Button(
-            onClick = onClickFav,
-            colors = buttonColors,
-            modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .weight(1f)
-        ) {
-
-            Icon(
-                imageVector = Icons.Filled.FavoriteBorder,
-                contentDescription = "Add to Cart",
-                tint = Color.White,
-                modifier = Modifier.padding(vertical = 5.dp),
-
-                )
-        }
-    }
-}*/
 
 @Composable
 fun BottomSection(
     onClickCart: () -> Unit,
     onClickFav: () -> Unit,
     buttonColors: ButtonColors,
-    isFav: Boolean // Pass isFav to determine filled state
+    isFav: Boolean
 ) {
     var isAnimatingFav by remember { mutableStateOf(false) }
 
@@ -705,6 +659,7 @@ fun BottomSection(
             colors = buttonColors,
             modifier = Modifier
                 .padding(horizontal = 10.dp)
+                .size(50.dp)
                 .weight(1f)
         ) {
             Icon(

@@ -13,7 +13,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -68,6 +67,7 @@ import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.currencyApi
 import com.example.shoparoo.data.repository.RepositoryImpl
+import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
@@ -90,43 +90,45 @@ fun ProfileScreen(navController: NavController) {
     var selectedCurrency by remember { mutableStateOf(savedCurrency) }
     val showSignOutDialog = remember { mutableStateOf(false) }
 
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            //  .verticalScroll(rememberScrollState())
             .background(Color(0xFFF7F7F7))
     ) {
         // Profile Header with background
         ProfileHeader()
-        // Settings Items as Cards
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp)
+
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            item {
-                SettingsCardItem(
-                    title = stringResource(R.string.currency),
-                    icon = R.drawable.ic_currency,
-                    onClick = { showCurrencySheet = !showCurrencySheet }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                SettingsCardItem(
-                    title = stringResource(R.string.language),
-                    icon = R.drawable.ic_language,
-                    onClick = { showLanguageSheet = !showLanguageSheet }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                SettingsCardItem(
-                    title = stringResource(R.string.about_us),
-                    icon = R.drawable.ic_about_us,
-                    onClick = { showAboutUsSheet = !showAboutUsSheet }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                SettingsCardItem(
-                    title = stringResource(R.string.contact_us),
-                    icon = R.drawable.ic_contact_us,
-                    onClick = { showContactUsSheet.value = !showContactUsSheet.value }
-                )
-            }
+            SettingsCardItem(
+                title = stringResource(R.string.currency),
+                icon = R.drawable.ic_currency,
+                onClick = { showCurrencySheet = !showCurrencySheet }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            SettingsCardItem(
+                title = stringResource(R.string.language),
+                icon = R.drawable.ic_language,
+                onClick = { showLanguageSheet = !showLanguageSheet }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            SettingsCardItem(
+                title = stringResource(R.string.about_us),
+                icon = R.drawable.ic_about_us,
+                onClick = { showAboutUsSheet = !showAboutUsSheet }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            SettingsCardItem(
+                title = stringResource(R.string.contact_us),
+                icon = R.drawable.ic_contact_us,
+                onClick = { showContactUsSheet.value = !showContactUsSheet.value }
+            )
         }
+
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -138,8 +140,7 @@ fun ProfileScreen(navController: NavController) {
                     onCurrencySelected = { currency ->
                         selectedCurrency = currency
                         saveCurrencyPreference(context, currency)
-                        Toast.makeText(context, "Currency changed to $currency", Toast.LENGTH_SHORT)
-                            .show()
+                        //   Toast.makeText(context, "Currency changed to $currency", Toast.LENGTH_SHORT).show()
                         showCurrencySheet = false
                     }
                 )
@@ -163,8 +164,9 @@ fun ProfileScreen(navController: NavController) {
                 ContactUs()
             }
         }
-        SignOutButton(showSignOutDialog = showSignOutDialog)
-        val authViewModel = AuthViewModel()
+        val authViewModel = viewModel<AuthViewModel>()
+        val isSignedIn by authViewModel.authState.collectAsState()
+        SignOutButton(showSignOutDialog = showSignOutDialog,isSignedIn,navController)
         if (showSignOutDialog.value) {
             SignOutConfirmationDialog(
                 onDismiss = { showSignOutDialog.value = false },
@@ -184,7 +186,11 @@ fun ProfileScreen(navController: NavController) {
 }
 
 @Composable
-fun SignOutButton(showSignOutDialog: MutableState<Boolean>) {
+fun SignOutButton(
+    showSignOutDialog: MutableState<Boolean>,
+    isSignedIn: AuthState,
+    navController: NavController
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -199,18 +205,46 @@ fun SignOutButton(showSignOutDialog: MutableState<Boolean>) {
                 )
             )
             .clickable {
-                showSignOutDialog.value = true
+                if (isSignedIn == AuthState.Authenticated || isSignedIn == AuthState.UnVerified)
+                    showSignOutDialog.value = true
+                else{
+                    navController.navigate("login") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
             }
             .padding(vertical = 14.dp)
     ) {
-        Text(
-            text = stringResource(R.string.sign_out),
-            color = Color.White,
-            fontSize = 18.sp,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.Center)
-        )
+        if (isSignedIn == AuthState.Authenticated || isSignedIn == AuthState.UnVerified) {
+            Text(
+                text = stringResource(R.string.sign_out),
+                color = Color.White,
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            Text(
+                text = stringResource(R.string.sign_in),
+                color = Color.White,
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+//        Text(
+//            text = stringResource(R.string.sign_out),
+//            color = Color.White,
+//            fontSize = 18.sp,
+//            textAlign = TextAlign.Center,
+//            fontWeight = FontWeight.Bold,
+//            modifier = Modifier.align(Alignment.Center)
+//        )
     }
 }
 
@@ -249,7 +283,7 @@ fun SignOutConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
             }
         },
         containerColor = Color.White,
-        shape = RoundedCornerShape(16.dp)
+        //   shape = RoundedCornerShape(16.dp)
     )
 }
 
@@ -301,7 +335,7 @@ fun ProfileHeader() {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = userName ?: "User Name",
+                text = userName ?: "Guest",
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 26.sp
@@ -309,7 +343,7 @@ fun ProfileHeader() {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = currentUser ?: "user@example.com",
+                text = currentUser ?: "guest@shoparoo.com",
                 color = Color(0xFF494949),
                 fontSize = 18.sp
             )
@@ -499,21 +533,28 @@ fun Language() {
 fun Currency(selectedCurrency: String, onCurrencySelected: (String) -> Unit) {
     val context = LocalContext.current
     val currencies = listOf(
-        Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8"),
-        Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC")
+        //  Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC" ),
+        //  Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8" ),
+
+
+        Triple("EGP", "\uD83C\uDDEA\uD83C\uDDEC", "USD"),
+        Triple("USD", "\uD83C\uDDFA\uD83C\uDDF8", "EGP")
     )
 
 
+
+
     LazyColumn {
-        items(currencies) { (currency, flag) ->
+        items(currencies) { (currency, flag,actual ) ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 10.dp, horizontal = 20.dp)
                     .clickable {
                         // Trigger currency conversion
-                        onCurrencySelected(currency)
-                        fetchConversionRate(context, currency)
+                        onCurrencySelected(actual)
+                        fetchConversionRate(context, actual)
+
                     }
             ) {
                 Text(
@@ -546,7 +587,8 @@ fun fetchConversionRate(context: Context, selectedCurrency: String) {
 fun updatePrices(context: Context, conversionRate: Double) {
     //store the conversion rate in SharedPreferences and update product prices across the app
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    sharedPreferences.edit().putFloat("conversionRate", conversionRate.toFloat()).apply()
+    var cc = 1 / conversionRate
+    sharedPreferences.edit().putFloat("conversionRate", cc.toFloat()).apply()
 
     CoroutineScope(Dispatchers.Main).launch {
         // Call necessary composables to update UI
@@ -560,5 +602,5 @@ fun saveCurrencyPreference(context: Context, currency: String) {
 
 fun getCurrencyPreference(context: Context): String {
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    return sharedPreferences.getString("currency", "USD") ?: "USD"  // Default to USD
+    return sharedPreferences.getString("currency", "EGP") ?: "EGP"  // Default to USD
 }

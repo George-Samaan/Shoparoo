@@ -28,19 +28,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -88,6 +92,7 @@ import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModelFacto
 import com.example.shoparoo.ui.theme.primary
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import kotlinx.coroutines.delay
 import networkListener
 
 @Composable
@@ -100,7 +105,7 @@ fun HomeScreenDesign(
     bottomNavController: NavController,
     navController: NavController,
 
-) {
+    ) {
     val isNetworkAvailable = networkListener()
     if (!isNetworkAvailable.value) {
         // Show No Internet connection message
@@ -118,8 +123,8 @@ fun HomeScreenDesign(
         val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
         val currencySymbols = mapOf(
-            "USD" to "$ ",
-            "EGP" to "EGP "
+            "EGP" to "$ ",
+            "USD" to "EGP "
         )
 
         val isRefreshing = remember { mutableStateOf(false) }
@@ -142,7 +147,7 @@ fun HomeScreenDesign(
                     })
                 }
                 item {
-                   // SearchBar(query, onQueryChange,navController,viewModel)
+                    // SearchBar(query, onQueryChange,navController,viewModel)
                 }
                 item {
                     CouponsSliderWithIndicator(
@@ -216,12 +221,12 @@ fun Header(userName: String, onFavouriteClick: () -> Unit, onSearchClick: () -> 
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
-      //  horizontalArrangement = Arrangement.SpaceBetween
+        //  horizontalArrangement = Arrangement.SpaceBetween
     ) {
         ProfileSection(userName)
         Spacer(modifier = Modifier.weight(1f))
-        FavouriteButton(onFavouriteClick)
         SearchButton(onSearchClick = onSearchClick)
+        FavouriteButton(onFavouriteClick)
     }
 }
 
@@ -260,7 +265,7 @@ fun FavouriteButton(onFavouriteClick: () -> Unit) {
 fun SearchButton(onSearchClick: () -> Unit) {
     IconButton(
         onClick = onSearchClick,
-        modifier = Modifier.size(70.dp)
+        modifier = Modifier.size(50.dp)
     ) {
         Image(
             painter = painterResource(id = R.drawable.baseline_search_24),
@@ -287,7 +292,7 @@ fun BrandsSection(navController: NavController, smartCollections: List<SmartColl
         Text(
             text = "Brands",
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
+            fontSize = 21.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -348,7 +353,7 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
             text = brandName.capitalizeWords(),
             color = primary,
             fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
+            fontSize = 17.sp,
             modifier = Modifier.padding(top = 8.dp)
         )
     }
@@ -377,7 +382,7 @@ fun ForYouSection(
         Text(
             text = "For You",
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
+            fontSize = 21.sp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
         AnimatedVisibility(
@@ -420,8 +425,20 @@ fun ProductCard(
     currencySymbol: String,
     onClick: () -> Unit,
     inFav: Boolean = false,
-    onClickDeleteFav: () -> Unit = {}// Callback for the delete icon
+    onClickDeleteFav: () -> Unit = {}, // Callback for the delete icon
+    onClickAddFav: () -> Unit = {} // Callback for the add to favorites icon
 ) {
+    var showDialog by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+
+    if (isLoading) {
+        LaunchedEffect(isLoading) {
+            delay(700)
+            showDialog = false
+            isLoading = false
+        }
+    }
+
     Card(
         modifier = Modifier
             .width(170.dp)
@@ -446,16 +463,16 @@ fun ProductCard(
                     text = productName.capitalizeWords(),
                     color = primary,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    fontSize = 17.sp,
                     modifier = Modifier.padding(top = 7.dp, start = 5.dp, end = 5.dp),
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "$currencySymbol$productPrice",
+                    text = "$productPrice $currencySymbol",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(bottom = 7.dp, start = 5.dp, end = 5.dp)
                 )
@@ -471,13 +488,44 @@ fun ProductCard(
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
                         .size(24.dp)
-                        .clickable { onClickDeleteFav() }
+                        .clickable { showDialog = true }
                 )
             }
         }
     }
-}
 
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Remove from Favorites", fontWeight = FontWeight.Bold) },
+            text = { Text("Are you sure you want to remove $productName from favorites?") },
+            confirmButton = {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(30.dp)
+                            .padding(top = 15.dp, end = 12.dp),
+                        strokeWidth = 2.dp,
+                        color = Color.Gray
+                    )
+                } else {
+                    TextButton(onClick = {
+                        onClickDeleteFav()
+                        isLoading = true // Set loading state to true
+                    }) {
+                        Text("Yes", color = Color.Black)
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("No", color = Color.Black)
+                }
+            },
+            containerColor = Color.White,
+        )
+    }
+}
 
 
 fun String.capitalizeWords(): String {
@@ -498,7 +546,7 @@ fun MainScreen(
         )
     )
 
-    val shoppingCartViewModel : ShoppingCartViewModel = viewModel(
+    val shoppingCartViewModel: ShoppingCartViewModel = viewModel(
         factory = ShoppingCartViewModelFactory(
             repository = RepositoryImpl(
                 remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
@@ -550,7 +598,15 @@ fun MainScreen(
             composable(BottomNav.Home.route) {
                 HomeScreenDesign(
                     if (isLoading) "" else userName ?: "Guest",
-                    {navController.navigate("favourites")},
+                    {
+                        if (userName != null) {
+                            navController.navigate("favourites")
+                        } else {
+                            navController.navigate("login")
+                        }
+                        //navController.navigate("favourites")
+
+                    },
 
                     smartCollectionsState,
                     forYouProductsState,
@@ -567,7 +623,7 @@ fun MainScreen(
 
             }
             composable(BottomNav.Cart.route) {
-                ShoppingCartScreen(navControllerBottom,shoppingCartViewModel,navController)
+                ShoppingCartScreen(navControllerBottom, shoppingCartViewModel, navController)
             }
             composable(BottomNav.orders.route) {
                 Text(text = "Orders Screen")
@@ -578,7 +634,7 @@ fun MainScreen(
                 )
             }
             composable(BottomNav.orders.route) {
-                OrderScreen(orderViewModel = orderViewModel, navController)
+                OrderScreen(orderViewModel = orderViewModel)
             }
 //            composable("settings") { SettingsScreen(navControllerBottom) }
             composable("login") { LoginScreen(navControllerBottom) }

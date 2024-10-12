@@ -72,37 +72,25 @@ fun Signup(navController: NavHostController) {
 
     LaunchedEffect(item.value) {
         when (item.value) {
-            is AuthState.Success -> {
-                Toast.makeText(context, "Successful sign up, Confirm your email", Toast.LENGTH_SHORT).show()
+            is AuthState.Authenticated -> {
+                //Toast.makeText(context, "Successful sign up, Confirm your email", Toast.LENGTH_SHORT).show()
                 navController.navigate("login")
                 isLoading = false
             }
 
-            is AuthState.Failed -> {
-                Toast.makeText(context, "Sign up failed", Toast.LENGTH_SHORT).show()
+            is AuthState.UnAuthenticated -> {
+               // Toast.makeText(context, "Sign up failed", Toast.LENGTH_SHORT).show()
                 isLoading = false
             }
 
-            AuthState.Authenticated -> isLoading = false
             AuthState.Loading -> isLoading = true
-            AuthState.UnAuthenticated -> isLoading = false
+            AuthState.UnVerified -> Unit
+            AuthState.Error -> {
+                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+                isLoading = false
+            }
         }
 
-        /*
-        //        viewModel.authState.collect {
-        //            when (it) {
-        //                is AuthState.Success -> {
-        //                    Toast.makeText(context, "Sign up successful", Toast.LENGTH_SHORT).show()
-        //                    navController.navigate("login")
-        //                }
-        //                is AuthState.Failed -> {
-        //                    Toast.makeText(context, "Sign up failed", Toast.LENGTH_SHORT).show()
-        //                }
-        //
-        //                AuthState.Authenticated -> TODO()
-        //                AuthState.Loading -> Unit
-        //            }
-        //        }*/
     }
 
     val nameValue = remember { mutableStateOf("") }
@@ -275,7 +263,8 @@ private fun NameFields(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 45.dp, vertical = 10.dp),
-            isError = Validation
+            isError = Validation,
+            singleLine = true
         )
     }
     if (nameValue.value.isEmpty() && Validation)
@@ -320,7 +309,8 @@ fun PasswordField(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 45.dp, vertical = 10.dp),
-        isError = Validation
+        isError = Validation,
+        singleLine = true
 
     )
     if (textValue.value.isEmpty() && Validation)

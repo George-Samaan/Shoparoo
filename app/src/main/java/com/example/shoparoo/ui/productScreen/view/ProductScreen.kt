@@ -2,6 +2,7 @@
 
 package com.example.shoparoo.ui.productScreen.view
 
+//noinspection UsingMaterialAndMaterial3Libraries
 import android.content.Context
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
@@ -26,7 +27,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,6 +53,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -62,6 +63,7 @@ import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.ui.Favourites.FavouritesViewModel
 import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.homeScreen.view.ProductCard
+import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModel
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
@@ -96,8 +98,8 @@ fun ProductsScreen(
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
     val currencySymbols = mapOf(
-        "USD" to "$ ",
-        "EGP" to "EGP "
+        "EGP" to "$ ",
+        "USD" to "EGP "
     )
     val isNetworkAvailable = networkListener()
     if (!isNetworkAvailable.value) {
@@ -233,8 +235,8 @@ fun ProductGrid(
     selectedCurrency: String,
     conversionRate: Float,
     currencySymbols: Map<String, String>,
-    inFav : Boolean = false,
-   viewModel: FavouritesViewModel? = null
+    inFav: Boolean = false,
+    viewModel: FavouritesViewModel? = null
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -259,9 +261,10 @@ fun ProductGrid(
                     navController!!.navigate("productDetails/${product.id}")
                 },
                 currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$"),
-                inFav = inFav, onClickDeleteFav =  {
-                    viewModel!!.getFavourites(true, product.id!!)
-                }
+                inFav = inFav,
+                onClickDeleteFav = { viewModel!!.getFavourites(true, product.id!!) },
+                //  onClickAddFav = {  }
+
 
             )
         }
@@ -309,16 +312,16 @@ fun LoadingIndicator() {
 }
 
 @Composable
-fun TopBar(navController: NavController, title: String) {
+fun TopBar(navController: NavController, title: String, top: Dp = 10.dp) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 30.dp, start = 5.dp)
+            .padding(top = top, start = 6.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(50.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(Color(0xFFF5F5F5))
                 .clickable { navController.popBackStack() },
@@ -332,9 +335,9 @@ fun TopBar(navController: NavController, title: String) {
         }
 
         Text(
-            text = title,
+            text = title.capitalizeWords(),
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
+            fontSize = 22.sp,
             color = primary,
             textAlign = TextAlign.Center,
             modifier = Modifier

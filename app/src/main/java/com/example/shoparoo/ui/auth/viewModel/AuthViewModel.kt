@@ -12,7 +12,8 @@ import kotlinx.coroutines.launch
 
 
 class AuthViewModel : ViewModel() {
-    private var _authState: MutableStateFlow<AuthState> = MutableStateFlow(AuthState.UnAuthenticated)
+    private var _authState: MutableStateFlow<AuthState> =
+        MutableStateFlow(AuthState.UnAuthenticated)
     val authState: MutableStateFlow<AuthState> = _authState
 
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -22,9 +23,14 @@ class AuthViewModel : ViewModel() {
         checkUser()
     }
 
-    private fun checkUser() {
+     private fun checkUser() {
         if (firebaseAuth.currentUser != null) {
-            _authState.value = AuthState.Authenticated
+            // _authState.value = AuthState.Authenticated
+            if (firebaseAuth.currentUser!!.isEmailVerified) {
+                _authState.value = AuthState.Authenticated
+            } else {
+                _authState.value = AuthState.UnVerified
+            }
         }
     }
 
@@ -41,12 +47,12 @@ class AuthViewModel : ViewModel() {
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 Log.d(TAG, "Email sent.")
-                                _authState.value = AuthState.Success
+                                _authState.value = AuthState.Authenticated
                             }
                         }
 
                 } else {
-                    _authState.value = AuthState.Failed
+                    _authState.value = AuthState.Error
                     Log.d(TAG, "signUp: failed")
                 }
             }
@@ -67,9 +73,22 @@ class AuthViewModel : ViewModel() {
             firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
                 if (it.isSuccessful) {
                     Log.d(TAG, "login: success")
-                    _authState.value = AuthState.Success
+                    if (firebaseAuth.currentUser!!.isEmailVerified) {
+                        _authState.value = AuthState.Authenticated
+                    } else {
+                        _authState.value = AuthState.UnVerified
+                        val user = firebaseAuth.currentUser
+                        user!!.sendEmailVerification()
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Log.d(TAG, "Email sent.")
+                                    _authState.value = AuthState.Authenticated
+                                }
+                            }
+                    }
+
                 } else {
-                    _authState.value = AuthState.Failed
+                    _authState.value = AuthState.Error
                     Log.d(TAG, "login: failed")
                 }
             }
@@ -80,12 +99,22 @@ class AuthViewModel : ViewModel() {
         firebaseAuth.signOut()
         _authState.value = AuthState.Loading
     }
+
+    fun refreshVerification() {
+        firebaseAuth.currentUser!!.reload().addOnCompleteListener {
+            if (firebaseAuth.currentUser!!.isEmailVerified) {
+                _authState.value = AuthState.Authenticated
+            } else {
+                _authState.value = AuthState.UnVerified
+            }
+        }
+    }
 }
 
 sealed class AuthState {
     object Loading : AuthState()
-    object Success : AuthState()
-    object Failed : AuthState()
     object Authenticated : AuthState()
     object UnAuthenticated : AuthState()
+    object UnVerified : AuthState()
+    object Error : AuthState()
 }

@@ -84,8 +84,8 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
     val currencySymbols = mapOf(
-        "USD" to "$ ",
-        "EGP" to "EGP "
+        "EGP" to "$ ",
+        "USD" to "EGP "
     )
 
     val isNetworkAvailable = networkListener()
@@ -207,8 +207,11 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                         exit = scaleOut(animationSpec = tween(durationMillis = 600))
                     ) {
                         ProductGrid(
-                            filteredProducts, navController = navController, selectedCurrency,
-                            conversionRate, currencySymbols
+                            filteredProducts,
+                            navController,
+                            selectedCurrency,
+                            conversionRate,
+                            currencySymbols
                         )
                     }
                 }
@@ -331,7 +334,7 @@ fun FilterBar(selectedFilter: String?, onFilterSelected: (String) -> Unit) {
         filters.forEach { filter ->
             Text(
                 text = filter,
-                fontSize = 16.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = if (filter == selectedFilter) primary else Color.Black,
                 modifier = Modifier

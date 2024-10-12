@@ -19,9 +19,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,11 +45,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shoparoo.R
 import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
+import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.ui.checkOut.viewModel.PaymentViewModel
 import com.example.shoparoo.ui.checkOut.viewModel.PaymentViewModelFactory
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModelFactory
+import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
 import java.util.Calendar
 
@@ -57,8 +61,7 @@ fun ChoosePaymentMethod(
     selectedPaymentMethod: String,
     onPaymentMethodSelected: (String) -> Unit,
     showAddCreditCardScreen: Boolean,
-
-    ) {
+) {
     Column(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier
@@ -82,7 +85,11 @@ fun ChoosePaymentMethod(
         ) {
             RadioButton(
                 selected = selectedPaymentMethod == "cash",
-                onClick = { onPaymentMethodSelected("cash") }
+                onClick = { onPaymentMethodSelected("cash") },
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = Color.Black,
+                    unselectedColor = Color.Gray
+                )
             )
             Image(
                 painter = painterResource(id = R.drawable.cash),
@@ -108,7 +115,11 @@ fun ChoosePaymentMethod(
         ) {
             RadioButton(
                 selected = selectedPaymentMethod == "card",
-                onClick = { onPaymentMethodSelected("card") }
+                onClick = { onPaymentMethodSelected("card") },
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = Color.Black,
+                    unselectedColor = Color.Gray
+                )
             )
             Image(
                 painter = painterResource(id = R.drawable.card),
@@ -301,6 +312,7 @@ fun CheckoutButtonCheck(
     expirationMonth: String = null.toString(),
     expirationYear: String = null.toString(),
 ) {
+    // ViewModels
     val shoppingCartViewModel: ShoppingCartViewModel = viewModel(
         factory = ShoppingCartViewModelFactory(
             repository = RepositoryImpl(
@@ -316,30 +328,45 @@ fun CheckoutButtonCheck(
         )
     )
     val context = LocalContext.current
-    var isProcessing by remember { mutableStateOf(false) } // Track payment process state
-    var paymentSuccess by remember { mutableStateOf(false) } // Track if payment was successful
+
+    // States
+    var isProcessing by remember { mutableStateOf(false) }
+    var paymentSuccess by remember { mutableStateOf(false) }
+    var orderPlaced by remember { mutableStateOf(false) }  // New flag to track if the order is placed
 
     val draftOrderDetails by shoppingCartViewModel.draftOrderDetails.collectAsState()
+    val completeOrderState by paymentViewModel.completeOrderState.collectAsState()
+
+    // Fetch draft order details
     LaunchedEffect(Unit) {
-        Log.d("CheckoutButtonCheck", "LaunchedEffect triggered")
         shoppingCartViewModel.getDraftOrderDetails()
     }
+
+    // Function to complete the order
     fun completeOrderIfPossible() {
         val orderId = draftOrderDetails?.id
-        Log.d("checkID", "$orderId")
-
         if (orderId != null) {
             paymentViewModel.addToCompleteOrder(orderId.toString())
-            paymentViewModel.let {
-                it.deleteOrderFromDraft(orderId.toString())
-            }
         } else {
             Log.d("CheckoutButtonCheck", "Order ID is null")
         }
     }
 
+    // Observe API state to delete draft after completing the order
+    LaunchedEffect(completeOrderState) {
+        if (completeOrderState is ApiState.Success) {
+            val orderId = draftOrderDetails?.id
+            orderId?.let {
+                paymentViewModel.deleteOrderFromDraft(it.toString())
+                orderPlaced = true // Set orderPlaced to true after successful completion
+            }
+        } else if (completeOrderState is ApiState.Failure) {
+            Log.d("CheckoutButtonCheck", "Failed to complete the order")
+        }
+    }
+
     if (isProcessing) {
-        // Show a circular progress indicator while processing the payment
+        // Show circular progress indicator while processing the payment
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -347,6 +374,7 @@ fun CheckoutButtonCheck(
             CircularProgressIndicator()
         }
 
+        // Simulate payment processing
         LaunchedEffect(Unit) {
             delay(5000L) // Simulate 5-second delay
             isProcessing = false
@@ -366,28 +394,35 @@ fun CheckoutButtonCheck(
             }
         }
     } else {
+        // Place Order Button
         Button(
             onClick = {
-                if (selectedPaymentMethod == "cash") {
-                    // Start processing for cash on delivery
-                    isProcessing = true
-                    completeOrderIfPossible()
-                } else if (selectedPaymentMethod == "card") {
-                    // Validate card and start processing if valid
-                    if (validateCardDetails(
-                            cardHolderName,
-                            cardNumber,
-                            expirationMonth,
-                            expirationYear
-                        )
-                    ) {
+                if (orderPlaced) {
+                    // Show message if the order has already been placed
+                    Toast.makeText(context, "Order already placed", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Process the order based on selected payment method
+                    if (selectedPaymentMethod == "cash") {
                         isProcessing = true
                         completeOrderIfPossible()
-                    } else {
-                        Toast.makeText(context, "Invalid Card Details", Toast.LENGTH_SHORT).show()
+                    } else if (selectedPaymentMethod == "card") {
+                        if (validateCardDetails(
+                                cardHolderName,
+                                cardNumber,
+                                expirationMonth,
+                                expirationYear
+                            )
+                        ) {
+                            isProcessing = true
+                            completeOrderIfPossible()
+                        } else {
+                            Toast.makeText(context, "Invalid Card Details", Toast.LENGTH_SHORT)
+                                .show()
+                        }
                     }
                 }
             },
+            colors = ButtonDefaults.buttonColors(primary),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -397,7 +432,7 @@ fun CheckoutButtonCheck(
         }
 
         // Show success message after processing
-        if (paymentSuccess) {
+        if (paymentSuccess && selectedPaymentMethod == "card") {
             Toast.makeText(context, "Payment successful", Toast.LENGTH_SHORT).show()
         }
     }
@@ -414,120 +449,3 @@ fun validateCardDetails(
             expirationMonth.length == 2 && expirationMonth.toIntOrNull() in 1..12 &&
             expirationYear.length == 2 && expirationYear.toIntOrNull() != null
 }
-
-
-/*/*
-@Composable
-fun CheckoutButtonCheck(
-    selectedPaymentMethod: String,
-    cardHolderName: String,
-    cardNumber: String,
-    expirationMonth: String,
-    expirationYear: String
-) {
-    val context = LocalContext.current
-    var isProcessing by remember { mutableStateOf(false) }
-    var isSuccess by remember { mutableStateOf(false) }
-
-    if (isProcessing) {
-        // Show progress bar while processing the payment
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(50.dp),
-                strokeWidth = 4.dp
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Processing payment...", fontWeight = FontWeight.Medium, fontSize = 16.sp)
-        }
-
-        // Simulate 5 seconds delay for the payment process
-        LaunchedEffect(Unit) {
-            delay(5000L)
-            isProcessing = false
-            isSuccess = true
-
-            if (selectedPaymentMethod == "cash") {
-                Toast.makeText(context, "Order placed with Cash on Delivery", Toast.LENGTH_SHORT).show()
-            } else if (selectedPaymentMethod == "card") {
-                if (validateCardDetails(cardHolderName, cardNumber, expirationMonth, expirationYear)) {
-                    Toast.makeText(context, "Order placed with Credit/Debit Card", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(context, "Invalid Card Details", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    } else {
-        if (!isSuccess) {
-            // Button for placing the order
-            Button(
-                onClick = {
-                    isProcessing = true
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .height(50.dp)
-            ) {
-                Text("Place Order", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
-        } else {
-            // Success message after payment is processed
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text("Payment Successful!", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { */
-/* Navigate to next screen or reset *//*
- }) {
-                    Text("Continue Shopping")
-                }
-            }
-        }
-    }
-}
-*/
-
-
-/*
-@Composable
-fun CheckoutButtonCheck(selectedPaymentMethod: String, cardHolderName: String, cardNumber: String, expirationMonth: String, expirationYear: String) {
-    val context = LocalContext.current
-    var isProcessing by remember { mutableStateOf(false) }
-    var isSuccess by remember { mutableStateOf(false) }
-
-    Button(
-        onClick = {
-            if (selectedPaymentMethod == "cash") {
-                // Handle cash on delivery
-                Toast.makeText(context, "Order placed with Cash on Delivery", Toast.LENGTH_SHORT).show()
-            } else if (selectedPaymentMethod == "card") {
-                // Handle card payment validation
-                if (validateCardDetails(cardHolderName, cardNumber, expirationMonth, expirationYear)) {
-                    Toast.makeText(context, "Order placed with Credit/Debit Card", Toast.LENGTH_SHORT).show()
-                    // Handle card payment here
-                    // Take location with you.
-                } else {
-                    Toast.makeText(context, "Invalid Card Details", Toast.LENGTH_SHORT).show()
-                }
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(50.dp)
-    ) {
-        Text("Place Order", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-    }
-}
-*/*/
