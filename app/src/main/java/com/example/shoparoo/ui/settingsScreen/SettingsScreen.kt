@@ -23,9 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -69,6 +67,7 @@ import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.currencyApi
 import com.example.shoparoo.data.repository.RepositoryImpl
+import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
@@ -91,10 +90,12 @@ fun ProfileScreen(navController: NavController) {
     var selectedCurrency by remember { mutableStateOf(savedCurrency) }
     val showSignOutDialog = remember { mutableStateOf(false) }
 
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            //  .verticalScroll(rememberScrollState())
             .background(Color(0xFFF7F7F7))
     ) {
         // Profile Header with background
@@ -139,7 +140,7 @@ fun ProfileScreen(navController: NavController) {
                     onCurrencySelected = { currency ->
                         selectedCurrency = currency
                         saveCurrencyPreference(context, currency)
-                     //   Toast.makeText(context, "Currency changed to $currency", Toast.LENGTH_SHORT).show()
+                        //   Toast.makeText(context, "Currency changed to $currency", Toast.LENGTH_SHORT).show()
                         showCurrencySheet = false
                     }
                 )
@@ -163,8 +164,9 @@ fun ProfileScreen(navController: NavController) {
                 ContactUs()
             }
         }
-        SignOutButton(showSignOutDialog = showSignOutDialog)
-        val authViewModel = AuthViewModel()
+        val authViewModel = viewModel<AuthViewModel>()
+        val isSignedIn by authViewModel.authState.collectAsState()
+        SignOutButton(showSignOutDialog = showSignOutDialog,isSignedIn,navController)
         if (showSignOutDialog.value) {
             SignOutConfirmationDialog(
                 onDismiss = { showSignOutDialog.value = false },
@@ -184,7 +186,11 @@ fun ProfileScreen(navController: NavController) {
 }
 
 @Composable
-fun SignOutButton(showSignOutDialog: MutableState<Boolean>) {
+fun SignOutButton(
+    showSignOutDialog: MutableState<Boolean>,
+    isSignedIn: AuthState,
+    navController: NavController
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -199,18 +205,46 @@ fun SignOutButton(showSignOutDialog: MutableState<Boolean>) {
                 )
             )
             .clickable {
-                showSignOutDialog.value = true
+                if (isSignedIn == AuthState.Authenticated || isSignedIn == AuthState.UnVerified)
+                    showSignOutDialog.value = true
+                else{
+                    navController.navigate("login") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
             }
             .padding(vertical = 14.dp)
     ) {
-        Text(
-            text = stringResource(R.string.sign_out),
-            color = Color.White,
-            fontSize = 18.sp,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.Center)
-        )
+        if (isSignedIn == AuthState.Authenticated || isSignedIn == AuthState.UnVerified) {
+            Text(
+                text = stringResource(R.string.sign_out),
+                color = Color.White,
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            Text(
+                text = stringResource(R.string.sign_in),
+                color = Color.White,
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+//        Text(
+//            text = stringResource(R.string.sign_out),
+//            color = Color.White,
+//            fontSize = 18.sp,
+//            textAlign = TextAlign.Center,
+//            fontWeight = FontWeight.Bold,
+//            modifier = Modifier.align(Alignment.Center)
+//        )
     }
 }
 
@@ -262,6 +296,9 @@ fun ProfileHeader() {
             )
         )
     )
+    LaunchedEffect(Unit) {
+        viewModel.getName()
+    }
     val userName by viewModel.userName.collectAsState()
     val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     val currentUser = firebaseAuth.currentUser?.email
@@ -298,7 +335,7 @@ fun ProfileHeader() {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = userName ?: "User Name",
+                text = userName ?: "Guest",
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 26.sp
@@ -306,7 +343,7 @@ fun ProfileHeader() {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = currentUser ?: "user@example.com",
+                text = currentUser ?: "guest@shoparoo.com",
                 color = Color(0xFF494949),
                 fontSize = 18.sp
             )
@@ -496,8 +533,8 @@ fun Language() {
 fun Currency(selectedCurrency: String, onCurrencySelected: (String) -> Unit) {
     val context = LocalContext.current
     val currencies = listOf(
-      //  Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC" ),
-      //  Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8" ),
+        //  Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC" ),
+        //  Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8" ),
 
 
         Triple("EGP", "\uD83C\uDDEA\uD83C\uDDEC", "USD"),

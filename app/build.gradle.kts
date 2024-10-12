@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.androidx.junit.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -100,8 +101,8 @@ dependencies {
 
     //rating bar
     implementation("com.github.SmartToolFactory:Compose-RatingBar:1.1.1")
-   implementation("com.github.SmartToolFactory:Compose-RatingBar:1.0.0")
-    implementation ("com.github.a914-gowtham:compose-ratingbar:1.3.12")
+    implementation("com.github.SmartToolFactory:Compose-RatingBar:1.0.0")
+    implementation("com.github.a914-gowtham:compose-ratingbar:1.3.12")
 
     //Animation
     implementation("com.airbnb.android:lottie-compose:6.0.0")
@@ -109,10 +110,10 @@ dependencies {
 
     //implementation ("com.paymob.accept:acceptsdk:2.3.5")
 
-    implementation ("androidx.webkit:webkit:1.5.0")
+    implementation("androidx.webkit:webkit:1.5.0")
 
     // OkHttp Logging (optional, for debugging)
-    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
 
     implementation("com.google.android.gms:play-services-maps:18.1.0")
@@ -123,7 +124,11 @@ dependencies {
     implementation("com.github.KeepSafe:TapTargetView:1.13.2")
 
 
-
-
-
+    // Testing
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("androidx.test:core:1.4.0")
+    testImplementation("org.robolectric:robolectric:4.10")
+    testImplementation("androidx.arch.core:core-testing:2.1.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
+    testImplementation("androidx.test.ext:junit:1.1.3")
 }

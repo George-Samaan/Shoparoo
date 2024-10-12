@@ -29,6 +29,10 @@ data class AppliedDiscount(
     val amount: Double?
 )
 
+data class ShippingAddress(
+    val name: String,
+)
+
 data class DraftOrderDetails(
     val id: Long?=null,
     var line_items: MutableList<LineItem>,  // Items in the draft order
@@ -40,6 +44,7 @@ data class DraftOrderDetails(
     val total_price: String? = null,
     val subtotal_price: String? = null,
     val total_tax: String? = null,
-    val applied_discount: AppliedDiscount? = null  // Discount applied to the order
+    val applied_discount: AppliedDiscount? = null , // Discount applied to the order
+    val shipping_address: ShippingAddress?= null
 )
 
