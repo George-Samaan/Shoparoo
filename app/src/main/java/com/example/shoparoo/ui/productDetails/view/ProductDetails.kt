@@ -50,7 +50,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -86,6 +85,7 @@ import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModel
 import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModelFactory
+import com.example.shoparoo.ui.theme.grey
 import com.example.shoparoo.ui.theme.primary
 import com.smarttoolfactory.ratingbar.RatingBar
 import com.smarttoolfactory.ratingbar.model.Shimmer
@@ -123,13 +123,13 @@ fun ProductDetails(id: String, navController: NavHostController) {
 
         is ApiState.Success -> {
             val data = ui.value as ApiState.Success
-            productInfo(data.data as SingleProduct, navController, viewModel, isFav.value)
+            ProductInfo(data.data as SingleProduct, navController, viewModel, isFav.value)
         }
     }
 }
 
 @Composable
-private fun productInfo(
+private fun ProductInfo(
     singleProductDetail: SingleProduct,
     navController: NavHostController,
     viewModel: ProductDetailsViewModel,
@@ -142,7 +142,8 @@ private fun productInfo(
     val selected = remember { mutableStateOf(singleProductDetail.product!!.variants!![0]) }
     val isLoggedIn = AuthViewModel().authState.collectAsState()
     val descriptionVisible = remember { mutableStateOf(false) }
-    val showAlert =  remember { mutableStateOf(false) }
+    val showDialog = remember { mutableStateOf(false) } // State to control dialog visibility
+
     // Trigger the animation when the product info is loaded
     LaunchedEffect(singleProductDetail) {
         descriptionVisible.value = true
@@ -192,8 +193,8 @@ private fun productInfo(
                 if (selected.value!!.inventoryQuantity!! < 1) {
                     Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
                 } else {
-                    if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT).show()
-                        //  showAlert.value = true
+                    if (isLoggedIn.value == AuthState.UnAuthenticated) {
+                        showDialog.value = true // Show dialog if not authenticated
                     } else {
                         viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
                         Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
@@ -201,8 +202,8 @@ private fun productInfo(
                 }
             },
             onClickFav = {
-                if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
-                    Toast.makeText(context, "Please login to add to fav", Toast.LENGTH_SHORT).show()
+                if (isLoggedIn.value == AuthState.UnAuthenticated) {
+                    showDialog.value = true // Show dialog if not authenticated
                 } else {
                     viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
                     if (!isFav)
@@ -226,15 +227,21 @@ private fun productInfo(
                     disabledContainerColor = Color(0xFF000000),
                 )
             },
-            isFav = isFav
+            isFav = isFav,
+            isLoggedIn = isLoggedIn.value // Pass the authentication state
         )
-        if (showAlert.value) {
-            alert()
-        }
-
     }
 
-
+    // Show the login dialog if required
+    if (showDialog.value) {
+        LoginDialog(
+            onDismiss = { showDialog.value = false },
+            onLogin = {
+                // Handle the login logic here
+                // For example, you might want to call a login function or redirect to the login screen
+            }
+        )
+    }
 }
 
 
@@ -584,9 +591,11 @@ fun BottomSection(
     onClickCart: () -> Unit,
     onClickFav: () -> Unit,
     buttonColors: ButtonColors,
-    isFav: Boolean // Pass isFav to determine filled state
+    isFav: Boolean, // Pass isFav to determine filled state
+    isLoggedIn: AuthState // Pass the authentication state
 ) {
     var isAnimatingFav by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
     // Trigger the animation when the button is clicked
     val iconScale by animateFloatAsState(targetValue = if (isAnimatingFav) 1.5f else 1f)
@@ -599,6 +608,7 @@ fun BottomSection(
             isAnimatingFav = false
         }
     }
+
     var isAnimating by remember { mutableStateOf(false) }
 
     // Trigger the animation when the button is clicked
@@ -614,7 +624,6 @@ fun BottomSection(
         }
     }
 
-
     Row(
         Modifier
             .fillMaxWidth()
@@ -625,8 +634,12 @@ fun BottomSection(
         // Add to Cart button
         Button(
             onClick = {
+                if (isLoggedIn == AuthState.UnAuthenticated) {
+                    showDialog = true // Show dialog if not authenticated
+                } else {
+                    onClickCart()
+                }
                 isAnimating = true
-                onClickCart()
             },
             colors = ButtonDefaults.buttonColors(primary),
             modifier = Modifier
@@ -653,8 +666,12 @@ fun BottomSection(
         // Favorite button
         Button(
             onClick = {
-                isAnimatingFav = true
-                onClickFav()
+                if (isLoggedIn == AuthState.UnAuthenticated) {
+                    showDialog = true // Show dialog if not authenticated
+                } else {
+                    isAnimatingFav = true
+                    onClickFav()
+                }
             },
             colors = buttonColors,
             modifier = Modifier
@@ -668,6 +685,16 @@ fun BottomSection(
                 modifier = Modifier.scale(iconScale) // Apply scale animation
             )
         }
+    }
+
+    // Show the login dialog if required
+    if (showDialog) {
+        LoginDialog(
+            onDismiss = { showDialog = false },
+            onLogin = {
+                // Handle the login logic here
+            }
+        )
     }
 }
 
@@ -688,40 +715,31 @@ private fun colorSetter(variant: VariantsItem?): Color {
     }
 }
 
-
 @Composable
-fun alert() {
-    // State to control the visibility of the alert
-    var showDialog by remember { mutableStateOf(true) }
-
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                // Dismiss the dialog when clicking outside
-                showDialog = false
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    // Dismiss the dialog when confirm button is clicked
-                    showDialog = false
-                }) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    // Dismiss the dialog when dismiss button is clicked
-                    showDialog = false
-                }) {
-                    Text("Cancel")
-                }
-            },
-            title = {
-                Text("Alert")
-            },
-            text = {
-                Text("This is an alert dialog. Press OK to dismiss.")
+fun LoginDialog(
+    onDismiss: () -> Unit,
+    onLogin: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Authentication Required") },
+        text = { Text("You must log in to access this feature.") },
+        confirmButton = {
+            Button(onClick = {
+                onLogin()
+                onDismiss()
+            }, colors = ButtonDefaults.buttonColors(primary)) {
+                Text("Login")
             }
-        )
-    }
+        },
+        containerColor = Color.White,
+        dismissButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(grey)
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
 }
