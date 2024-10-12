@@ -96,6 +96,11 @@ fun LoginScreen(navController: NavHostController) {
                 navController.navigate("UnVerified")
                 isLoading = false
             }
+
+            AuthState.Error -> {
+                isLoading = false
+                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+            }
         }
     }
     Column(

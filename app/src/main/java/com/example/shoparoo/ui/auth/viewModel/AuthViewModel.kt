@@ -52,7 +52,7 @@ class AuthViewModel : ViewModel() {
                         }
 
                 } else {
-                    _authState.value = AuthState.UnAuthenticated
+                    _authState.value = AuthState.Error
                     Log.d(TAG, "signUp: failed")
                 }
             }
@@ -88,7 +88,7 @@ class AuthViewModel : ViewModel() {
                     }
 
                 } else {
-                    _authState.value = AuthState.UnAuthenticated
+                    _authState.value = AuthState.Error
                     Log.d(TAG, "login: failed")
                 }
             }
@@ -116,4 +116,5 @@ sealed class AuthState {
     object Authenticated : AuthState()
     object UnAuthenticated : AuthState()
     object UnVerified : AuthState()
+    object Error : AuthState()
 }

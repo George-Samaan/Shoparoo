@@ -85,6 +85,10 @@ fun Signup(navController: NavHostController) {
 
             AuthState.Loading -> isLoading = true
             AuthState.UnVerified -> Unit
+            AuthState.Error -> {
+                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+                isLoading = false
+            }
         }
 
     }
