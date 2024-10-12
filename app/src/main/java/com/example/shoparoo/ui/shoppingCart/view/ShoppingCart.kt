@@ -104,10 +104,8 @@ fun ShoppingCartScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize().fillMaxWidth(),
-                    //.padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    //AppHeader(navController, "Cart")
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
