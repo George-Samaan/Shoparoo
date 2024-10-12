@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
+import com.example.shoparoo.model.ShippingAddress
+import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
@@ -49,7 +51,7 @@ import java.io.IOException
 import java.util.Locale
 
 @Composable
-fun Location() {
+fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long, ) {
     val context = LocalContext.current
     var locationText by remember { mutableStateOf("Fetching location...") }
     var showMap by remember { mutableStateOf(false) }
@@ -84,6 +86,7 @@ fun Location() {
         Dialog(onDismissRequest = { showMap = false }) {
             LocationPickerMap { newAddress ->
                 locationText = newAddress
+                viewModel.updateShippingAddress(draftOrderId, ShippingAddress(newAddress))
                 showMap = false
             }
         }
@@ -94,6 +97,7 @@ fun Location() {
         ManualLocationInputDialog(
             onConfirm = { manualAddress ->
                 locationText = manualAddress
+                viewModel.updateShippingAddress(draftOrderId, ShippingAddress(manualAddress))
                 showManualDialog = false
             },
             onDismiss = { showManualDialog = false }
@@ -408,109 +412,3 @@ fun rememberMapViewWithLifecycle(): MapView {
 }
 
 
-
-//Text(text = "📍", fontSize = 24.sp)
-/*
-@SuppressLint("MissingPermission")
-@Composable
-fun LocationPickerMap(onLocationPicked: (String) -> Unit) {
-    val context = LocalContext.current
-    val mapView = rememberMapViewWithLifecycle()
-    var searchQuery by remember { mutableStateOf("") }
-    var searchError by remember { mutableStateOf(false) }
-    val geocoder = Geocoder(context, Locale.getDefault())
-
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        AndroidView(
-            factory = { mapView },
-            modifier = Modifier.fillMaxSize()
-        ) { mapView ->
-            mapView.getMapAsync { googleMap ->
-                googleMap.uiSettings.isZoomControlsEnabled = true
-                googleMap.uiSettings.isMyLocationButtonEnabled = true
-
-                googleMap.setOnMapLongClickListener { latLng ->
-                    // Convert lat/lng to address
-                    val geocoder = Geocoder(context, Locale.getDefault())
-                    val addresses: List<Address>?
-
-                    try {
-                        addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
-                        if (!addresses.isNullOrEmpty()) {
-                            val address = addresses[0].getAddressLine(0)
-                            googleMap.clear()
-                            googleMap.addMarker(MarkerOptions().position(latLng).title(address))
-                            onLocationPicked(address)
-                        }
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                    }
-                }
-
-                if (searchQuery.isNotEmpty()){
-                    val addresses = geocoder.getFromLocationName(searchQuery, 1)
-                    if (!addresses.isNullOrEmpty()){
-                        val location = addresses[0]
-                        val latLng = LatLng(location.latitude, location.longitude)
-                        googleMap.clear()
-                        googleMap.addMarker(MarkerOptions().position(latLng).title(location.getAddressLine(0)))
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
-                        searchError = false
-                    }else{
-                        searchError = true
-                    }
-                }
-            }
-        }
-        // Search Bar
-        Column(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(16.dp)
-        ) {
-            TextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                label = { Text("Search by name") },
-                isError = searchError,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .shadow(4.dp, RoundedCornerShape(10.dp)),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    errorContainerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Red
-                )
-            )
-            if (searchError) {
-                Text(
-                    text = "Location not found",
-                    color = Color.Red,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-        }
-
-
-        // Text overlay at the bottom center of the map
-        Text(
-            text = "Long press to choose location",
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-                .background(Color.White.copy(alpha = 0.7f), shape = RoundedCornerShape(8.dp))
-                .padding(8.dp),
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            fontSize = 16.sp
-        )
-    }
-}
-
-*/

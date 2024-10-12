@@ -329,10 +329,14 @@ fun CheckoutButton(
     totalItems: Int,
     viewModel: ShoppingCartViewModel
 ) {
+
+    if (totalItems == 15){
+        Toast.makeText(LocalContext.current, "Capacity full for you", Toast.LENGTH_SHORT).show()
+    }
     Button(
         onClick = {
-            viewModel.clearCart() // Clear the cart items
-            navController.navigate("checkout")
+                viewModel.clearCart() // Clear the cart items
+                navController.navigate("checkout")
         },
         modifier = Modifier
             .fillMaxWidth()

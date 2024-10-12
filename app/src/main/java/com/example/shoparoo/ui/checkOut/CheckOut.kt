@@ -1,6 +1,8 @@
 package com.example.shoparoo.ui.checkOut
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -16,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -37,6 +40,7 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
     var selectedPaymentMethod by remember { mutableStateOf("cash") }
     var showAddCreditCardScreen by remember { mutableStateOf(false) }
 
+
     Scaffold {
         LazyColumn(
             modifier = Modifier
@@ -46,7 +50,7 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
             // Header
             item { AppHeader(navController, title = stringResource(R.string.check_out)) }
             item { Spacer(modifier = Modifier.height(16.dp)) }
-            item { Location() }
+            item { Location(viewModel, draftOrderDetails?.id ?: 0L) }
 
 
             item {
@@ -66,6 +70,11 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
                     val totalTax = order.total_tax?.toDoubleOrNull() ?: 0.0
                     val discount = order.applied_discount?.amount ?: 0.0
                     val total = (order.total_price?.toDoubleOrNull() ?: 0.0) - totalDiscount
+                    val address = order.shipping_address
+                    Log.d("CheckoutScreen", "Address: $address")
+
+
+
 
                     OrderSummary(
                         subtotal = subtotal,
