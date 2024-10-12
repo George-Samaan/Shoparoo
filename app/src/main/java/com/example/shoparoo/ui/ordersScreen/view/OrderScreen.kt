@@ -12,6 +12,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -51,6 +53,7 @@ import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.Order
 import com.example.shoparoo.ui.ordersScreen.viewModel.OrdersViewModel
 import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
+import com.example.shoparoo.ui.theme.darkGreen
 import com.example.shoparoo.ui.theme.primary
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -229,13 +232,30 @@ fun OrderItem(order: Order) {
                             lineItem.properties?.forEach { property ->
                                 if (property.name == "imageUrl") {
                                     item {
-                                        Image(
-                                            painter = rememberAsyncImagePainter(model = property.value),
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .size(80.dp)
-                                                .padding(end = 8.dp)
-                                        )
+                                        Box(modifier = Modifier.size(80.dp)) {
+                                            Image(
+                                                painter = rememberAsyncImagePainter(model = property.value),
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .size(80.dp)
+                                                    .padding(end = 8.dp)
+                                            )
+                                            if (lineItem.quantity > 1) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .align(Alignment.TopEnd)
+                                                        .size(24.dp)
+                                                        .background(darkGreen, shape = CircleShape)
+                                                ) {
+                                                    Text(
+                                                        text = lineItem.quantity.toString(),
+                                                        color = Color.White,
+                                                        fontSize = 12.sp,
+                                                        modifier = Modifier.align(Alignment.Center)
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
