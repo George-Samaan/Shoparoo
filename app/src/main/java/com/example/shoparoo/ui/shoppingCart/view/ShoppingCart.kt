@@ -47,6 +47,7 @@ import coil.compose.AsyncImage
 import com.example.shoparoo.R
 import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.ui.auth.view.ReusableLottie
+import com.example.shoparoo.ui.checkOut.AppHeader
 import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
 import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
@@ -72,82 +73,101 @@ fun ShoppingCartScreen(
         isLoading.value = false
     }
 
-    if (isLoading.value) {
-        Scaffold {
-            Box(
+    Scaffold(
+        topBar = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
             ) {
-                LoadingIndicator()
+                Text(
+                    text = "Cart",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp,
+                    color = primary,
+                    textAlign = TextAlign.Center,
+                )
             }
         }
-    }
-    else if (cartItems.isEmpty()){
-        Scaffold {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ){
-                Column (
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ){
-                    ReusableLottie(R.raw.cart, null, size = 400.dp, speed = 0.66f)
-                    Text(
-                        text = "No Items Found",
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+    ) {
+
+        if (isLoading.value) {
+            Scaffold {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LoadingIndicator()
                 }
             }
-        }
-    }
-    else {
-        Scaffold {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                item {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp, start = 55.dp)
+        } else if (cartItems.isEmpty()) {
+            Scaffold {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize().fillMaxWidth(),
+                    //.padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    //AppHeader(navController, "Cart")
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
+                        ReusableLottie(R.raw.cart, null, size = 400.dp, speed = 0.66f)
                         Text(
-                            text = "Cart",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp,
-                            color = primary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .padding(end = 50.dp)
+                            text = "No Items Found",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                item { ProductList(cartItems, viewModel, navController) }
-
-                if (cartItems.isNotEmpty()) {
+            }
+        } else {
+            Scaffold {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
                     item {
-                        val totalItems = cartItems.sumOf { it.quantity }
-                        CheckoutButton(navControllerBottom, totalItems, viewModel)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 10.dp, start = 55.dp)
+                        ) {
+                            Text(
+                                text = "Cart",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 22.sp,
+                                color = primary,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .padding(end = 50.dp)
+                            )
+                        }
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    item { ProductList(cartItems, viewModel, navController) }
+
+                    if (cartItems.isNotEmpty()) {
+                        item {
+                            val totalItems = cartItems.sumOf { it.quantity }
+                            CheckoutButton(navControllerBottom, totalItems, viewModel)
+                        }
                     }
                 }
             }
         }
     }
 }
-
 
 @SuppressLint("DefaultLocale")
 @Composable
