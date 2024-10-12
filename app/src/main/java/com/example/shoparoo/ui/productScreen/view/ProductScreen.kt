@@ -108,7 +108,7 @@ fun ProductsScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp)
+            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp, null)
         }
     } else {
         // Reset isGridVisible and loading state on initial load

@@ -47,15 +47,15 @@ fun Favourites(navController: NavController) {
     if (favProducts.value.isEmpty()) {
         Column(
             Modifier
-                .padding(top = 100.dp)
+                .padding(top = 80.dp)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             //   Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favourites", modifier = Modifier.size(300.dp))
 
-            ReusableLottie(R.raw.empty, null, size = 400.dp)
-            Text(text = "No Favourites Found", fontSize = 35.sp, fontWeight = FontWeight.Bold)
+            ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
+            Text(text = "No Favourites Found", fontSize = 30.sp, fontWeight = FontWeight.SemiBold)
         }
     }
     TopBar(navController = navController, title = "Favourites", top = 50.dp)
