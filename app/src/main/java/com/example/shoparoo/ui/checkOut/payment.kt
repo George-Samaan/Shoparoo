@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -332,7 +333,8 @@ fun CheckoutButtonCheck(
     // States
     var isProcessing by remember { mutableStateOf(false) }
     var paymentSuccess by remember { mutableStateOf(false) }
-    var orderPlaced by remember { mutableStateOf(false) }  // New flag to track if the order is placed
+    var orderPlaced by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) } // New state for dialog visibility
 
     val draftOrderDetails by shoppingCartViewModel.draftOrderDetails.collectAsState()
     val completeOrderState by paymentViewModel.completeOrderState.collectAsState()
@@ -365,8 +367,69 @@ fun CheckoutButtonCheck(
         }
     }
 
+    // Handle the button click
+    Button(
+        onClick = {
+            if (orderPlaced) {
+                Toast.makeText(context, "Order already placed", Toast.LENGTH_SHORT).show()
+            } else {
+                if (selectedPaymentMethod == "card") {
+                    if (validateCardDetails(
+                            cardHolderName,
+                            cardNumber,
+                            expirationMonth,
+                            expirationYear
+                        )
+                    ) {
+                        isProcessing = true
+                        completeOrderIfPossible()
+                    } else {
+                        Toast.makeText(context, "Invalid Card Details", Toast.LENGTH_SHORT).show()
+                    }
+                } else if (selectedPaymentMethod == "cash") {
+                    val totalAmount = draftOrderDetails?.total_price?.toDoubleOrNull() ?: 0.0
+                    if (totalAmount > 2000) {
+                        showDialog = true
+                    } else {
+                        isProcessing = true
+                        completeOrderIfPossible()
+                    }
+                }
+            }
+        },
+        colors = ButtonDefaults.buttonColors(primary),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .height(50.dp)
+    ) {
+        Text("Place Order", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Order Limit Exceeded") },
+            text = {
+                Text(
+                    "Cash on Delivery is not available for orders exceeding 2000 EGP. Please choose another payment method.",
+                    fontSize = 15.sp
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showDialog = false },
+                    colors = ButtonDefaults.buttonColors(primary)
+                ) {
+                    Text("OK")
+                }
+            },
+            containerColor = Color.White
+        )
+    }
+
+    // Show circular progress indicator while processing
     if (isProcessing) {
-        // Show circular progress indicator while processing the payment
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -393,48 +456,11 @@ fun CheckoutButtonCheck(
                     .show()
             }
         }
-    } else {
-        // Place Order Button
-        Button(
-            onClick = {
-                if (orderPlaced) {
-                    // Show message if the order has already been placed
-                    Toast.makeText(context, "Order already placed", Toast.LENGTH_SHORT).show()
-                } else {
-                    // Process the order based on selected payment method
-                    if (selectedPaymentMethod == "cash") {
-                        isProcessing = true
-                        completeOrderIfPossible()
-                    } else if (selectedPaymentMethod == "card") {
-                        if (validateCardDetails(
-                                cardHolderName,
-                                cardNumber,
-                                expirationMonth,
-                                expirationYear
-                            )
-                        ) {
-                            isProcessing = true
-                            completeOrderIfPossible()
-                        } else {
-                            Toast.makeText(context, "Invalid Card Details", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    }
-                }
-            },
-            colors = ButtonDefaults.buttonColors(primary),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .height(50.dp)
-        ) {
-            Text("Place Order", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-        }
+    }
 
-        // Show success message after processing
-        if (paymentSuccess && selectedPaymentMethod == "card") {
-            Toast.makeText(context, "Payment successful", Toast.LENGTH_SHORT).show()
-        }
+    // Show success message after processing
+    if (paymentSuccess && selectedPaymentMethod == "card") {
+        Toast.makeText(context, "Payment successful", Toast.LENGTH_SHORT).show()
     }
 }
 

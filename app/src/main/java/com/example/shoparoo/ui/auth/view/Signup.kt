@@ -159,7 +159,7 @@ fun Signup(navController: NavHostController) {
         NameFields(nameValue, "Name", nameValidation)
         NameFields(emailValue, "Email", mailValidation)
         PasswordField(passValue, "password", passValidation)
-        PasswordField(confirmpassValue, "confirmPassword", cPassValidation)
+        PasswordField(confirmpassValue, "Confirm Password", cPassValidation)
         Spacer(modifier = Modifier.padding(top = 30.dp))
         Button(
             colors = ButtonDefaults.buttonColors(primary),
