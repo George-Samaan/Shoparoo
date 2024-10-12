@@ -96,7 +96,12 @@ fun ShoppingCartScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ){
-                    ReusableLottie(R.raw.cart, null, size = 600.dp)
+                    ReusableLottie(R.raw.cart, null, size = 400.dp, speed = 0.66f)
+                    Text(
+                        text = "No Items Found",
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         }
