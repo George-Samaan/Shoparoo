@@ -116,7 +116,7 @@ fun ProductDetails(id: String, navController: NavHostController) {
     when (ui.value) {
         is ApiState.Loading -> {
             Log.i("ProductDetails", "Loading")
-            Box (Modifier.padding(top = 25.dp)){
+            Box(Modifier.padding(top = 70.dp)) {
                 LoadingIndicator()
             }
         }
@@ -141,7 +141,7 @@ fun ProductDetails(id: String, navController: NavHostController) {
         is ApiState.Success -> {
             val gg = order.value as ApiState.Success
             val data = gg.data as DraftOrderDetails
-           itemsIncart = data.line_items[0].quantity
+            itemsIncart = data.line_items[0].quantity
             Log.i("ProductDetailsUserOrderrrrrrrrr", "Success ${data.line_items.size}")
         }
     }
@@ -210,53 +210,60 @@ private fun productInfo(
 
         Spacer(modifier = Modifier.weight(1f))
 
-            BottomSection(
-                onClickCart = {
-                    Log.i("ProductDetail", "Cartclickeddd   ${selected.value!!.inventoryQuantity}    $itemsIncart")
-                    if (selected.value!!.inventoryQuantity!! < 1 ) {
-                        Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
-                    } else if (itemsIncart == selected.value!!.inventoryQuantity!!) {
-                        Toast.makeText(context, "you've already added $itemsIncart ", Toast.LENGTH_SHORT).show()
-                    }
-                    else {
-                        if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
-                            Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT).show()
-                            navController.navigate("login")
-                        } else {
-                            viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
-                         //   Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                },
-                onClickFav = {
+        BottomSection(
+            onClickCart = {
+                Log.i(
+                    "ProductDetail",
+                    "Cartclickeddd   ${selected.value!!.inventoryQuantity}    $itemsIncart"
+                )
+                if (selected.value!!.inventoryQuantity!! < 1) {
+                    Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
+                } else if (itemsIncart == selected.value!!.inventoryQuantity!!) {
+                    Toast.makeText(
+                        context,
+                        "you've already added $itemsIncart ",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
                     if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
-                        Toast.makeText(context, "Please login to favourites", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT)
+                            .show()
                         navController.navigate("login")
                     } else {
-                        viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
+                        viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
+                        //   Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            },
+            onClickFav = {
+                if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
+                    Toast.makeText(context, "Please login to favourites", Toast.LENGTH_SHORT).show()
+                    navController.navigate("login")
+                } else {
+                    viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
 //                        if (!isFav)
 //                         //   Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
 //                        else
 //                         //   Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
-                    }
-                },
-                buttonColors = if (isFav) {
-                    ButtonDefaults.buttonColors(
-                        containerColor = Color.Red,
-                        contentColor = Color.Yellow,
-                        disabledContentColor = Color.Gray,
-                        disabledContainerColor = Color(0xFF000000),
-                    )
-                } else {
-                    ButtonDefaults.buttonColors(
-                        containerColor = Color.Gray,
-                        contentColor = Color.White,
-                        disabledContentColor = Color.Gray,
-                        disabledContainerColor = Color(0xFF000000),
-                    )
-                },
-                isFav = isFav
-            )
+                }
+            },
+            buttonColors = if (isFav) {
+                ButtonDefaults.buttonColors(
+                    containerColor = Color.Red,
+                    contentColor = Color.Yellow,
+                    disabledContentColor = Color.Gray,
+                    disabledContainerColor = Color(0xFF000000),
+                )
+            } else {
+                ButtonDefaults.buttonColors(
+                    containerColor = Color.Gray,
+                    contentColor = Color.White,
+                    disabledContentColor = Color.Gray,
+                    disabledContainerColor = Color(0xFF000000),
+                )
+            },
+            isFav = isFav
+        )
 
     }
 

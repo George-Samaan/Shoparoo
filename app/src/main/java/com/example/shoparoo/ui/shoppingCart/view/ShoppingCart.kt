@@ -92,26 +92,30 @@ fun ShoppingCartScreen(
                 LoadingIndicator()
             }
         } else if (cartItems.isEmpty()) {
-            Box(
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
-                contentAlignment = Alignment.Center
             ) {
+                Text(
+                    text = "Cart",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp,
+                    color = primary,
+                    textAlign = TextAlign.Center
+                )
                 Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    Modifier
+                        .padding(top = 80.dp)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "Cart",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp,
-                        color = primary,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    ReusableLottie(R.raw.cart, null, size = 400.dp, speed = 0.66f)
-                    Text(
+                    //   Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favourites", modifier = Modifier.size(300.dp))
+
+                    ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
+                    androidx.compose.material.Text(
                         text = "No Items Found",
                         fontSize = 30.sp,
                         fontWeight = FontWeight.SemiBold

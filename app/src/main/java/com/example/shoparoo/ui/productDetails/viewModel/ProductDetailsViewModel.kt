@@ -32,7 +32,7 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
     private val _draftOrder = MutableStateFlow<ApiState>(ApiState.Loading)
     val draftOrder = _draftOrder.asStateFlow()
 
-  private val _userOrder = MutableStateFlow<ApiState>(ApiState.Loading)
+    private val _userOrder = MutableStateFlow<ApiState>(ApiState.Loading)
     val userOrder = _userOrder.asStateFlow()
 
     val userMail by lazy {
@@ -75,7 +75,7 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         }
     }
 
-   /* fun filterByUser(
+    fun filterByUser(
         draftOrdersResponse: DraftOrderResponse,
         theSingleProduct: SingleProduct,
         varient: VariantsItem,
@@ -113,44 +113,43 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
             if (isCart)
                 filterByItem(user!!, varient, theSingleProduct, isCart)
             else
-                FilterFavDraftOrder(user!!, theSingleProduct, varient, infav)
+                filterFavDraftOrder(user!!, theSingleProduct, varient, infav)
         } else if (!infav)
             createDraftOrder(theSingleProduct, varient, isCart)
     }
-*/
 
-    fun filterByUser(
-        draftOrdersResponse: DraftOrderResponse,
-        theSingleProduct: SingleProduct,
-        varient: VariantsItem,
-        isCart: Boolean,
-        infav: Boolean = false
-    ) {
-        val emailPrefix = if (isCart) "" else "FAV_"
-        val targetEmail = emailPrefix + userMail
-        var user: DraftOrderDetails? = null
+    /*    fun filterByUser(
+            draftOrdersResponse: DraftOrderResponse,
+            theSingleProduct: SingleProduct,
+            varient: VariantsItem,
+            isCart: Boolean,
+            infav: Boolean = false
+        ) {
+            val emailPrefix = if (isCart) "" else "FAV_"
+            val targetEmail = emailPrefix + userMail
+            var user: DraftOrderDetails? = null
 
-        draftOrdersResponse.draft_orders.forEach { draftOrder ->
-            if (draftOrder.email == targetEmail) {
-                Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
-                Log.i("ProductDetailsviewModel", "Draft Order Found $draftOrder")
-                user = draftOrder
-                return@forEach // Exit the loop early if found
+            draftOrdersResponse.draft_orders.forEach { draftOrder ->
+                if (draftOrder.email == targetEmail) {
+                    Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
+                    Log.i("ProductDetailsviewModel", "Draft Order Found $draftOrder")
+                    user = draftOrder
+                    return@forEach // Exit the loop early if found
+                }
             }
-        }
-        _userOrder.value = ApiState.Success(user!!)
-        user?.let {
-            if (isCart) {
-                filterByItem(it, varient, theSingleProduct, isCart)
-            } else {
-                filterFavDraftOrder(it, theSingleProduct, varient, infav)
+            _userOrder.value = ApiState.Success(user!!)
+            user?.let {
+                if (isCart) {
+                    filterByItem(it, varient, theSingleProduct, isCart)
+                } else {
+                    filterFavDraftOrder(it, theSingleProduct, varient, infav)
+                }
+            } ?: run {
+                if (!infav) {
+                    createDraftOrder(theSingleProduct, varient, isCart)
+                }
             }
-        } ?: run {
-            if (!infav) {
-                createDraftOrder(theSingleProduct, varient, isCart)
-            }
-        }
-    }
+        }*/
 
     private fun filterFavDraftOrder(
         draftOrderDetails: DraftOrderDetails,
@@ -170,32 +169,31 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
     }
 
 
+    /*
 
-/*
+        private fun FilterFavDraftOrder(
+            draftOrderDetails: DraftOrderDetails,
+            theSingleProduct: SingleProduct,
+            varient: VariantsItem,
+            infav: Boolean = false
+        ) {
+            var item: DraftOrderDetails? = null
+            var myLineItem: LineItem? = null
+            for (line_item in draftOrderDetails.line_items) {
+                if (line_item.product_id == varient.productId && line_item.variant_id == varient.id.toString())
+                    item = draftOrderDetails        //item already exists in the favourites
+                myLineItem = line_item
+            }
 
-    private fun FilterFavDraftOrder(
-        draftOrderDetails: DraftOrderDetails,
-        theSingleProduct: SingleProduct,
-        varient: VariantsItem,
-        infav: Boolean = false
-    ) {
-        var item: DraftOrderDetails? = null
-        var myLineItem: LineItem? = null
-        for (line_item in draftOrderDetails.line_items) {
-            if (line_item.product_id == varient.productId && line_item.variant_id == varient.id.toString())
-                item = draftOrderDetails        //item already exists in the favourites
-            myLineItem = line_item
+            if (infav && item != null) {
+                _isFav.value = true
+            } else if (infav && item == null) {
+                _isFav.value = false
+            } else {
+                UpdateFavDraftOrder(draftOrderDetails, item, myLineItem, theSingleProduct, varient)
+            }
         }
-
-        if (infav && item != null) {
-            _isFav.value = true
-        } else if (infav && item == null) {
-            _isFav.value = false
-        } else {
-            UpdateFavDraftOrder(draftOrderDetails, item, myLineItem, theSingleProduct, varient)
-        }
-    }
-*/
+    */
 
     private fun UpdateFavDraftOrder(
         draftOrderDetails: DraftOrderDetails,
@@ -286,7 +284,7 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         line: LineItem,
         inventoryQuantity: Int?
     ) {
-       // draftOrder.line_items.find { (it.variant_id == line.variant_id )}?.quantity = line.quantity + 1
+        // draftOrder.line_items.find { (it.variant_id == line.variant_id )}?.quantity = line.quantity + 1
         draftOrder.line_items.find { (it.variant_id == line.variant_id )}?.quantity =
             if (line.quantity + 1 > inventoryQuantity!!) inventoryQuantity else line.quantity + 1
         viewModelScope.launch {
