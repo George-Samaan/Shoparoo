@@ -56,7 +56,7 @@ fun Search(navController: NavController) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.height(10.dp))
-        TopBar(navController = navController, title = "Search")
+        TopBar(navController = navController, title = "Search", 50.dp)
 
         val searchQuery = remember { mutableStateOf("") }
         TextField(
@@ -112,7 +112,7 @@ fun filterItems(products: List<ProductsItem>, query: String, navController: NavC
         if (product.title!!.contains(query, ignoreCase = true)) {
             Log.i("Search", "Product: ${product.title}")
             filteredProducts.add(product)
-           Log.i("SearchFilter", "Filtered products: $filteredProducts")
+            Log.i("SearchFilter", "Filtered products: $filteredProducts")
         }
     }
     ProductGrid(filteredProducts, navController, "gg", 1.0f, emptyMap(), false)

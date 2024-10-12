@@ -20,10 +20,10 @@ import kotlinx.coroutines.launch
 
 class FavouritesViewModel(private val repository: Repository) : ViewModel() {
     private val _draftOrderFav = MutableStateFlow<ApiState>(ApiState.Loading)
-    //  val draftOrderFav = _draftOrderFav.asStateFlow()
+    val draftOrderFav = _draftOrderFav.asStateFlow()
 
-    private val _productItems: MutableStateFlow<MutableList<ProductsItem>> =
-        MutableStateFlow(mutableListOf())
+
+    private val _productItems: MutableStateFlow<MutableList<ProductsItem>> = MutableStateFlow(mutableListOf())
     val productItems = _productItems.asStateFlow()
 
     val userMail by lazy {
@@ -116,14 +116,13 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
             }
 
             if (second.line_items.isEmpty()) {
+                _productItems.value = mutableListOf()
                 repository.deleteDraftOrder(second.id!!)
             } else {
+                _productItems.value = _productItems.value.filter { it.id != id }.toMutableList()
                 val order = DraftOrderRequest(second)
                 repository.updateDraftOrder(order)
             }
-
-            // Update the productItems state after deletion to trigger recomposition
-            _productItems.value = _productItems.value.filter { it.id != id }.toMutableList()
         }
     }
 

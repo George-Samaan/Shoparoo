@@ -72,6 +72,8 @@ import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
+import com.example.shoparoo.ui.Favourites.FavouritesViewModel
+import com.example.shoparoo.ui.Favourites.FavouritesViewModelFactory
 import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
@@ -108,8 +110,23 @@ fun HomeScreenDesign(
     onRefresh: () -> Unit = {},
     bottomNavController: NavController,
     navController: NavController,
-
     ) {
+
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val fav by favViewModel.favProducts.collectAsState()
+
+    LaunchedEffect(fav) {
+        favViewModel.getFavourites()
+    }
+
+
+
     val isNetworkAvailable = networkListener()
     if (!isNetworkAvailable.value) {
         // Show No Internet connection message
@@ -592,6 +609,7 @@ fun MainScreen(
             )
         )
     )
+
     val authViewModel: AuthViewModel = viewModel()
 
 
@@ -604,6 +622,7 @@ fun MainScreen(
     LaunchedEffect(Unit) {
         viewModel.getSmartCollections()
         viewModel.getForYouProducts()
+      //  favViewModel.getFavourites()
     }
 
     Scaffold(
@@ -636,36 +655,41 @@ fun MainScreen(
                     navController,
                 )
             }
+
             composable(BottomNav.Categories.route) {
-
                 CategoriesScreen(categoryViewModel, navController)
-
             }
-                composable(BottomNav.Cart.route) {
+
+            composable(BottomNav.Cart.route) {
                     ShoppingCartScreen(navControllerBottom, shoppingCartViewModel, navController)
             }
+
             composable(BottomNav.orders.route) {
                 Text(text = "Orders Screen")
             }
+
             composable(BottomNav.Profile.route) {
                 ProfileScreen(
                     navControllerBottom,
                 )
             }
+
             composable(BottomNav.orders.route) {
                 OrderScreen(orderViewModel = orderViewModel, navController)
             }
+
 //            composable("settings") { SettingsScreen(navControllerBottom) }
+
             composable("login") { LoginScreen(navControllerBottom) }
+
             composable(BottomNav.Profile.route) {
                 ProfileScreen(navController)
             }
-//            composable("settings") {
-//                SettingsScreen(navControllerBottom)
-//            }
+
             composable("checkout") {
                 CheckoutScreen(navControllerBottom, shoppingCartViewModel)
             }
+
             composable("brand/{brandId}/{brandTitle}") { backStackEntry ->
                 val brandId =
                     backStackEntry.arguments?.getString("brandId") ?: return@composable
@@ -677,6 +701,7 @@ fun MainScreen(
                     navController
                 )
             }
+
         }
     }
 }

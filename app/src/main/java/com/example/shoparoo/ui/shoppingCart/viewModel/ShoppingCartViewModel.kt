@@ -3,11 +3,13 @@ package com.example.shoparoo.ui.shoppingCart.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shoparoo.data.repository.Repository
 import com.example.shoparoo.model.AppliedDiscount
 import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.LineItem
+import com.example.shoparoo.model.ShippingAddress
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +28,6 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
 
     private val _draftOrderDetails = MutableStateFlow<DraftOrderDetails?>(null)
     val draftOrderDetails = _draftOrderDetails.asStateFlow()
-
 
     fun getDraftOrderDetails() {
         viewModelScope.launch {
@@ -54,9 +55,20 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
+    fun updateShippingAddress(draftOrderId: Long, address: ShippingAddress) {
+        viewModelScope.launch {
+            val draftOrder = _draftOrderDetails.value?.copy(shipping_address = address)
+            if (draftOrder != null) {
+                val updatedDraftOrder = repository.updateDraftOrder(DraftOrderRequest(draftOrder))
+                _draftOrderDetails.value = updatedDraftOrder as? DraftOrderDetails
+            }
+        }
+    }
+
     fun clearDiscount() {
         _draftOrderDetails.value = _draftOrderDetails.value?.copy(applied_discount = null)
     }
+
 
 
     fun getCartItems() {
@@ -71,6 +83,11 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
             }
         }
     }
+
+    fun clearCart() {
+        _cartItems.value = emptyList()
+    }
+
 
 
     fun increaseQuantity(lineItem: LineItem) {
@@ -165,4 +182,3 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
 
 
 }
-

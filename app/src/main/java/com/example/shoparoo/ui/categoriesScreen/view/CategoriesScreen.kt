@@ -80,7 +80,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
     // Get saved currency and conversion rate from SharedPreferences
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
     val currencySymbols = mapOf(
@@ -94,7 +94,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp)
+            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp, null)
         }
     } else {
         LaunchedEffect(Unit) {
@@ -334,7 +334,7 @@ fun FilterBar(selectedFilter: String?, onFilterSelected: (String) -> Unit) {
         filters.forEach { filter ->
             Text(
                 text = filter,
-                fontSize = 16.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = if (filter == selectedFilter) primary else Color.Black,
                 modifier = Modifier

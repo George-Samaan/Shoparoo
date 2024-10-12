@@ -1,7 +1,6 @@
 package com.example.shoparoo.ui.auth.view
 
 
-import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.RawRes
 import androidx.compose.animation.animateContentSize
@@ -45,7 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -58,7 +56,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieAnimation
@@ -96,6 +93,11 @@ fun LoginScreen(navController: NavHostController) {
                 navController.navigate("UnVerified")
                 isLoading = false
             }
+
+            AuthState.Error -> {
+                isLoading = false
+                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+            }
         }
     }
     Column(
@@ -125,7 +127,7 @@ fun LoginScreen(navController: NavHostController) {
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
-            ReusableLottie(R.raw.login_anim, R.drawable.ic_bg, 200.dp)
+            ReusableLottie(R.raw.login_anim, R.drawable.ic_bg, 200.dp, null)
         }
 
         Column(
@@ -303,14 +305,15 @@ fun LoginScreen(navController: NavHostController) {
 fun ReusableLottie(
     @RawRes lottieRes: Int,
     backgroundImageRes: Int?,
-    size: Dp
-
+    size: Dp,
+    speed: Float?
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(lottieRes))
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = LottieConstants.IterateForever,
-        isPlaying = true // Auto-play
+        isPlaying = true, // Auto-play
+        speed = speed ?: 1f, // Adjust the speed as needed
     )
 
     Box(
