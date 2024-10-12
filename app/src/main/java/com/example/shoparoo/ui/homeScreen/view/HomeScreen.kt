@@ -28,6 +28,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,6 +38,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -71,6 +74,7 @@ import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
 import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.auth.view.ReusableLottie
+import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.categoriesScreen.view.CategoriesScreen
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModel
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModelFactory
@@ -145,9 +149,6 @@ fun HomeScreenDesign(
                     Header(userName, onFavouriteClick, onSearchClick = {
                         navController.navigate("search")
                     })
-                }
-                item {
-                    // SearchBar(query, onQueryChange,navController,viewModel)
                 }
                 item {
                     CouponsSliderWithIndicator(
@@ -225,7 +226,9 @@ fun Header(userName: String, onFavouriteClick: () -> Unit, onSearchClick: () -> 
     ) {
         ProfileSection(userName)
         Spacer(modifier = Modifier.weight(1f))
+        if (userName != ""  && userName != "Guest") {
         FavouriteButton(onFavouriteClick)
+        }
         SearchButton(onSearchClick = onSearchClick)
     }
 }
@@ -491,6 +494,20 @@ fun ProductCard(
                         .clickable { showDialog = true }
                 )
             }
+            else{
+                val isFav = true //handle this from the api and handle guest mode
+
+                Icon(
+                    if (isFav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    contentDescription = "Add to Favorites",
+                    tint = Color.Red,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(24.dp)
+                        .clickable { onClickAddFav() }
+                )
+            }
         }
     }
 
@@ -575,11 +592,14 @@ fun MainScreen(
             )
         )
     )
+    val authViewModel: AuthViewModel = viewModel()
+
 
     val smartCollectionsState by viewModel.smartCollections.collectAsState()
     val forYouProductsState by viewModel.forYouProducts.collectAsState()
     val userName by viewModel.userName.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val isLogged = authViewModel.authState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.getSmartCollections()
@@ -587,7 +607,7 @@ fun MainScreen(
     }
 
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController = navControllerBottom) }
+        bottomBar = { BottomNavigationBar(navController = navControllerBottom,isLogged) }
     ) {
         NavHost(
             navController = navControllerBottom,
@@ -621,8 +641,8 @@ fun MainScreen(
                 CategoriesScreen(categoryViewModel, navController)
 
             }
-            composable(BottomNav.Cart.route) {
-                ShoppingCartScreen(navControllerBottom, shoppingCartViewModel, navController)
+                composable(BottomNav.Cart.route) {
+                    ShoppingCartScreen(navControllerBottom, shoppingCartViewModel, navController)
             }
             composable(BottomNav.orders.route) {
                 Text(text = "Orders Screen")
@@ -660,6 +680,25 @@ fun MainScreen(
         }
     }
 }
+
+
+@Composable
+fun MySnackBar(state : Boolean) {
+   var visible by remember { mutableStateOf(false) }
+        visible = state
+        Snackbar(
+            modifier = Modifier.fillMaxWidth(),
+            action = {
+                Text(text = "Dismiss", modifier = Modifier.fillMaxWidth())
+            }
+        ) {
+            Text("This is a SnackBar!")
+        }
+
+
+
+}
+
 
 //@Preview(showSystemUi = true)
 //@Composable

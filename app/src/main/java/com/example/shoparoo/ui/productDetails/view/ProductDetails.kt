@@ -41,6 +41,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.filled.StarRate
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -49,6 +50,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -140,7 +142,7 @@ private fun productInfo(
     val selected = remember { mutableStateOf(singleProductDetail.product!!.variants!![0]) }
     val isLoggedIn = AuthViewModel().authState.collectAsState()
     val descriptionVisible = remember { mutableStateOf(false) }
-
+    val showAlert =  remember { mutableStateOf(false) }
     // Trigger the animation when the product info is loaded
     LaunchedEffect(singleProductDetail) {
         descriptionVisible.value = true
@@ -190,9 +192,8 @@ private fun productInfo(
                 if (selected.value!!.inventoryQuantity!! < 1) {
                     Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
                 } else {
-                    if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
-                        Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT)
-                            .show()
+                    if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT).show()
+                        //  showAlert.value = true
                     } else {
                         viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
                         Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
@@ -200,11 +201,15 @@ private fun productInfo(
                 }
             },
             onClickFav = {
-                viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
-                if (!isFav)
-                    Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
-                else
-                    Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
+                    Toast.makeText(context, "Please login to add to fav", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
+                    if (!isFav)
+                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                    else
+                        Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                }
             },
             buttonColors = if (isFav) {
                 ButtonDefaults.buttonColors(
@@ -223,6 +228,9 @@ private fun productInfo(
             },
             isFav = isFav
         )
+        if (showAlert.value) {
+            alert()
+        }
 
     }
 
@@ -409,7 +417,8 @@ private fun StockAndPrice(
             )
             Spacer(Modifier.weight(1f))
             Text(
-                text =  formattedPrice +" "+ currencySymbols[selectedCurrency] ?: " $", //"${"%.2f".format(price)} ${currencySymbols[selectedCurrency] ?: " $"}",
+                text = formattedPrice + " " + currencySymbols[selectedCurrency]
+                    ?: " $", //"${"%.2f".format(price)} ${currencySymbols[selectedCurrency] ?: " $"}",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -676,5 +685,43 @@ private fun colorSetter(variant: VariantsItem?): Color {
         "light_brown" -> return Color(0xFFC4A484)
         "burgandy" -> return Color(0xFF800020)
         else -> return Color.Transparent
+    }
+}
+
+
+@Composable
+fun alert() {
+    // State to control the visibility of the alert
+    var showDialog by remember { mutableStateOf(true) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                // Dismiss the dialog when clicking outside
+                showDialog = false
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    // Dismiss the dialog when confirm button is clicked
+                    showDialog = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    // Dismiss the dialog when dismiss button is clicked
+                    showDialog = false
+                }) {
+                    Text("Cancel")
+                }
+            },
+            title = {
+                Text("Alert")
+            },
+            text = {
+                Text("This is an alert dialog. Press OK to dismiss.")
+            }
+        )
     }
 }

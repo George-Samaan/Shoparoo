@@ -63,7 +63,7 @@ fun UnVerified(navController: NavHostController) {
                     val intent = Intent(Intent.ACTION_MAIN).apply {
                         addCategory(Intent.CATEGORY_APP_EMAIL)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        // data = Uri.parse("mailto:")
+                        // data = Uri.parse("mailto:") or use this one
                     }
                     startActivity(context, intent, null)
 
