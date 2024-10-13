@@ -36,7 +36,7 @@ fun UnVerified(navController: NavHostController) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ReusableLottie(R.raw.confrim, null, size = 222.dp, null)
+        ReusableLottie(R.raw.confrim, null, size = 222.dp, 1f)
         Text(
             "Please verify your email", fontSize = 30.sp, fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 20.dp)
