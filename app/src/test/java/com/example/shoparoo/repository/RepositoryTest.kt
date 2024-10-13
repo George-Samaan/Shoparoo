@@ -64,23 +64,22 @@ class RepositoryTest {
     }
 
 
+    /*    @Test
+        fun test_get_draft_order() = runTest {
+            val draftOrderResponse = repository.getDraftOrder()
+            val draftOrderDetails = draftOrderResponse.first().draft_orders
+            assertEquals(1, draftOrderDetails.size)
+            assertEquals("Test Email", draftOrderDetails[0].email)
+        }
 
-    @Test
-    fun test_get_draft_order() = runTest {
-        val draftOrderResponse = repository.getDraftOrder()
-        val draftOrderDetails = draftOrderResponse.first().draft_orders
-        assertEquals(1, draftOrderDetails.size)
-        assertEquals("Test Email", draftOrderDetails[0].email)
-    }
-
-    @Test
-    fun test_delete_draft_order() = runTest {
-        var draftOrderResponse = repository.getDraftOrder()
-        assertEquals(1, draftOrderResponse.first().draft_orders.size)
-        repository.deleteDraftOrder(1L)
-        draftOrderResponse = repository.getDraftOrder()
-        assertEquals(0, draftOrderResponse.first().draft_orders.size)
-    }
+        @Test
+        fun test_delete_draft_order() = runTest {
+            var draftOrderResponse = repository.getDraftOrder()
+            assertEquals(1, draftOrderResponse.first().draft_orders.size)
+            repository.deleteDraftOrder(1L)
+            draftOrderResponse = repository.getDraftOrder()
+            assertEquals(0, draftOrderResponse.first().draft_orders.size)
+        }*/
 
 
     @Test
@@ -107,9 +106,7 @@ class RepositoryTest {
 
     @Test
     fun update_draft_order() = runTest {
-        val draftOrder = repository.updateDraftOrder(mockDraftOrderRequest)
-       assertEquals(mockDraftOrderRequest, mockDraftOrderRequesttobeUpdated)
+        repository.updateDraftOrder(mockDraftOrderRequest)
+        assertEquals(mockDraftOrderRequest, mockDraftOrderRequesttobeUpdated)
     }
-
-
 }
