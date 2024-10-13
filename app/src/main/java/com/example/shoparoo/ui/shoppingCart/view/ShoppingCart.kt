@@ -156,6 +156,7 @@ fun ShoppingCartScreen(
                             CheckoutButton(navControllerBottom, totalItems, viewModel)
                         }
                     }
+
                 }
             }
         }
@@ -332,8 +333,8 @@ fun CheckoutButton(
     }
     Button(
         onClick = {
-                viewModel.clearCart()
-                navController.navigate("checkout")
+            navController.navigate("checkout")
+            //viewModel.clearCart()
         },
         modifier = Modifier
             .fillMaxWidth()

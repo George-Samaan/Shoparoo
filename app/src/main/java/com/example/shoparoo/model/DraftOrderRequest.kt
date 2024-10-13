@@ -25,13 +25,15 @@ data class DraftOrderRequest(
 
 data class AppliedDiscount(
     val value: Double,
-    val value_type: String,     //percentage
+    val value_type: String,
     val amount: Double?
 )
 
 data class ShippingAddress(
-    val name: String,
+    val address1: String,
+    val phone: String? = null,
 )
+
 
 data class DraftOrderDetails(
     val id: Long?=null,
@@ -45,6 +47,6 @@ data class DraftOrderDetails(
     val subtotal_price: String? = null,
     val total_tax: String? = null,
     val applied_discount: AppliedDiscount? = null , // Discount applied to the order
-    val shipping_address: ShippingAddress?= null
+    val shipping_address: ShippingAddress? = null   // Shipping address details
 )
 

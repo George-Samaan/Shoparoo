@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -17,14 +18,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,11 +41,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
+import com.example.shoparoo.R
 import com.example.shoparoo.model.ShippingAddress
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.google.android.gms.location.LocationServices
@@ -63,6 +72,8 @@ fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long, ) {
         if (isGranted) {
             getLocation(context) { address ->
                 locationText = address ?: "Unable to fetch address"
+                val shippingAddress = ShippingAddress(address1 = locationText)
+                viewModel.updateShippingAddress(draftOrderId, shippingAddress)
             }
         } else {
             locationText = "Location permission denied"
@@ -75,6 +86,8 @@ fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long, ) {
         if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
             getLocation(context) { address ->
                 locationText = address ?: "Unable to fetch address"
+                val shippingAddress = ShippingAddress(address1 = locationText)
+                viewModel.updateShippingAddress(draftOrderId, shippingAddress)
             }
         } else {
             permissionLauncher.launch(permission)
@@ -86,8 +99,9 @@ fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long, ) {
         Dialog(onDismissRequest = { showMap = false }) {
             LocationPickerMap { newAddress ->
                 locationText = newAddress
-                viewModel.updateShippingAddress(draftOrderId, ShippingAddress(newAddress))
                 showMap = false
+                val shippingAddress = ShippingAddress(address1 = locationText)
+                viewModel.updateShippingAddress(draftOrderId, shippingAddress)
             }
         }
     }
@@ -97,8 +111,9 @@ fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long, ) {
         ManualLocationInputDialog(
             onConfirm = { manualAddress ->
                 locationText = manualAddress
-                viewModel.updateShippingAddress(draftOrderId, ShippingAddress(manualAddress))
                 showManualDialog = false
+                val shippingAddress = ShippingAddress(address1 = locationText)
+                viewModel.updateShippingAddress(draftOrderId, shippingAddress)
             },
             onDismiss = { showManualDialog = false }
         )
@@ -120,11 +135,13 @@ fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long, ) {
             contentAlignment = Alignment.Center
         ) {
             Text(text = "📍", fontSize = 28.sp)
-            /*Image(
+         /*
+            Image(
                 painter = painterResource(id = R.drawable.ic_location),
                 contentDescription = stringResource(R.string.back),
                 modifier = Modifier.size(24.dp)
             )*/
+
         }
         Column(modifier = Modifier.padding(start = 10.dp)) {
             Text(
@@ -142,6 +159,10 @@ fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long, ) {
         }
     }
 }
+
+
+
+
 
 @Composable
 fun ManualLocationInputDialog(
@@ -210,6 +231,19 @@ fun ManualLocationInputDialog(
                     ErrorText("Floor/Villa Number cannot be empty")
                 }
 
+                /*OutlinedTextField(
+                   value = phone,
+                   onValueChange = { phone = it },
+                   label = { Text("Phone Number") },
+                   isError = isError && phone.isBlank(),
+                   modifier = Modifier.fillMaxWidth(),
+                   singleLine = true,
+                   keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+               )
+               if (isError && phone.isBlank()) {
+                   ErrorText("Phone Number cannot be empty")
+               }*/
+
                 // Add and Cancel Buttons
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -225,7 +259,8 @@ fun ManualLocationInputDialog(
                     Button(
                         onClick = {
                             if (streetName.isNotBlank() && buildingNumber.isNotBlank() && floorNumber.isNotBlank()) {
-                                val fullAddress = "$streetName, $buildingNumber, $floorNumber"
+                                val fullAddress = "$streetName, $buildingNumber, " +
+                                        "$floorNumber"
                                 onConfirm(fullAddress)
                             } else {
                                 isError = true
@@ -410,5 +445,7 @@ fun rememberMapViewWithLifecycle(): MapView {
 
     return mapView
 }
+
+
 
 
