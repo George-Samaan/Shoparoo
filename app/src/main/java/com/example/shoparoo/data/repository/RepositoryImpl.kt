@@ -65,6 +65,10 @@ class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repositor
         return remoteDataSource.getDraftOrder()
     }
 
+    override suspend fun deleteDraftOrder(draftOrderId: String) {
+        remoteDataSource.deleteDraftOrder(draftOrderId)  // Call the RemoteDataSource function
+    }
+
     override suspend fun updateDraftOrder(draftOrderDetails: DraftOrderRequest) {
         remoteDataSource.updateDraftOrder(draftOrderDetails)
     }
@@ -77,9 +81,7 @@ class RepositoryImpl(private val remoteDataSource: RemoteDataSource) : Repositor
         return remoteDataSource.getOrders()
     }
 
-    override suspend fun deleteDraftOrder(draftOrderId: String) {
-        remoteDataSource.deleteDraftOrder(draftOrderId)  // Call the RemoteDataSource function
-    }
+
     override suspend fun addToCompleteOrder(id: String) {
         remoteDataSource.addToCompleteOrder(id)
     }

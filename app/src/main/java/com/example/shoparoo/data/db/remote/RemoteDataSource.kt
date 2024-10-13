@@ -32,7 +32,6 @@ interface RemoteDataSource {
 
     suspend fun deleteDraftOrder(id: Long)
 
-
   
     //delete draft order
     suspend fun deleteDraftOrder(draftOrderId: String)

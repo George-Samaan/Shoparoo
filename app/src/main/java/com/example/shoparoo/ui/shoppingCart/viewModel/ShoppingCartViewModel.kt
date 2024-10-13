@@ -3,7 +3,6 @@ package com.example.shoparoo.ui.shoppingCart.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shoparoo.data.repository.Repository
 import com.example.shoparoo.model.AppliedDiscount
 import com.example.shoparoo.model.DraftOrderDetails
@@ -23,10 +22,10 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
         FirebaseAuth.getInstance().currentUser?.email
     }
 
-    private val _cartItems = MutableStateFlow<List<LineItem>>(emptyList())
+    val _cartItems = MutableStateFlow<List<LineItem>>(emptyList())
     val cartItems = _cartItems.asStateFlow()
 
-    private val _draftOrderDetails = MutableStateFlow<DraftOrderDetails?>(null)
+    val _draftOrderDetails = MutableStateFlow<DraftOrderDetails?>(null)
     val draftOrderDetails = _draftOrderDetails.asStateFlow()
 
     fun getDraftOrderDetails() {
@@ -45,12 +44,23 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun applyDiscountToDraftOrder(draftOrderId: Long, discount: AppliedDiscount) {
+/*    fun applyDiscountToDraftOrder(draftOrderId: Long, discount: AppliedDiscount) {
         viewModelScope.launch {
             val draftOrder = _draftOrderDetails.value?.copy(applied_discount = discount)
             if (draftOrder != null) {
                 val updatedDraftOrder = repository.updateDraftOrder(DraftOrderRequest(draftOrder))
                 _draftOrderDetails.value = updatedDraftOrder as? DraftOrderDetails
+            }
+        }
+    }*/
+
+    fun applyDiscountToDraftOrder(draftOrderId: Long, discount: AppliedDiscount) {
+        viewModelScope.launch {
+            val currentOrderDetails = _draftOrderDetails.value
+            if (currentOrderDetails != null) {
+                val updatedOrderDetails = currentOrderDetails.copy(applied_discount = discount)
+                repository.updateDraftOrder(DraftOrderRequest(updatedOrderDetails))
+                _draftOrderDetails.value = updatedOrderDetails
             }
         }
     }
@@ -65,9 +75,7 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun clearDiscount() {
-        _draftOrderDetails.value = _draftOrderDetails.value?.copy(applied_discount = null)
-    }
+
 
 
 
@@ -88,6 +96,9 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
         _cartItems.value = emptyList()
     }
 
+    fun clearDiscount() {
+        _draftOrderDetails.value = _draftOrderDetails.value?.copy(applied_discount = null)
+    }
 
 
     fun increaseQuantity(lineItem: LineItem) {
