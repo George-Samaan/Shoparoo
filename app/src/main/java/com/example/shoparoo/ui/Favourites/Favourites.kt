@@ -93,14 +93,7 @@ fun Favourites(navController: NavController) {
                     exit = scaleOut(animationSpec = tween(durationMillis = 800))
                 ) {
                     ProductGrid(
-                        favProducts.value,
-                        navController,
-                        selectedCurrency,
-                        conversionRate,
-                        currencySymbols,
-                        true,
-                        viewModel
-                    )
+                        favProducts.value, navController, selectedCurrency, conversionRate, currencySymbols, true, viewModel)
                 }
 
                 if (!isGridVisible && favProducts.value.isEmpty()) {

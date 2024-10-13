@@ -4,13 +4,17 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.Repository
 import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
 import com.example.shoparoo.model.ImagesItem
+import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.model.ProductsItem
+import com.example.shoparoo.model.Property
+import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,6 +59,7 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
 
     }
 
+    //show all favourites (favourite screen)
     private fun getFavData(second: DraftOrderDetails?) {
         _productItems.value = mutableListOf()
         for (lineItem in second!!.line_items) {
@@ -126,8 +131,144 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
+    fun addFav(id: Long) {
+        viewModelScope.launch {
+            _draftOrderFav.value = ApiState.Loading
+            repository.getDraftOrder().catch {
+                _draftOrderFav.value = ApiState.Failure(it.message ?: "Unknown Error")
+            }.collect {
+                _draftOrderFav.value = ApiState.Success(it)
+                var filter = filterByUser(it, userMail)
+                if (filter.first) {
+                    filterFav(filter.second!!, id)
+                } else {
+                    CreateDraftOrderFav(id)
+                }
+            }
+        }
 
+    }
+
+    private fun filterFav(second: DraftOrderDetails, id: Long) {
+        viewModelScope.launch {
+            repository.getSingleProductFromId(id.toString()).catch {
+                _draftOrderFav.value = ApiState.Failure(it.message ?: "Unknown Error")
+            }.collect {
+                _draftOrderFav.value = ApiState.Success(it)
+                val singleProduct = it as SingleProduct
+                val varient = singleProduct.product!!.variants!![0]
+                filterFavDraftOrder(second, singleProduct, varient!!)
+            }
+        }
+    }
+
+
+    private fun CreateDraftOrderFav(id: Long) {
+        Log.i("CreateDraftOrderFav22", "CreateDraftOrderFav: ")
+
+        viewModelScope.launch {
+            repository.getSingleProductFromId(id.toString()).catch {
+                _draftOrderFav.value = ApiState.Failure(it.message ?: "Unknown Error")
+            }.collect {
+                Log.i("CreateDraftOrderFav2", "CreateDraftOrderFav: ")
+                _draftOrderFav.value = ApiState.Success(it)
+                val singleProduct = it as SingleProduct
+                val varient = singleProduct.product!!.variants!![0]
+                //val lineItem = setLineItem(singleProduct, varient)
+                val draftOrderDetails = DraftOrderDetails(
+                    email = "FAV_" + userMail,
+                    line_items = mutableListOf(
+                        LineItem(
+                            product_id = varient!!.productId,
+                            title = singleProduct.product.title!!,
+                            price = varient.price!!,
+                            quantity = 1,
+                            variant_id = varient.id.toString(),
+                            properties = listOf(
+                                Property(
+                                    name = "image",
+                                    value = singleProduct.product.images!![0]!!.src!!
+                                )
+                            )
+                        )
+                    )
+                )
+                val order = DraftOrderRequest(draftOrderDetails)
+                Log.i("CreateDraftOrderFav3", "CreateDraftOrderFav: ")
+                repository.createDraftOrder(order)
+            }
+        }
+    }
+
+
+
+    fun filterFavDraftOrder(
+        draftOrderDetails: DraftOrderDetails,
+        theSingleProduct: SingleProduct,
+        variant: VariantsItem,
+        infav: Boolean = false
+    ) {
+        val myLineItem = draftOrderDetails.line_items.find {
+            it.product_id == variant.productId && it.variant_id == variant.id.toString()
+        }
+
+        if (infav) {
+         //   _isFav.value = myLineItem != null
+        } else {
+            UpdateFavDraftOrder(draftOrderDetails, draftOrderDetails.takeIf { myLineItem != null }, myLineItem, theSingleProduct, variant)
+        }
+    }
+    private fun UpdateFavDraftOrder(
+        draftOrderDetails: DraftOrderDetails,
+        item: DraftOrderDetails?,
+        myLineItem: LineItem?,
+        theSingleProduct: SingleProduct,
+        varient: VariantsItem
+    ) {
+
+        if (item != null) {
+            Log.i("xoxoxoxoxox", "Update draft order")
+            //if the product already exists in the favourites
+           // _isFav.value = false
+            draftOrderDetails.line_items.remove(myLineItem)
+            if (draftOrderDetails.line_items.isEmpty()) {
+                viewModelScope.launch {
+                    repository.deleteDraftOrder(draftOrderDetails.id!!)
+                }
+            }
+            else {
+                viewModelScope.launch {
+                    val order = DraftOrderRequest(draftOrderDetails)
+                    repository.updateDraftOrder(order)
+                }
+            }
+        } else {                                                        // add the product to the favourites
+            Log.i("xoxoxoxoxox", "add draft order")
+            draftOrderDetails.line_items.add(setLineItem(theSingleProduct, varient))
+          //  _isFav.value = true
+
+            viewModelScope.launch {
+                val order = DraftOrderRequest(draftOrderDetails)
+                repository.updateDraftOrder(order)
+            }
+        }
+    }
+
+    private fun setLineItem(theSingleProduct: SingleProduct, varient: VariantsItem, ) = LineItem(
+        title = theSingleProduct.product!!.title!!,
+        price = (varient.price?.toFloatOrNull().toString()),
+        quantity = 1,
+        variant_id = varient.id.toString(),
+        product_id = theSingleProduct.product.id!!,
+        properties = listOf(
+            Property("imageUrl", theSingleProduct.product.images!![0]!!.src!!),
+            Property("Color", varient.option1!!),
+            Property("Size", varient.option2!!)
+        )
+    )
 }
+
+
 
 fun filterByUser(
     draftOrderResponse: DraftOrderResponse,
