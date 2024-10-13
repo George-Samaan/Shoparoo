@@ -1,6 +1,7 @@
 package com.example.shoparoo.repository
 
 import com.example.shoparoo.data.db.remote.RemoteDataSource
+import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.DraftOrderResponse
 import com.example.shoparoo.model.OrderResponse
@@ -23,6 +24,11 @@ class FakeRemoteDataSource : RemoteDataSource {
         products = listOf(testProduct1, testProduct2, testProduct3)
     )
 
+    private val draftOrders = mutableListOf(
+        DraftOrderDetails(1L, mutableListOf(), "Test Email", "Test Note", "Test Tags")
+    )
+
+
     override fun getSmartCollections(): Flow<SmartCollections> = flow {
         emit(testSmartCollectionProduct)
     }
@@ -31,15 +37,27 @@ class FakeRemoteDataSource : RemoteDataSource {
         emit(testForYouProduct)
     }
 
+
+    override fun getDraftOrder(): Flow<DraftOrderResponse> {
+        return flow {
+            emit(DraftOrderResponse(draft_orders = draftOrders))
+        }
+    }
+
+
+    override suspend fun deleteDraftOrder(id: Long) {
+        draftOrders.removeIf { it.id == id }
+    }
+
     override fun getProductsFromBrandsId(collectionId: String): Flow<Product> {
         TODO("Not yet implemented")
-    }
 
     override fun getSingleProductFromId(id: String): Flow<SingleProduct> = flow {
         emit(mockProductItem)
+
     }
 
-    override fun getWomenProducts(): Flow<Product> {
+    override fun getSingleProductFromId(id: String): Flow<SingleProduct> {
         TODO("Not yet implemented")
     }
 
@@ -48,6 +66,9 @@ class FakeRemoteDataSource : RemoteDataSource {
     }
 
     override fun getMensProducts(): Flow<Product> {
+        TODO("Not yet implemented")
+    }
+    override fun getWomenProducts(): Flow<Product> {
         TODO("Not yet implemented")
     }
 
@@ -59,9 +80,12 @@ class FakeRemoteDataSource : RemoteDataSource {
         TODO("Not yet implemented")
     }
 
+
+
     override fun getDraftOrder(): Flow<DraftOrderResponse>  = flow {
       emit(createMockDraftOrderResponse())
     }
+
 
     override suspend fun updateDraftOrder(draftOrderDetails: DraftOrderRequest) {
         mockDraftOrderRequesttobeUpdated = draftOrderDetails
@@ -71,9 +95,6 @@ class FakeRemoteDataSource : RemoteDataSource {
         TODO("Not yet implemented")
     }
 
-    override suspend fun deleteDraftOrder(id: Long) {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun deleteDraftOrder(draftOrderId: String) {
         TODO("Not yet implemented")
