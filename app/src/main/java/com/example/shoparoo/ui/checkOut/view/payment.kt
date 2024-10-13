@@ -157,16 +157,16 @@ fun CreditCardItem() {
     var isExpirationMonthValid by remember { mutableStateOf(true) }
     var isExpirationYearValid by remember { mutableStateOf(true) }
     var isCvvValid by remember { mutableStateOf(true) }
-    val viewModel: ShoppingCartViewModel = viewModel(
+
+    val baseYear = 19
+
+    val shoppingCartViewModel: ShoppingCartViewModel = viewModel(
         factory = ShoppingCartViewModelFactory(
             repository = RepositoryImpl(
                 remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
             )
         )
     )
-
-    val currentYear =
-        Calendar.getInstance().get(Calendar.YEAR) % 100 // get last two digits of the year
 
     Column(
         modifier = Modifier
@@ -201,9 +201,13 @@ fun CreditCardItem() {
 
         // Card Number Field
         OutlinedTextField(
-            value = cardNumber, onValueChange = {
-                cardNumber = it
-                isCardNumberValid = it.length == 16 && it.all { char -> char.isDigit() }
+            value = cardNumber,
+            onValueChange = {
+                val cleaned = it.replace(" ", "")
+                if (cleaned.length <= 16) {
+                    cardNumber = cleaned.chunked(4).joinToString(" ")
+                    isCardNumberValid = cardNumber.replace(" ", "").length == 16
+                }
             },
             label = { Text("Card number") },
             shape = RoundedCornerShape(25.dp),
@@ -220,6 +224,7 @@ fun CreditCardItem() {
                 modifier = Modifier.padding(start = 8.dp)
             )
         }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -248,70 +253,128 @@ fun CreditCardItem() {
         Spacer(modifier = Modifier.height(16.dp))
 
 
-        // Expiration Date Fields (MM/YY)
+          // Expiration Date Fields (MM/YY)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            OutlinedTextField(
-                value = expirationMonth,
-                onValueChange = {
-                    expirationMonth = it
-                    isExpirationMonthValid = it.length == 2 && it.toIntOrNull() in 1..12
-                },
-                label = { Text("MM") },
-                shape = RoundedCornerShape(25.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp),
-                singleLine = true,
-                isError = !isExpirationMonthValid,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = expirationMonth,
+                    onValueChange = {
+                        expirationMonth = it
+                        isExpirationMonthValid = it.length == 2 && it.toIntOrNull() in 1..12
+                    },
+                    label = { Text("MM") },
+                    shape = RoundedCornerShape(25.dp),
+                    modifier = Modifier.padding(end = 8.dp),
+                    singleLine = true,
+                    isError = !isExpirationMonthValid,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
 
-            OutlinedTextField(
-                value = expirationYear,
-                onValueChange = {
-                    expirationYear = it
-                    isExpirationYearValid = it.length == 2 && it.toIntOrNull()
-                        ?.let { year -> year >= currentYear } ?: false
-                },
-                label = { Text("YY") },
-                shape = RoundedCornerShape(25.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp),
-                singleLine = true,
-                isError = !isExpirationYearValid,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
+                if (!isExpirationMonthValid) {
+                    Text(
+                        text = "Invalid expiration month",
+                        color = Color.Red,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = expirationYear,
+                    onValueChange = {
+                        expirationYear = it
+                        isExpirationYearValid = it.length == 2 && expirationYear.toIntOrNull()?.let { year ->
+                            year in baseYear..59
+                        } ?: false
+                    },
+                    label = { Text("YY") },
+                    shape = RoundedCornerShape(25.dp),
+                    modifier = Modifier.padding(start = 8.dp),
+                    singleLine = true,
+                    isError = !isExpirationYearValid,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+
+                if (!isExpirationYearValid) {
+                    Text(
+                        text = "Invalid expiration year",
+                        color = Color.Red,
+                        modifier = Modifier.padding(start = 20.dp)
+                    )
+                }
+            }
         }
 
-        if (!isExpirationMonthValid) {
-            Text(
-                text = "Invalid expiration month",
-                color = Color.Red,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
 
-        if (!isExpirationYearValid) {
-            Text(
-                text = "Invalid expiration year",
-                color = Color.Red,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
+        // Expiration Date Fields (MM/YY)
+       /* Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Column(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = expirationMonth,
+                    onValueChange = {
+                        expirationMonth = it
+                        isExpirationMonthValid = it.length == 2 && it.toIntOrNull() in 1..12
+                    },
+                    label = { Text("MM") },
+                    shape = RoundedCornerShape(25.dp),
+                    modifier = Modifier.padding(end = 8.dp),
+                    singleLine = true,
+                    isError = !isExpirationMonthValid,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+
+                if (!isExpirationMonthValid) {
+                    Text(
+                        text = "Invalid expiration month",
+                        color = Color.Red,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = expirationYear,
+                    onValueChange = {
+                        expirationYear = it
+                        isExpirationYearValid = it.length == 2 && expirationYear.toIntOrNull()?.let { year ->
+                            year in baseYear..59
+                        } ?: false
+                    },
+                    label = { Text("YY") },
+                    shape = RoundedCornerShape(25.dp),
+                    modifier = Modifier.padding(start = 8.dp),
+                    singleLine = true,
+                    isError = !isExpirationYearValid,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+
+                if (!isExpirationYearValid) {
+                    Text(
+                        text = "Invalid expiration year",
+                        color = Color.Red,
+                        modifier = Modifier.padding(start = 20.dp)
+                    )
+                }
+            }
+        }*/
+
+
+
+
 
         Spacer(modifier = Modifier.height(32.dp))
 
 
         CheckoutButtonCheck(
             selectedPaymentMethod = selectedPaymentMethod,
-            viewModel = viewModel,
+            shoppingCartViewModel,
             cardHolderName = cardHolderName, cardNumber = cardNumber,
             expirationMonth = expirationMonth, expirationYear = expirationYear
         )
     }
 }
-
 
 @Composable
 fun CheckoutButtonCheck(
