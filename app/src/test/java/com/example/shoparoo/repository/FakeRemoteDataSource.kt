@@ -38,11 +38,11 @@ class FakeRemoteDataSource : RemoteDataSource {
     }
 
 
-    override fun getDraftOrder(): Flow<DraftOrderResponse> {
-        return flow {
-            emit(DraftOrderResponse(draft_orders = draftOrders))
-        }
-    }
+    /*    override fun getDraftOrder(): Flow<DraftOrderResponse> {
+            return flow {
+                emit(DraftOrderResponse(draft_orders = draftOrders))
+            }
+        }*/
 
 
     override suspend fun deleteDraftOrder(id: Long) {
@@ -51,15 +51,16 @@ class FakeRemoteDataSource : RemoteDataSource {
 
     override fun getProductsFromBrandsId(collectionId: String): Flow<Product> {
         TODO("Not yet implemented")
+    }
 
     override fun getSingleProductFromId(id: String): Flow<SingleProduct> = flow {
         emit(mockProductItem)
 
     }
 
-    override fun getSingleProductFromId(id: String): Flow<SingleProduct> {
-        TODO("Not yet implemented")
-    }
+    /*    override fun getSingleProductFromId(id: String): Flow<SingleProduct> {
+            TODO("Not yet implemented")
+        }*/
 
     override fun getSalesProducts(): Flow<Product> {
         TODO("Not yet implemented")
