@@ -25,8 +25,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -94,6 +96,9 @@ fun Signup(navController: NavHostController) {
     }
 
     val nameValue = remember { mutableStateOf("") }
+    val locationValue = remember { mutableStateOf("") }
+    val phoneField = remember { mutableStateOf("") }
+    var phoneValidation by remember { mutableStateOf(false) }
     val passValue = remember { mutableStateOf("") }
     val confirmpassValue = remember { mutableStateOf("") }
     val emailValue = remember { mutableStateOf("") }
@@ -117,7 +122,7 @@ fun Signup(navController: NavHostController) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 25.dp, start = 15.dp, top = 5.dp)
+                .padding(start = 15.dp)
         ) {
             Box(
                 modifier = Modifier
@@ -128,7 +133,7 @@ fun Signup(navController: NavHostController) {
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_back),
+                    painter = painterResource(id = R.drawable.ic_arrow_back_2),
                     contentDescription = stringResource(R.string.back),
                     modifier = Modifier
                         .size(24.dp)
@@ -148,7 +153,7 @@ fun Signup(navController: NavHostController) {
                     fontSize = 36.sp,
                     fontWeight = FontWeight.Bold,
                     color = primary,
-                    modifier = Modifier.padding(top = 20.dp, start = 8.dp)
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
@@ -158,7 +163,9 @@ fun Signup(navController: NavHostController) {
 
         NameFields(nameValue, "Name", nameValidation)
         NameFields(emailValue, "Email", mailValidation)
-        PasswordField(passValue, "password", passValidation)
+        LocationField(locationValue, "Location", nameValidation)
+        PhoneField(phoneField, phoneValidation)
+        PasswordField(passValue, "Password", passValidation)
         PasswordField(confirmpassValue, "Confirm Password", cPassValidation)
         Spacer(modifier = Modifier.padding(top = 30.dp))
         Button(
@@ -168,6 +175,9 @@ fun Signup(navController: NavHostController) {
                 mailValidation = emailValue.value.isEmpty()
                 passValidation = passValue.value.isEmpty()
                 cPassValidation = confirmpassValue.value.isEmpty()
+                phoneValidation =
+                    phoneField.value.isEmpty() || !isValidPhoneNumber(phoneField.value)
+
                 if (!android.util.Patterns.EMAIL_ADDRESS.matcher(emailValue.value).matches()) {
                     mailValidation = true
                 }
@@ -273,6 +283,82 @@ private fun NameFields(
         Text("Enter correct $name", color = Color.Red)
 }
 
+@Composable
+private fun LocationField(
+    nameValue: MutableState<String>,
+    name: String,
+    Validation: Boolean,
+
+    ) {
+    Column {
+        OutlinedTextField(
+            label = { Text("Enter $name") },
+            leadingIcon = {
+                if (name == "Name") {
+                    Icon(
+                        Icons.Filled.LocationOn, contentDescription = null,
+                        tint = primary
+                    )
+                } else
+                    Icon(
+                        Icons.Filled.LocationOn, contentDescription = null,
+                        tint = primary
+                    )
+
+            },
+
+            value = nameValue.value,
+            onValueChange = { nameValue.value = it },
+            shape = RoundedCornerShape(25.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 45.dp, vertical = 10.dp),
+            isError = Validation,
+            singleLine = true
+        )
+    }
+    if (nameValue.value.isEmpty() && Validation)
+        Row("Don't leave this field empty")
+    else if (Validation && name == "Email")
+        Text("Enter correct $name", color = Color.Red)
+}
+
+@Composable
+private fun PhoneField(
+    phoneValue: MutableState<String>,
+    Validation: Boolean
+) {
+    Column {
+        OutlinedTextField(
+            label = { Text("Enter Phone Number") },
+            leadingIcon = {
+                Icon(
+                    Icons.Filled.Phone, contentDescription = null,
+                    tint = primary
+                )
+            },
+            value = phoneValue.value,
+            onValueChange = { phoneValue.value = it },
+            shape = RoundedCornerShape(25.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 45.dp, vertical = 10.dp),
+            isError = Validation,
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
+            singleLine = true
+        )
+    }
+    // Error message if validation fails
+    if (phoneValue.value.isEmpty() && Validation) {
+        Row("Don't leave this field empty")
+    } else if (Validation && !isValidPhoneNumber(phoneValue.value)) {
+        Text("Enter a valid phone number", color = Color.Red)
+    }
+}
+
+private fun isValidPhoneNumber(phoneNumber: String): Boolean {
+    return phoneNumber.length == 11 && phoneNumber.all { it.isDigit() }
+}
 
 @Composable
 fun PasswordField(
