@@ -175,8 +175,8 @@ fun Signup(navController: NavHostController) {
                 mailValidation = emailValue.value.isEmpty()
                 passValidation = passValue.value.isEmpty()
                 cPassValidation = confirmpassValue.value.isEmpty()
-                phoneValidation =
-                    phoneField.value.isEmpty() || !isValidPhoneNumber(phoneField.value)
+                phoneValidation = phoneField.value.isEmpty() || !isValidPhoneNumber(phoneField.value)
+
 
                 if (!android.util.Patterns.EMAIL_ADDRESS.matcher(emailValue.value).matches()) {
                     mailValidation = true
@@ -188,26 +188,8 @@ fun Signup(navController: NavHostController) {
                     cPassValidation = true
                 }
 
-                if (!nameValidation && !mailValidation && !passValidation && !cPassValidation) {
-                    viewModel.signUp(emailValue.value, passValue.value, nameValue.value)
-
-                    /*                    var auth: FirebaseAuth = Firebase.auth
-                    //                    auth.createUserWithEmailAndPassword(emailValue.value, passValue.value)
-                    //                        .addOnCompleteListener { task ->
-                    //                            if (task.isSuccessful) {
-                    //                                val user = Firebase.auth.currentUser
-                    //
-                    //                                user!!.sendEmailVerification()
-                    //                                    .addOnCompleteListener { task ->
-                    //                                        if (task.isSuccessful) {
-                    //                                            Log.d(TAG, "Email sent.")
-                    //                                        }
-                    //                                    }
-                    //                                navController.navigate("login")
-                    //                            } else {
-                    //                                mailValidation = true
-                    //                            }}
-                    */
+                if (!nameValidation && !mailValidation && !passValidation && !cPassValidation && !phoneValidation) {
+                    viewModel.signUp(emailValue.value, passValue.value, nameValue.value, locationValue.value, phoneField.value)
 
                 }
 
@@ -357,7 +339,24 @@ private fun PhoneField(
 }
 
 private fun isValidPhoneNumber(phoneNumber: String): Boolean {
-    return phoneNumber.length == 11 && phoneNumber.all { it.isDigit() }
+    // Remove spaces, dashes, and other formatting characters
+    val cleanedPhoneNumber = phoneNumber.replace(Regex("[\\s-]"), "")
+
+    // Check if the phone number contains only digits or starts with a "+"
+    if (!cleanedPhoneNumber.startsWith("+") && cleanedPhoneNumber.any { !it.isDigit() }) {
+        return false
+    }
+
+    // Basic validation: length and starting conditions
+    return when {
+        // Example: validating local number format of 11 digits
+        cleanedPhoneNumber.length == 11 && cleanedPhoneNumber.all { it.isDigit() } -> true
+
+        // Example: validating international number format starting with "+"
+        cleanedPhoneNumber.startsWith("+") && cleanedPhoneNumber.length in 12..15 -> true
+
+        else -> false
+    }
 }
 
 @Composable

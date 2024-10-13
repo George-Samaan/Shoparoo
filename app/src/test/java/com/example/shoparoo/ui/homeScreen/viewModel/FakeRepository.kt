@@ -80,9 +80,10 @@ class FakeRepository : Repository {
     }
 
     override fun getDraftOrder(): Flow<DraftOrderResponse> {
-        TODO("Not yet implemented")
+        return flow {
+            emit(mockDraftOrderResponse)
+        }
     }
-
     override suspend fun updateDraftOrder(draftOrderDetails: DraftOrderRequest) {
         TODO("Not yet implemented")
     }

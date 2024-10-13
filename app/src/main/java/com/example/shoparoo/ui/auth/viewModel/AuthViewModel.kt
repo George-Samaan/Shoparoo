@@ -34,14 +34,14 @@ class AuthViewModel : ViewModel() {
     }
 
 
-    fun signUp(email: String, pass: String, name: String) {
+    fun signUp(email: String, pass: String, name: String, location: String, phoneNum: String) {
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             firebaseAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener {
                 if (it.isSuccessful) {
                     Log.d(TAG, "signUp: success")
                     val user = firebaseAuth.currentUser
-                    saveUserDataFireBase(user!!.uid, name)
+                    saveUserDataFireBase(user!!.uid, name, location, phoneNum)
                     user!!.sendEmailVerification()
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
@@ -58,10 +58,12 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    private fun saveUserDataFireBase(uid: String, name: String) {
+    private fun saveUserDataFireBase(uid: String, name: String, location: String, phoneNum: String) {
         val user = hashMapOf(
             "name" to name,
-            "email" to firebaseAuth.currentUser!!.email
+            "email" to firebaseAuth.currentUser!!.email,
+            "location" to location,
+            "phoneNum" to phoneNum
         )
         db.collection("users").document(uid).set(user)
     }

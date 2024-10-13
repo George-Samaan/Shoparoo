@@ -9,7 +9,9 @@ import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
 import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.model.ShippingAddress
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -17,9 +19,11 @@ import kotlinx.coroutines.launch
 
 class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
 
+    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    val db = Firebase.firestore
 
     val userMail by lazy {
-        FirebaseAuth.getInstance().currentUser?.email
+        firebaseAuth.currentUser?.email
     }
 
     val _cartItems = MutableStateFlow<List<LineItem>>(emptyList())
@@ -191,5 +195,24 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
+    //get address and phone number from firebase
+    fun getUserData(): Pair<String,String> {
+        var location = ""
+        var phoneNum = ""
+        db.collection("users").document(firebaseAuth.currentUser!!.uid).get()
+            .addOnSuccessListener { document ->
+                if (document != null) {
+                     location = document.data?.get("location").toString()
+                     phoneNum = document.data?.get("phoneNum").toString()
+                    Log.d("ShoppingCartViewModel", "Location: $location, Phone Number: $phoneNum")
+                } else {
+                    Log.d("ShoppingCartViewModel", "No such document")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.d("ShoppingCartViewModel", "get failed with ", exception)
+            }
+        return Pair(location, phoneNum)
+    }
 
 }

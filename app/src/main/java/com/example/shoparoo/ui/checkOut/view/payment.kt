@@ -4,11 +4,12 @@ package com.example.shoparoo.ui.checkOut
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -54,7 +56,6 @@ import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModelFactory
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
-import java.util.Calendar
 
 
 @Composable
@@ -407,9 +408,16 @@ fun CheckoutButtonCheck(
     var paymentSuccess by remember { mutableStateOf(false) }
     var orderPlaced by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) } // New state for dialog visibility
+    var buttonText by remember { mutableStateOf("Place Order") }
 
     val draftOrderDetails by shoppingCartViewModel.draftOrderDetails.collectAsState()
     val completeOrderState by paymentViewModel.completeOrderState.collectAsState()
+
+     buttonText = when {
+        isProcessing -> "Processing..."
+        orderPlaced -> "Order Placed"
+        else -> "Place Order"
+    }
 
     // Fetch draft order details
     LaunchedEffect(Unit) {
@@ -441,42 +449,78 @@ fun CheckoutButtonCheck(
     }
 
     // Handle the button click
-    Button(
-        onClick = {
-            if (orderPlaced) {
-                Toast.makeText(context, "Order already placed", Toast.LENGTH_SHORT).show()
-            } else {
-                if (selectedPaymentMethod == "card") {
-                    if (validateCardDetails(
-                            cardHolderName,
-                            cardNumber,
-                            expirationMonth,
-                            expirationYear
-                        )
-                    ) {
-                        isProcessing = true
-                        completeOrderIfPossible()
-                    } else {
-                        Toast.makeText(context, "Invalid Card Details", Toast.LENGTH_SHORT).show()
-                    }
-                } else if (selectedPaymentMethod == "cash") {
-                    val totalAmount = draftOrderDetails?.total_price?.toDoubleOrNull() ?: 0.0
-                    if (totalAmount > 1500) {
-                        showDialog = true
-                    } else {
-                        isProcessing = true
-                        completeOrderIfPossible()
+    Row(horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+            .padding(16.dp)
+        ) {
+        Button(
+
+            onClick = {
+                if (orderPlaced) {
+                   // Toast.makeText(context, "Order already placed", Toast.LENGTH_SHORT).show()
+                 //   placeholderBtn = "Order Placed"
+                } else {
+                    if (selectedPaymentMethod == "card") {
+                        if (validateCardDetails(
+                                cardHolderName,
+                                cardNumber,
+                                expirationMonth,
+                                expirationYear
+                            )
+                        ) {
+                            isProcessing = true
+                            completeOrderIfPossible()
+                        } else {
+                            Toast.makeText(context, "Invalid Card Details", Toast.LENGTH_SHORT).show()
+                        }
+                    } else if (selectedPaymentMethod == "cash") {
+                        val totalAmount = draftOrderDetails?.total_price?.toDoubleOrNull() ?: 0.0
+                        if (totalAmount > 1500) {
+                            showDialog = true
+                        } else {
+                            isProcessing = true
+                            completeOrderIfPossible()
+                        }
                     }
                 }
+            },
+            enabled = if(orderPlaced || isProcessing ) false else true,
+            colors = ButtonDefaults.buttonColors(primary),
+            //        modifier = Modifier
+            //            .fillMaxWidth()
+            //            .padding(16.dp)
+            //            .height(50.dp)
+            //    )
+            modifier = Modifier
+                .run {
+                    if (isProcessing) {
+                        size(50.dp)
+                    } else {
+                        fillMaxWidth()
+                            .padding(horizontal = 70.dp)
+                    }
+                }
+                .animateContentSize(),
+            contentPadding = PaddingValues(15.dp),
+        )
+
+        {
+
+            if (isProcessing) {
+                Modifier.width(50.dp)
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    buttonText,
+                    fontSize = 20.sp
+                )
             }
-        },
-        colors = ButtonDefaults.buttonColors(primary),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(50.dp)
-    ) {
-        Text("Place Order", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+        }
     }
 
     if (showDialog) {
@@ -503,12 +547,12 @@ fun CheckoutButtonCheck(
 
     // Show circular progress indicator while processing
     if (isProcessing) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+//        Box(
+//            modifier = Modifier.fillMaxSize(),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            LoadingIndicator()
+//        }
 
         // Simulate payment processing
         LaunchedEffect(Unit) {

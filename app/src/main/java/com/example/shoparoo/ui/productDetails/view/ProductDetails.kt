@@ -471,7 +471,7 @@ private fun StockAndPrice(
                 .fillMaxWidth()
         ) {
             Text(
-                text = Math.abs((selected.value!!.inventoryQuantity!!)).toString() + " item left",
+                text = if (selected.value!!.inventoryQuantity!! < 0) " 0 In Stock" else (selected.value!!.inventoryQuantity!!).toString() + " item left",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = if (selected.value!!.inventoryQuantity!! > 6) darkGreen else Color.Red

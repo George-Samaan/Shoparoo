@@ -9,6 +9,7 @@ import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.Property
 import com.example.shoparoo.model.RulesItem
+import com.example.shoparoo.model.ShippingAddress
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.SmartCollections
 import com.example.shoparoo.model.SmartCollectionsItem
@@ -267,3 +268,50 @@ object mockData3 {
     )
 
 }
+val mockDraftOrderResponse = DraftOrderResponse(
+    draft_orders = listOf(
+        DraftOrderDetails(
+            id = 101,
+            line_items = mutableListOf(
+                LineItem(
+                    id = 1,
+                    product_id = 1001,
+                    title = "Sneakers",
+                    price = "50.00",
+                    quantity = 2,
+                    variant_id = "v001",
+                    properties = listOf(
+                        Property(name = "Size", value = "42"),
+                        Property(name = "Color", value = "Red")
+                    ),
+                    vendor = "Adidas"
+                ),
+                LineItem(
+                    id = 2,
+                    product_id = 1002,
+                    title = "T-Shirt",
+                    price = "20.00",
+                    quantity = 1,
+                    variant_id = "v002",
+                    properties = listOf(
+                        Property(name = "Size", value = "M"),
+                        Property(name = "Color", value = "Blue")
+                    ),
+                    vendor = "Nike"
+                )
+            ),
+            email = "customer1@example.com",
+            note = "Please gift wrap",
+            tags = "holiday-sale",
+            invoice_url = "https://shopify.com/invoice/101",
+            current_total_price = "120.00",
+            total_price = "120.00",
+            subtotal_price = "110.00",
+            total_tax = "10.00",
+            shipping_address = ShippingAddress(
+                address1 = "123 Main St",
+                phone = "555-1234"
+            )
+        )
+    )
+)
