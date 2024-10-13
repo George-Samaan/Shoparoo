@@ -230,13 +230,13 @@ private fun ProductInfo(
                 )
                 if (selected.value!!.inventoryQuantity!! < 1) {
                     Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
-                } else if (itemsIncart >= selected.value!!.inventoryQuantity!!) {
+                } /*else if (itemsIncart >= selected.value!!.inventoryQuantity!!) {
                     Toast.makeText(
                         context,
                         "you've already added $itemsIncart ",
                         Toast.LENGTH_SHORT
                     ).show()
-                } else {
+                } */ else {
                     if (isLoggedIn.value != AuthState.Authenticated && isLoggedIn.value != AuthState.UnVerified) { //this is bullshit but i'll change it later
 //                        Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT).show()
                         showDialog = true

@@ -75,49 +75,6 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         }
     }
 
-    fun filterByUser(
-        draftOrdersResponse: DraftOrderResponse,
-        theSingleProduct: SingleProduct,
-        varient: VariantsItem,
-        isCart: Boolean,
-        infav: Boolean = false
-    ) {
-
-        Log.i("ProductDetailsviewModel", "filter by user ${userMail}")
-        var user: DraftOrderDetails? = null
-        var check: Boolean = false
-
-        if (isCart) {
-            for (draftOrder in draftOrdersResponse.draft_orders!!) {
-                if (draftOrder.email == userMail) {
-                    // filterByItem(id, draftOrder)
-                    Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
-                    Log.i("ProductDetailsviewModel", "Draft Order Found ${draftOrder}")
-
-                    user = draftOrder
-                    check = true
-                }
-            }
-        } else {
-            for (draftOrder in draftOrdersResponse.draft_orders!!) {
-                if (draftOrder.email == "FAV_" + userMail) {
-                    Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
-                    Log.i("ProductDetailsviewModel", "Draft Order Found ${draftOrder}")
-                    user = draftOrder
-                    check = true
-                }
-            }
-        }
-
-        if (check) {
-            if (isCart)
-                filterByItem(user!!, varient, theSingleProduct, isCart)
-            else
-                filterFavDraftOrder(user!!, theSingleProduct, varient, infav)
-        } else if (!infav)
-            createDraftOrder(theSingleProduct, varient, isCart)
-    }
-
     /*    fun filterByUser(
             draftOrdersResponse: DraftOrderResponse,
             theSingleProduct: SingleProduct,
@@ -125,31 +82,75 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
             isCart: Boolean,
             infav: Boolean = false
         ) {
-            val emailPrefix = if (isCart) "" else "FAV_"
-            val targetEmail = emailPrefix + userMail
-            var user: DraftOrderDetails? = null
 
-            draftOrdersResponse.draft_orders.forEach { draftOrder ->
-                if (draftOrder.email == targetEmail) {
-                    Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
-                    Log.i("ProductDetailsviewModel", "Draft Order Found $draftOrder")
-                    user = draftOrder
-                    return@forEach // Exit the loop early if found
+            Log.i("ProductDetailsviewModel", "filter by user ${userMail}")
+            var user: DraftOrderDetails? = null
+            var check: Boolean = false
+
+            if (isCart) {
+                for (draftOrder in draftOrdersResponse.draft_orders!!) {
+                    if (draftOrder.email == userMail) {
+                        // filterByItem(id, draftOrder)
+                        Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
+                        Log.i("ProductDetailsviewModel", "Draft Order Found ${draftOrder}")
+
+                        user = draftOrder
+                        check = true
+                    }
+                }
+            } else {
+                for (draftOrder in draftOrdersResponse.draft_orders!!) {
+                    if (draftOrder.email == "FAV_" + userMail) {
+                        Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
+                        Log.i("ProductDetailsviewModel", "Draft Order Found ${draftOrder}")
+                        user = draftOrder
+                        check = true
+                    }
                 }
             }
-            _userOrder.value = ApiState.Success(user!!)
-            user?.let {
-                if (isCart) {
-                    filterByItem(it, varient, theSingleProduct, isCart)
-                } else {
-                    filterFavDraftOrder(it, theSingleProduct, varient, infav)
-                }
-            } ?: run {
-                if (!infav) {
-                    createDraftOrder(theSingleProduct, varient, isCart)
-                }
-            }
+
+            if (check) {
+                if (isCart)
+                    filterByItem(user!!, varient, theSingleProduct, isCart)
+                else
+                    filterFavDraftOrder(user!!, theSingleProduct, varient, infav)
+            } else if (!infav)
+                createDraftOrder(theSingleProduct, varient, isCart)
         }*/
+
+    fun filterByUser(
+        draftOrdersResponse: DraftOrderResponse,
+        theSingleProduct: SingleProduct,
+        varient: VariantsItem,
+        isCart: Boolean,
+        infav: Boolean = false
+    ) {
+        val emailPrefix = if (isCart) "" else "FAV_"
+        val targetEmail = emailPrefix + userMail
+        var user: DraftOrderDetails? = null
+
+        draftOrdersResponse.draft_orders.forEach { draftOrder ->
+            if (draftOrder.email == targetEmail) {
+                Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
+                Log.i("ProductDetailsviewModel", "Draft Order Found $draftOrder")
+                user = draftOrder
+                return@forEach // Exit the loop early if found
+            }
+        }
+        _userOrder.value =
+            user?.let { ApiState.Success(it) } ?: ApiState.Failure("Draft order not found")
+        user?.let {
+            if (isCart) {
+                filterByItem(it, varient, theSingleProduct, isCart)
+            } else {
+                filterFavDraftOrder(it, theSingleProduct, varient, infav)
+            }
+        } ?: run {
+            if (!infav) {
+                createDraftOrder(theSingleProduct, varient, isCart)
+            }
+        }
+    }
 
     private fun filterFavDraftOrder(
         draftOrderDetails: DraftOrderDetails,
