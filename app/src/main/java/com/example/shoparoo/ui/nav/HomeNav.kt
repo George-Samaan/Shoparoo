@@ -47,6 +47,7 @@ fun BottomNavigationBar(navController: NavController, isLogged: State<AuthState>
     )
     if (isLogged.value == AuthState.UnAuthenticated) {
         items.remove(BottomNav.Cart)
+        items.remove(BottomNav.orders)
     }
     Box(
         modifier = Modifier

@@ -98,13 +98,15 @@ fun Favourites(navController: NavController) {
 
                 if (!isGridVisible && favProducts.value.isEmpty()) {
                     Column(
-                        verticalArrangement = Arrangement.Top,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(top = 100.dp)
+                        Modifier
+                            .padding(top = 45.dp)
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
                         Text(
-                            text = "No Favourites Found",
+                            text = "No Items Found",
                             fontSize = 30.sp,
                             fontWeight = FontWeight.SemiBold
                         )

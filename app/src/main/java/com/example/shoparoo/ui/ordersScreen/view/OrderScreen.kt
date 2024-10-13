@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -49,8 +50,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.shoparoo.R
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.model.Order
+import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.ordersScreen.viewModel.OrdersViewModel
 import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.theme.darkGreen
@@ -62,8 +65,13 @@ import java.util.Locale
 fun OrderScreen(
     orderViewModel: OrdersViewModel,
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    LaunchedEffect(Unit) {
+        orderViewModel.getOrders()
+    }
 
+    val ordersState by orderViewModel.orders.collectAsState()
+
+    Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
@@ -82,21 +90,37 @@ fun OrderScreen(
             )
         }
         Spacer(modifier = Modifier.size(16.dp))
-        LaunchedEffect(Unit) {
-            orderViewModel.getOrders()
-        }
-
-        val ordersState by orderViewModel.orders.collectAsState()
-
         when (ordersState) {
             is ApiState.Loading -> {
                 LoadingIndicator()
             }
 
             is ApiState.Success -> {
-                val orders = (ordersState as ApiState.Success).data
+                val orders = (ordersState as ApiState.Success).data as? List<Order> ?: emptyList()
                 Log.d("OrdersScreen", "Orders loaded: $orders")
-                OrderList(orders as List<Order>)
+                if (orders.isEmpty()) {
+                    Column(
+                        Modifier
+                            .padding(top = 45.dp)
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+//                        Spacer(Modifier.padding(top = 120.dp))
+                        ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
+                        androidx.compose.material.Text(
+                            text = "No Items Found",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else
+                    OrderList(orders)
             }
 
             is ApiState.Failure -> {
