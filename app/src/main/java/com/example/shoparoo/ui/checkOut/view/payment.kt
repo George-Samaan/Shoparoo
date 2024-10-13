@@ -157,6 +157,13 @@ fun CreditCardItem() {
     var isExpirationMonthValid by remember { mutableStateOf(true) }
     var isExpirationYearValid by remember { mutableStateOf(true) }
     var isCvvValid by remember { mutableStateOf(true) }
+    val viewModel: ShoppingCartViewModel = viewModel(
+        factory = ShoppingCartViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
 
     val currentYear =
         Calendar.getInstance().get(Calendar.YEAR) % 100 // get last two digits of the year
@@ -298,6 +305,7 @@ fun CreditCardItem() {
 
         CheckoutButtonCheck(
             selectedPaymentMethod = selectedPaymentMethod,
+            viewModel = viewModel,
             cardHolderName = cardHolderName, cardNumber = cardNumber,
             expirationMonth = expirationMonth, expirationYear = expirationYear
         )
@@ -308,6 +316,7 @@ fun CreditCardItem() {
 @Composable
 fun CheckoutButtonCheck(
     selectedPaymentMethod: String,
+    viewModel: ShoppingCartViewModel,
     cardHolderName: String = null.toString(),
     cardNumber: String = null.toString(),
     expirationMonth: String = null.toString(),
@@ -361,6 +370,7 @@ fun CheckoutButtonCheck(
             orderId?.let {
                 paymentViewModel.deleteOrderFromDraft(it.toString())
                 orderPlaced = true // Set orderPlaced to true after successful completion
+                viewModel.clearCart()
             }
         } else if (completeOrderState is ApiState.Failure) {
             Log.d("CheckoutButtonCheck", "Failed to complete the order")

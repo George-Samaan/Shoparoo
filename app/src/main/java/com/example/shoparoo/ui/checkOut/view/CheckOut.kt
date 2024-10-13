@@ -104,6 +104,7 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
                 item {
                     CheckoutButtonCheck(
                         selectedPaymentMethod = selectedPaymentMethod,
+                        viewModel = viewModel
                     )
                 }
             }
