@@ -54,6 +54,7 @@ import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModelFactory
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
+import java.util.Calendar
 
 
 @Composable
@@ -142,7 +143,6 @@ fun ChoosePaymentMethod(
 }
 
 
-/*
 @Composable
 fun CreditCardItem() {
     var selectedPaymentMethod by remember { mutableStateOf("card") } // Default to "cash" option
@@ -158,10 +158,9 @@ fun CreditCardItem() {
     var isExpirationYearValid by remember { mutableStateOf(true) }
     var isCvvValid by remember { mutableStateOf(true) }
 
-   // val currentYear = Calendar.getInstance().get(Calendar.YEAR) % 100 // get last two digits of the year
-    val baseYear = 19
-
-    val shoppingCartViewModel: ShoppingCartViewModel = viewModel(
+    val currentYear =
+        Calendar.getInstance().get(Calendar.YEAR) % 100 // get last two digits of the year
+    val viewModel: ShoppingCartViewModel = viewModel(
         factory = ShoppingCartViewModelFactory(
             repository = RepositoryImpl(
                 remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
@@ -267,8 +266,7 @@ fun CreditCardItem() {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-           */
-/* OutlinedTextField(
+            OutlinedTextField(
                 value = expirationYear,
                 onValueChange = {
                     expirationYear = it
@@ -283,32 +281,6 @@ fun CreditCardItem() {
                 singleLine = true,
                 isError = !isExpirationYearValid,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )*/
-/*
-
-            OutlinedTextField(
-                value = expirationYear,
-                onValueChange = {
-                    expirationYear = it
-                    isExpirationYearValid = it.length == 2 && expirationYear.toIntOrNull()?.let { year ->
-                        year in baseYear..59
-                    } ?: false
-                },
-                label = { Text("YY") },
-                shape = RoundedCornerShape(25.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp),
-                singleLine = true,
-                isError = !isExpirationYearValid,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-        }
-        if (!isExpirationYearValid) {
-            Text(
-                text = "Invalid expiration year",
-                color = Color.Red,
-                modifier = Modifier.padding(start = 8.dp)
             )
         }
 
@@ -320,193 +292,25 @@ fun CreditCardItem() {
             )
         }
 
-
+        if (!isExpirationYearValid) {
+            Text(
+                text = "Invalid expiration year",
+                color = Color.Red,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
 
         CheckoutButtonCheck(
             selectedPaymentMethod = selectedPaymentMethod,
-            shoppingCartViewModel,
+            viewModel = viewModel,
             cardHolderName = cardHolderName, cardNumber = cardNumber,
             expirationMonth = expirationMonth, expirationYear = expirationYear
         )
     }
 }
-*/
-
-@Composable
-fun CreditCardItem() {
-    var selectedPaymentMethod by remember { mutableStateOf("") }
-    var cardHolderName by remember { mutableStateOf("") }
-    var cardNumber by remember { mutableStateOf("") }
-    var expirationMonth by remember { mutableStateOf("") }
-    var expirationYear by remember { mutableStateOf("") }
-    var cvv by remember { mutableStateOf("") }
-
-    var isCardHolderNameValid by remember { mutableStateOf(true) }
-    var isCardNumberValid by remember { mutableStateOf(true) }
-    var isExpirationMonthValid by remember { mutableStateOf(true) }
-    var isExpirationYearValid by remember { mutableStateOf(true) }
-    var isCvvValid by remember { mutableStateOf(true) }
-
-    val baseYear = 19
-
-    val shoppingCartViewModel: ShoppingCartViewModel = viewModel(
-        factory = ShoppingCartViewModelFactory(
-            repository = RepositoryImpl(
-                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
-            )
-        )
-    )
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Name on Card Field
-        OutlinedTextField(
-            value = cardHolderName,
-            onValueChange = {
-                cardHolderName = it
-                isCardHolderNameValid = cardHolderName.isNotBlank()
-            },
-            label = { Text("Name on card") },
-            shape = RoundedCornerShape(25.dp),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            isError = !isCardHolderNameValid,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-        )
-
-        if (!isCardHolderNameValid) {
-            Text(
-                text = "Name on card cannot be empty",
-                color = Color.Red,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = cardNumber,
-            onValueChange = {
-                val cleaned = it.replace(" ", "")
-                if (cleaned.length <= 16) {
-                    cardNumber = cleaned.chunked(4).joinToString(" ")
-                    isCardNumberValid = cardNumber.replace(" ", "").length == 16
-                }
-            },
-            label = { Text("Card number") },
-            shape = RoundedCornerShape(25.dp),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            isError = !isCardNumberValid,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-
-        if (!isCardNumberValid) {
-            Text(
-                text = "Card number must be 16 digits",
-                color = Color.Red,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // CVV Number Field
-        OutlinedTextField(
-            value = cvv, onValueChange = {
-                cvv = it
-                isCvvValid = it.length == 3 && it.all { char -> char.isDigit() }
-            },
-            label = { Text("CVV number") },
-            shape = RoundedCornerShape(25.dp),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            isError = !isCvvValid,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-
-        if (!isCvvValid) {
-            Text(
-                text = "CVV number must be 3 digits",
-                color = Color.Red,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Expiration Date Fields (MM/YY)
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Column(modifier = Modifier.weight(1f)) {
-                OutlinedTextField(
-                    value = expirationMonth,
-                    onValueChange = {
-                        expirationMonth = it
-                        isExpirationMonthValid = it.length == 2 && it.toIntOrNull() in 1..12
-                    },
-                    label = { Text("MM") },
-                    shape = RoundedCornerShape(25.dp),
-                    modifier = Modifier.padding(end = 8.dp),
-                    singleLine = true,
-                    isError = !isExpirationMonthValid,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-
-                if (!isExpirationMonthValid) {
-                    Text(
-                        text = "Invalid expiration month",
-                        color = Color.Red,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                OutlinedTextField(
-                    value = expirationYear,
-                    onValueChange = {
-                        expirationYear = it
-                        isExpirationYearValid = it.length == 2 && expirationYear.toIntOrNull()?.let { year ->
-                            year in baseYear..59
-                        } ?: false
-                    },
-                    label = { Text("YY") },
-                    shape = RoundedCornerShape(25.dp),
-                    modifier = Modifier.padding(start = 8.dp),
-                    singleLine = true,
-                    isError = !isExpirationYearValid,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-
-                if (!isExpirationYearValid) {
-                    Text(
-                        text = "Invalid expiration year",
-                        color = Color.Red,
-                        modifier = Modifier.padding(start = 20.dp)
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        CheckoutButtonCheck(
-            selectedPaymentMethod = selectedPaymentMethod,
-            shoppingCartViewModel,
-            cardHolderName = cardHolderName,
-            cardNumber = cardNumber,
-            expirationMonth = expirationMonth,
-            expirationYear = expirationYear
-        )
-    }
-}
-
 
 
 @Composable
@@ -517,8 +321,6 @@ fun CheckoutButtonCheck(
     cardNumber: String = null.toString(),
     expirationMonth: String = null.toString(),
     expirationYear: String = null.toString(),
-
-
 ) {
     // ViewModels
     val shoppingCartViewModel: ShoppingCartViewModel = viewModel(
@@ -662,7 +464,6 @@ fun CheckoutButtonCheck(
             ) {
                 Toast.makeText(context, "Order placed with Credit/Debit Card", Toast.LENGTH_SHORT)
                     .show()
-
             }
         }
     }
