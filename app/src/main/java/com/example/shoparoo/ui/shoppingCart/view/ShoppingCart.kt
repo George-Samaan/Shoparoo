@@ -359,7 +359,7 @@ fun CheckoutButton(
 
     Button(
         onClick = {
-            viewModel.clearCart()
+//            viewModel.clearCart()
             navController.navigate("checkout")
         },
         modifier = Modifier
