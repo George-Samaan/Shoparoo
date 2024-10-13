@@ -106,9 +106,7 @@ class RepositoryTest {
 
     @Test
     fun update_draft_order() = runTest {
-        val draftOrder = repository.updateDraftOrder(mockDraftOrderRequest)
-       assertEquals(mockDraftOrderRequest, mockDraftOrderRequesttobeUpdated)
+        repository.updateDraftOrder(mockDraftOrderRequest)
+        assertEquals(mockDraftOrderRequest, mockDraftOrderRequesttobeUpdated)
     }
-
-
 }

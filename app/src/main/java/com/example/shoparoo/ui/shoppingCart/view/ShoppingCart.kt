@@ -143,13 +143,45 @@ fun ShoppingCartScreen(
                         )
                     }
                 }
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-                items(cartItems) { lineItem ->
-                    ProductListItem(lineItem, viewModel, navController)
-                }
-                item {
-                    val totalItems = cartItems.sumOf { it.quantity }
-                    CheckoutButton(navControllerBottom, totalItems, viewModel)
+
+            }
+        } else {
+            Scaffold {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    item {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 10.dp, start = 55.dp)
+                        ) {
+                            Text(
+                                text = "Cart",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 22.sp,
+                                color = primary,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .padding(end = 50.dp)
+                            )
+                        }
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    item { ProductList(cartItems, viewModel, navController) }
+
+                    if (cartItems.isNotEmpty()) {
+                        item {
+                            val totalItems = cartItems.sumOf { it.quantity }
+                            CheckoutButton(navControllerBottom, totalItems, viewModel)
+                        }
+                    }
                 }
             }
         }
@@ -359,8 +391,8 @@ fun CheckoutButton(
 
     Button(
         onClick = {
-//            viewModel.clearCart()
             navController.navigate("checkout")
+            //viewModel.clearCart()
         },
         modifier = Modifier
             .fillMaxWidth()
