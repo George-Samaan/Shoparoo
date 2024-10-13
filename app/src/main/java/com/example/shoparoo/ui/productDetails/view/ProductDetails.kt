@@ -185,6 +185,7 @@ private fun ProductInfo(
     Column(
         Modifier
             .fillMaxSize()
+            .padding(top= 5.dp)
             .verticalScroll(state = rememberScrollState(), enabled = true),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -340,11 +341,12 @@ fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
                 modifier = Modifier
                     .size(50.dp)
                     .clip(CircleShape)
+                    //.padding(top = 10.dp)
                     .background(Color(0xFFF5F5F5)),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_back),
+                    painter = painterResource(id = R.drawable.ic_arrow_back_2),
                     contentDescription = stringResource(R.string.back),
                     modifier = Modifier.size(24.dp)
                 )

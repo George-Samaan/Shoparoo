@@ -350,7 +350,7 @@ fun TopBar(navController: NavController, title: String, top: Dp = 10.dp) {
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_back),
+                painter = painterResource(id = R.drawable.ic_arrow_back_2),
                 contentDescription = stringResource(R.string.back),
                 modifier = Modifier.size(24.dp)
             )

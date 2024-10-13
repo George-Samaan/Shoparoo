@@ -32,7 +32,7 @@ fun AppHeader(navController: NavController, title: String) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 15.dp, start = 5.dp)
+            .padding(top = 0.dp, start = 5.dp)
     ) {
         Box(
             modifier = Modifier
@@ -43,7 +43,7 @@ fun AppHeader(navController: NavController, title: String) {
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_back),
+                painter = painterResource(id = R.drawable.ic_arrow_back_2),
                 contentDescription = stringResource(R.string.back),
                 modifier = Modifier.size(24.dp)
             )

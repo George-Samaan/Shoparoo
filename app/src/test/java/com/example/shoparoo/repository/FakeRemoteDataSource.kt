@@ -20,6 +20,15 @@ import kotlinx.coroutines.flow.flow
 
 class FakeRemoteDataSource : RemoteDataSource {
 
+     private val testSalesProduct = Product(
+        products = listOf(testProduct1, testProduct2)
+    )
+
+    private val testMensProduct = Product(
+        products = listOf(testProduct2, testProduct3)
+    )
+
+
     private val testForYouProduct = Product(
         products = listOf(testProduct1, testProduct2, testProduct3)
     )
@@ -28,7 +37,6 @@ class FakeRemoteDataSource : RemoteDataSource {
         DraftOrderDetails(1L, mutableListOf(), "Test Email", "Test Note", "Test Tags")
     )
 
-
     override fun getSmartCollections(): Flow<SmartCollections> = flow {
         emit(testSmartCollectionProduct)
     }
@@ -36,14 +44,6 @@ class FakeRemoteDataSource : RemoteDataSource {
     override fun getForYouProducts(): Flow<Product> = flow {
         emit(testForYouProduct)
     }
-
-
-    /*    override fun getDraftOrder(): Flow<DraftOrderResponse> {
-            return flow {
-                emit(DraftOrderResponse(draft_orders = draftOrders))
-            }
-        }*/
-
 
     override suspend fun deleteDraftOrder(id: Long) {
         draftOrders.removeIf { it.id == id }
@@ -58,17 +58,24 @@ class FakeRemoteDataSource : RemoteDataSource {
 
     }
 
-    /*    override fun getSingleProductFromId(id: String): Flow<SingleProduct> {
-            TODO("Not yet implemented")
-        }*/
+    // Galal start.
 
-    override fun getSalesProducts(): Flow<Product> {
-        TODO("Not yet implemented")
+    override fun getSalesProducts(): Flow<Product> = flow {
+        emit(testSalesProduct)
+        throw Throwable("Error retrieving sales products")
+
     }
 
-    override fun getMensProducts(): Flow<Product> {
-        TODO("Not yet implemented")
+    override fun getMensProducts(): Flow<Product> = flow {
+        emit(testMensProduct)
+        throw Throwable("Error retrieving sales products")
     }
+
+
+    // Galal End.
+
+
+
     override fun getWomenProducts(): Flow<Product> {
         TODO("Not yet implemented")
     }
