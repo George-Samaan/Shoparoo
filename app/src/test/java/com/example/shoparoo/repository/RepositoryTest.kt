@@ -22,6 +22,14 @@ class RepositoryTest {
     private lateinit var repository: Repository
     private lateinit var fakeRemoteDataSource: RemoteDataSource
 
+    private val testSalesProduct = Product(
+        products = listOf(testProduct1, testProduct2)
+    )
+
+    private val testMensProduct = Product(
+        products = listOf(testProduct2, testProduct3)
+    )
+
     @Before
     fun setup() {
         fakeRemoteDataSource = FakeRemoteDataSource()
@@ -64,22 +72,38 @@ class RepositoryTest {
     }
 
 
-    /*    @Test
-        fun test_get_draft_order() = runTest {
-            val draftOrderResponse = repository.getDraftOrder()
-            val draftOrderDetails = draftOrderResponse.first().draft_orders
-            assertEquals(1, draftOrderDetails.size)
-            assertEquals("Test Email", draftOrderDetails[0].email)
-        }
+    @Test
+    fun test_get_sales_products_assert_size() = runTest {
+        val salesProducts = repository.getSalesProducts()
+        val checkSize = salesProducts.first()
+        assertEquals(checkSize.products!!.size, testSalesProduct.products?.size ?: "")
+    }
 
-        @Test
-        fun test_delete_draft_order() = runTest {
-            var draftOrderResponse = repository.getDraftOrder()
-            assertEquals(1, draftOrderResponse.first().draft_orders.size)
-            repository.deleteDraftOrder(1L)
-            draftOrderResponse = repository.getDraftOrder()
-            assertEquals(0, draftOrderResponse.first().draft_orders.size)
-        }*/
+    @Test
+    fun test_get_sales_products_data() = runTest {
+        val salesProducts = repository.getSalesProducts()
+        val checkData = salesProducts.first()
+        assertEquals(checkData, testSalesProduct)
+    }
+
+    @Test
+    fun test_get_mens_products_assert_size() = runTest {
+        val mensProducts = repository.getMensProducts()
+        val checkSize = mensProducts.first()
+        assertEquals(checkSize.products!!.size, testMensProduct.products?.size ?: "")
+    }
+
+    @Test
+    fun test_get_mens_products_data() = runTest {
+        val mensProducts = repository.getMensProducts()
+        val checkData = mensProducts.first()
+        assertEquals(checkData, testMensProduct)
+    }
+
+
+
+
+
 
 
     @Test
@@ -110,3 +134,25 @@ class RepositoryTest {
         assertEquals(mockDraftOrderRequest, mockDraftOrderRequesttobeUpdated)
     }
 }
+
+
+
+
+/*    @Test
+       fun test_get_draft_order() = runTest {
+           val draftOrderResponse = repository.getDraftOrder()
+           val draftOrderDetails = draftOrderResponse.first().draft_orders
+           assertEquals(1, draftOrderDetails.size)
+           assertEquals("Test Email", draftOrderDetails[0].email)
+       }
+
+       @Test
+       fun test_delete_draft_order() = runTest {
+           var draftOrderResponse = repository.getDraftOrder()
+           assertEquals(1, draftOrderResponse.first().draft_orders.size)
+           repository.deleteDraftOrder(1L)
+           draftOrderResponse = repository.getDraftOrder()
+           assertEquals(0, draftOrderResponse.first().draft_orders.size)
+       }*/
+
+//

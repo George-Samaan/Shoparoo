@@ -43,7 +43,7 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 20.dp)
+                //.padding(top = 5.dp)
         ) {
             // Header
             item { AppHeader(navController, title = stringResource(R.string.check_out)) }
