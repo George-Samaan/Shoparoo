@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.Repository
 import com.example.shoparoo.model.DraftOrderDetails
@@ -26,14 +25,14 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
     private val _draftOrderFav = MutableStateFlow<ApiState>(ApiState.Loading)
     val draftOrderFav = _draftOrderFav.asStateFlow()
 
-
-    private val _productItems: MutableStateFlow<MutableList<ProductsItem>> = MutableStateFlow(mutableListOf())
+    private val _productItems: MutableStateFlow<MutableList<ProductsItem>> =
+        MutableStateFlow(mutableListOf())
     val productItems = _productItems.asStateFlow()
 
     val userMail by lazy {
         FirebaseAuth.getInstance().currentUser?.email
     }
-
+    //get all favourites and have the option to delete a favourite(we are sure item exists in favourites)
     fun getFavourites(clkDelete: Boolean = false, id: Long = 0) {
         viewModelScope.launch {
             _draftOrderFav.value = ApiState.Loading
@@ -85,32 +84,6 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-
-    /*
-        fun deleteFav(id: Long?) {
-            Log.i("FavouritesViewModeldelete", "deleteFav: $id")
-
-            //   getFavourites(false, id!!)
-    //        viewModelScope.launch {
-    //            _draftOrderFav.value = ApiState.Loading
-    //            repository.getDraftOrder().catch {
-    //                _draftOrderFav.value = ApiState.Failure(it.message ?: "Unknown Error")
-    //            }.collect {
-    //                _draftOrderFav.value = ApiState.Success(it)
-    //                var filter = filterByUser(it, userMail)
-    //
-    //                if (filter.first) { //handle this in ui
-    //                    deleteItem(filter.second, id)
-    //                } else {
-    //                    Log.d("FavouritesViewModeldelete", "Favourites not found")
-    //                }
-    //            }
-    //        }
-
-
-        }
-    */
-
     private fun deleteItem(second: DraftOrderDetails, id: Long?) {
         viewModelScope.launch {
             for (lineItem in second.line_items) {
@@ -140,121 +113,96 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
                 _draftOrderFav.value = ApiState.Success(it)
                 var filter = filterByUser(it, userMail)
                 if (filter.first) {
-                    filterFav(filter.second!!, id)
+                    getProductDataById(filter.second!!, id)
                 } else {
-                    CreateDraftOrderFav(id)
+                    createDraftOrderFav(id)
                 }
             }
         }
 
     }
 
-    private fun filterFav(second: DraftOrderDetails, id: Long) {
+    //get product data by id to add, remove or update favourites
+    private fun getProductDataById(userDraftOrder: DraftOrderDetails, id: Long) {
         viewModelScope.launch {
-            repository.getSingleProductFromId(id.toString()).catch {
+            repository.getSingleProductById(id.toString()).catch {
                 _draftOrderFav.value = ApiState.Failure(it.message ?: "Unknown Error")
             }.collect {
                 _draftOrderFav.value = ApiState.Success(it)
                 val singleProduct = it as SingleProduct
                 val varient = singleProduct.product!!.variants!![0]
-                filterFavDraftOrder(second, singleProduct, varient!!)
+                editFavDraftOrder(userDraftOrder, singleProduct, varient!!)
             }
         }
     }
 
-
-    private fun CreateDraftOrderFav(id: Long) {
-        Log.i("CreateDraftOrderFav22", "CreateDraftOrderFav: ")
-
+    //create draft order for favourites if user has no favourites
+    private fun createDraftOrderFav(id: Long) {
         viewModelScope.launch {
-            repository.getSingleProductFromId(id.toString()).catch {
+            repository.getSingleProductById(id.toString()).catch {
                 _draftOrderFav.value = ApiState.Failure(it.message ?: "Unknown Error")
             }.collect {
-                Log.i("CreateDraftOrderFav2", "CreateDraftOrderFav: ")
                 _draftOrderFav.value = ApiState.Success(it)
                 val singleProduct = it as SingleProduct
                 val varient = singleProduct.product!!.variants!![0]
-                //val lineItem = setLineItem(singleProduct, varient)
-                val draftOrderDetails = DraftOrderDetails(
-                    email = "FAV_" + userMail,
-                    line_items = mutableListOf(
-                        LineItem(
-                            product_id = varient!!.productId,
-                            title = singleProduct.product.title!!,
-                            price = varient.price!!,
-                            quantity = 1,
-                            variant_id = varient.id.toString(),
-                            properties = listOf(
-                                Property(
-                                    name = "image",
-                                    value = singleProduct.product.images!![0]!!.src!!
-                                )
-                            )
-                        )
+                val lineItem = setLineItem(singleProduct, varient!!)
+                val order = DraftOrderRequest(
+                    DraftOrderDetails(
+                        line_items = mutableListOf(lineItem),
+                        email = "FAV_" + userMail
                     )
                 )
-                val order = DraftOrderRequest(draftOrderDetails)
-                Log.i("CreateDraftOrderFav3", "CreateDraftOrderFav: ")
+                val us = singleProduct.product
+                productItems.value.add(us)
                 repository.createDraftOrder(order)
             }
+
         }
     }
 
 
-
-    fun filterFavDraftOrder(
+    fun editFavDraftOrder( //add or remove item from favourites
         draftOrderDetails: DraftOrderDetails,
         theSingleProduct: SingleProduct,
         variant: VariantsItem,
-        infav: Boolean = false
     ) {
         val myLineItem = draftOrderDetails.line_items.find {
-            it.product_id == variant.productId && it.variant_id == variant.id.toString()
+            it.product_id == variant.productId
         }
 
-        if (infav) {
-         //   _isFav.value = myLineItem != null
-        } else {
-            UpdateFavDraftOrder(draftOrderDetails, draftOrderDetails.takeIf { myLineItem != null }, myLineItem, theSingleProduct, variant)
-        }
-    }
-    private fun UpdateFavDraftOrder(
-        draftOrderDetails: DraftOrderDetails,
-        item: DraftOrderDetails?,
-        myLineItem: LineItem?,
-        theSingleProduct: SingleProduct,
-        varient: VariantsItem
-    ) {
+        if (myLineItem != null) { //item is in fav
 
-        if (item != null) {
-            Log.i("xoxoxoxoxox", "Update draft order")
-            //if the product already exists in the favourites
-           // _isFav.value = false
             draftOrderDetails.line_items.remove(myLineItem)
+
             if (draftOrderDetails.line_items.isEmpty()) {
-                viewModelScope.launch {
+                _productItems.value = mutableListOf()
+
+                viewModelScope.launch { //item is the only one in fav  -> remove from fav & delete draft order
                     repository.deleteDraftOrder(draftOrderDetails.id!!)
+                   // getFavourites()
                 }
-            }
-            else {
-                viewModelScope.launch {
+            } else {
+                _productItems.value = _productItems.value.filter { it.id != theSingleProduct.product!!.id }.toMutableList()
+                viewModelScope.launch { //item is not the only one in fav -> remove from fav
                     val order = DraftOrderRequest(draftOrderDetails)
                     repository.updateDraftOrder(order)
+                   // getFavourites()
                 }
             }
-        } else {                                                        // add the product to the favourites
-            Log.i("xoxoxoxoxox", "add draft order")
-            draftOrderDetails.line_items.add(setLineItem(theSingleProduct, varient))
-          //  _isFav.value = true
-
+        } else {   //item is not in fav and there exists another items -> add to fav
+            draftOrderDetails.line_items.add(setLineItem(theSingleProduct, variant))
+            val us = theSingleProduct.product
+            productItems.value.add(us!!)
             viewModelScope.launch {
                 val order = DraftOrderRequest(draftOrderDetails)
                 repository.updateDraftOrder(order)
+              //  getFavourites()
             }
         }
     }
 
-    private fun setLineItem(theSingleProduct: SingleProduct, varient: VariantsItem, ) = LineItem(
+    //create line item for draft order requests
+    private fun setLineItem(theSingleProduct: SingleProduct, varient: VariantsItem) = LineItem(
         title = theSingleProduct.product!!.title!!,
         price = (varient.price?.toFloatOrNull().toString()),
         quantity = 1,
@@ -268,8 +216,7 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
     )
 }
 
-
-
+//filter draft order by user and return the draft order details
 fun filterByUser(
     draftOrderResponse: DraftOrderResponse,
     userMail: String?

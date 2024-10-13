@@ -3,8 +3,14 @@
 
 package com.example.shoparoo.ui.homeScreen.view
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
@@ -100,6 +106,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.delay
 import networkListener
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreenDesign(
     userName: String,
@@ -336,6 +343,7 @@ fun BrandsSection(navController: NavController, smartCollections: List<SmartColl
                             brandImage = collection.image?.src!!,
                             onClick = {
                                 // Log the ID of the clicked brand
+
                                 Log.d("BrandsSection", "Clicked brand ID: ${collection.id}")
                                 navController.navigate("brand/${collection.id}/${collection.title}")
                             }
@@ -380,6 +388,7 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ForYouSection(
     products: List<ProductsItem>, navController: NavController,
@@ -439,6 +448,8 @@ fun ForYouSection(
 
 }
 
+@SuppressLint("NewApi", "SuspiciousIndentation")
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProductCard(
     productName: String,
@@ -449,7 +460,6 @@ fun ProductCard(
     inFav: Boolean = false,
     id : Long ,
     onClickDeleteFav: () -> Unit = {}, // Callback for the delete icon
-    onClickAddFav: () -> Unit = {}, // Callback for the add to favorites icon
 
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -537,8 +547,11 @@ fun ProductCard(
                         }
                     }
                 }
+               val  context = LocalContext.current
+                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                 Icon(
                     if (isFav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                  //  Icons.Filled.Favorite,
                     contentDescription = "Add to Favorites",
                     tint = Color.Red,
                     modifier = Modifier
@@ -546,11 +559,20 @@ fun ProductCard(
                         .padding(8.dp)
                         .size(24.dp)
                         .clickable {
-                           if (isFav) {
-                                 showDialog = true
-                           } else {
-                               favViewModel.addFav(id)
-                           }
+                          val vibrationEffect1 =  VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                            vibrator.cancel()
+                            vibrator.vibrate(vibrationEffect1)
+                            favViewModel.addFav(id)
+//                           if (isFav) {
+//                               Toast.makeText(context, "Removed to Favourites", Toast.LENGTH_SHORT).show()
+//                           } else {
+//                               Toast.makeText(context, "Added from Favourites", Toast.LENGTH_SHORT).show()
+//                           }
+//                           if (isFav) {
+//                                 showDialog = true
+//                           } else {
+//                               favViewModel.addFav(id)
+//                           }
                         }
                 )
             }
@@ -596,6 +618,7 @@ fun String.capitalizeWords(): String {
         .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen(
     navController: NavController
