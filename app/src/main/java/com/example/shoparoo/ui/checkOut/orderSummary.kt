@@ -38,8 +38,6 @@ fun OrderSummary(
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
 
-
-
     val currencySymbols = mapOf(
         "EGP" to "$ ",
         "USD" to "EGP "
