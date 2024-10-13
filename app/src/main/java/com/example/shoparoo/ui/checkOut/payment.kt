@@ -388,7 +388,7 @@ fun CheckoutButtonCheck(
                     }
                 } else if (selectedPaymentMethod == "cash") {
                     val totalAmount = draftOrderDetails?.total_price?.toDoubleOrNull() ?: 0.0
-                    if (totalAmount > 2000) {
+                    if (totalAmount > 1500) {
                         showDialog = true
                     } else {
                         isProcessing = true
@@ -412,7 +412,7 @@ fun CheckoutButtonCheck(
             title = { Text("Order Limit Exceeded") },
             text = {
                 Text(
-                    "Cash on Delivery is not available for orders exceeding 2000 EGP. Please choose another payment method.",
+                    "Cash on Delivery is not available for orders exceeding 1500 EGP. Please choose another payment method.",
                     fontSize = 15.sp
                 )
             },

@@ -3,6 +3,7 @@
 package com.example.shoparoo.ui.categoriesScreen.view
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -40,10 +41,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.shoparoo.R
+import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
+import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
+import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
+import com.example.shoparoo.ui.Favourites.FavouritesViewModel
+import com.example.shoparoo.ui.Favourites.FavouritesViewModelFactory
 import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModel
 import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
@@ -83,6 +90,21 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
     val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
+
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val fav by favViewModel.productItems.collectAsState()
+    Log.i("FavouritesViewModel", "ProductItems: $fav")
+    LaunchedEffect(Unit) {
+        favViewModel.getFavourites()
+    }
+
+
     val currencySymbols = mapOf(
         "EGP" to "$ ",
         "USD" to "EGP "
@@ -94,7 +116,7 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp, null)
+            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp, 1f)
         }
     } else {
         LaunchedEffect(Unit) {
@@ -211,7 +233,8 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
                             navController,
                             selectedCurrency,
                             conversionRate,
-                            currencySymbols
+                            currencySymbols,
+                            viewModel = favViewModel
                         )
                     }
                 }

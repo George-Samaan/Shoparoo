@@ -127,7 +127,7 @@ fun LoginScreen(navController: NavHostController) {
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
-            ReusableLottie(R.raw.login_anim, R.drawable.ic_bg, 200.dp, null)
+            ReusableLottie(R.raw.login_anim, R.drawable.ic_bg, 200.dp, 1f)
         }
 
         Column(
@@ -306,14 +306,14 @@ fun ReusableLottie(
     @RawRes lottieRes: Int,
     backgroundImageRes: Int?,
     size: Dp,
-    speed: Float?
+    speed: Float = 1f
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(lottieRes))
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = LottieConstants.IterateForever,
         isPlaying = true, // Auto-play
-        speed = speed ?: 1f, // Adjust the speed as needed
+        speed = speed, // Adjust the speed as needed
     )
 
     Box(

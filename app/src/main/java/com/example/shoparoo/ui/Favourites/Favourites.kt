@@ -1,6 +1,10 @@
 package com.example.shoparoo.ui.Favourites
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,14 +28,15 @@ import androidx.navigation.NavController
 import com.example.shoparoo.R
 import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
+import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.ui.auth.view.ReusableLottie
+import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.productScreen.view.ProductGrid
 import com.example.shoparoo.ui.productScreen.view.TopBar
 
 @Composable
 fun Favourites(navController: NavController) {
-
     val viewModel: FavouritesViewModel = viewModel(
         factory = FavouritesViewModelFactory(
             repository = RepositoryImpl(
@@ -36,56 +44,92 @@ fun Favourites(navController: NavController) {
             )
         )
     )
-
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
+    val currencySymbols = mapOf(
+        "USD" to "EGP ", "EGP" to "$ "
+    )
     val favProducts = viewModel.productItems.collectAsStateWithLifecycle()
+    val apiState = viewModel.draftOrderFav.collectAsStateWithLifecycle()
 
-    // may run multiple times
-    LaunchedEffect(favProducts.value) {
+    LaunchedEffect(Unit) {
         viewModel.getFavourites()
     }
 
-    if (favProducts.value.isEmpty()) {
-        Column(
-            Modifier
-                .padding(top = 80.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            //   Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favourites", modifier = Modifier.size(300.dp))
-
-            ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
-            Text(text = "No Favourites Found", fontSize = 30.sp, fontWeight = FontWeight.SemiBold)
-        }
-    }
     TopBar(navController = navController, title = "Favourites", top = 50.dp)
-    Column(
-        Modifier
-            .padding(top = 100.dp)
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
 
-        val context = LocalContext.current
-        val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    when (apiState.value) {
+        is ApiState.Loading -> {
+            Column(
+                Modifier
+                    .padding(top = 80.dp)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                LoadingIndicator()
+            }
+        }
 
-        // Get saved currency and conversion rate from SharedPreferences
-        val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
-        val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
+        is ApiState.Success -> {
+            var isGridVisible by remember { mutableStateOf(false) }
 
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(top = 100.dp)
+                    .fillMaxSize()
+            ) {
+                LaunchedEffect(favProducts.value) {
+                    isGridVisible = favProducts.value.isNotEmpty()
+                }
 
-        val currencySymbols = mapOf(
-            "USD" to "EGP ",
-            "EGP" to "$ "
-        )
+                AnimatedVisibility(
+                    visible = isGridVisible,
+                    enter = scaleIn(animationSpec = tween(durationMillis = 800)),
+                    exit = scaleOut(animationSpec = tween(durationMillis = 800))
+                ) {
+                    ProductGrid(
+                        favProducts.value, navController, selectedCurrency, conversionRate, currencySymbols, true, viewModel)
+                }
 
+                if (!isGridVisible && favProducts.value.isEmpty()) {
+                    Column(
+                        Modifier
+                            .padding(top = 45.dp)
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
+                        Text(
+                            text = "No Items Found",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+        }
 
-        //galal handle currency conversion
-        //  ProductGridd(favProducts.value, navController, "gg", 1.0f, emptyMap(),true,viewModel)
-
-        ProductGrid(favProducts.value, navController, selectedCurrency, conversionRate, currencySymbols,true, viewModel)
-
+        is ApiState.Failure -> {
+            Column(
+                Modifier
+                    .padding(top = 80.dp)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Failed to load favourites",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
     }
 }
 

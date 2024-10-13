@@ -36,7 +36,7 @@ fun UnVerified(navController: NavHostController) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ReusableLottie(R.raw.confrim, null, size = 222.dp, null)
+        ReusableLottie(R.raw.confrim, null, size = 222.dp, 1f)
         Text(
             "Please verify your email", fontSize = 30.sp, fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 20.dp)
@@ -63,7 +63,7 @@ fun UnVerified(navController: NavHostController) {
                     val intent = Intent(Intent.ACTION_MAIN).apply {
                         addCategory(Intent.CATEGORY_APP_EMAIL)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        // data = Uri.parse("mailto:")
+                        // data = Uri.parse("mailto:") or use this one
                     }
                     startActivity(context, intent, null)
 

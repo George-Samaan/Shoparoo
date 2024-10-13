@@ -13,6 +13,7 @@ import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.shoparoo.R
+import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.theme.primary
 
 sealed class BottomNav(val route: String, val icon: Int, val label: String) {
@@ -35,15 +37,18 @@ sealed class BottomNav(val route: String, val icon: Int, val label: String) {
 }
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
-    val items = listOf(
+fun BottomNavigationBar(navController: NavController, isLogged: State<AuthState>) {
+    var items = mutableListOf(
         BottomNav.Categories,
         BottomNav.Cart,
         BottomNav.Home,
         BottomNav.orders,
         BottomNav.Profile,
     )
-
+    if (isLogged.value == AuthState.UnAuthenticated) {
+        items.remove(BottomNav.Cart)
+        items.remove(BottomNav.orders)
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()

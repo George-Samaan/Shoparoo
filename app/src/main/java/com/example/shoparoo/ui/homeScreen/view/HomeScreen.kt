@@ -3,8 +3,14 @@
 
 package com.example.shoparoo.ui.homeScreen.view
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
@@ -28,6 +34,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -69,8 +77,11 @@ import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
+import com.example.shoparoo.ui.Favourites.FavouritesViewModel
+import com.example.shoparoo.ui.Favourites.FavouritesViewModelFactory
 import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.auth.view.ReusableLottie
+import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.categoriesScreen.view.CategoriesScreen
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModel
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModelFactory
@@ -95,6 +106,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.delay
 import networkListener
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreenDesign(
     userName: String,
@@ -105,15 +117,29 @@ fun HomeScreenDesign(
     bottomNavController: NavController,
     navController: NavController,
 
-    ) {
-    val isNetworkAvailable = networkListener()
+    )
+{
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val fav by favViewModel.productItems.collectAsState()
+    Log.i("FavouritesViewModel", "ProductItems: $fav")
+    LaunchedEffect(Unit) {
+        favViewModel.getFavourites()
+    }
+
+   val isNetworkAvailable = networkListener()
     if (!isNetworkAvailable.value) {
         // Show No Internet connection message
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp, null)
+            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp, 1f)
         }
     } else {
         val context = LocalContext.current
@@ -225,8 +251,10 @@ fun Header(userName: String, onFavouriteClick: () -> Unit, onSearchClick: () -> 
     ) {
         ProfileSection(userName)
         Spacer(modifier = Modifier.weight(1f))
+        if (userName != "" && userName != "Guest") {
+            FavouriteButton(onFavouriteClick)
+        }
         SearchButton(onSearchClick = onSearchClick)
-        FavouriteButton(onFavouriteClick)
     }
 }
 
@@ -315,6 +343,7 @@ fun BrandsSection(navController: NavController, smartCollections: List<SmartColl
                             brandImage = collection.image?.src!!,
                             onClick = {
                                 // Log the ID of the clicked brand
+
                                 Log.d("BrandsSection", "Clicked brand ID: ${collection.id}")
                                 navController.navigate("brand/${collection.id}/${collection.title}")
                             }
@@ -359,6 +388,7 @@ fun CircularBrandCard(brandName: String, brandImage: String, onClick: () -> Unit
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ForYouSection(
     products: List<ProductsItem>, navController: NavController,
@@ -408,7 +438,8 @@ fun ForYouSection(
                         productPrice = formattedPrice,
                         productImage = product.images?.get(0)?.src,
                         onClick = { navController.navigate("productDetails/${product.id}") },
-                        currencySymbol = currencySymbols[selectedCurrency] ?: "$"
+                        currencySymbol = currencySymbols[selectedCurrency] ?: "$",
+                        id = product.id!!
                     )
                 }
             }
@@ -417,6 +448,8 @@ fun ForYouSection(
 
 }
 
+@SuppressLint("NewApi", "SuspiciousIndentation")
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProductCard(
     productName: String,
@@ -425,8 +458,9 @@ fun ProductCard(
     currencySymbol: String,
     onClick: () -> Unit,
     inFav: Boolean = false,
+    id : Long ,
     onClickDeleteFav: () -> Unit = {}, // Callback for the delete icon
-    onClickAddFav: () -> Unit = {} // Callback for the add to favorites icon
+
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
@@ -438,6 +472,17 @@ fun ProductCard(
             isLoading = false
         }
     }
+
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val fav by favViewModel.productItems.collectAsState()
+        Log.i("FavouritesViewModel", "ProductItems: $fav")
+
 
     Card(
         modifier = Modifier
@@ -490,6 +535,46 @@ fun ProductCard(
                         .size(24.dp)
                         .clickable { showDialog = true }
                 )
+            } else {
+                var isFav = false //handle this from the api and handle guest mode
+                fav.let {
+                    for (item in it) {
+                        if (item.id == id) {
+                            isFav = true
+                            break
+                        } else {
+                            isFav = false
+                        }
+                    }
+                }
+               val  context = LocalContext.current
+                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                Icon(
+                    if (isFav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                  //  Icons.Filled.Favorite,
+                    contentDescription = "Add to Favorites",
+                    tint = Color.Red,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(24.dp)
+                        .clickable {
+                          val vibrationEffect1 =  VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                            vibrator.cancel()
+                            vibrator.vibrate(vibrationEffect1)
+                            favViewModel.addFav(id)
+//                           if (isFav) {
+//                               Toast.makeText(context, "Removed to Favourites", Toast.LENGTH_SHORT).show()
+//                           } else {
+//                               Toast.makeText(context, "Added from Favourites", Toast.LENGTH_SHORT).show()
+//                           }
+//                           if (isFav) {
+//                                 showDialog = true
+//                           } else {
+//                               favViewModel.addFav(id)
+//                           }
+                        }
+                )
             }
         }
     }
@@ -533,6 +618,7 @@ fun String.capitalizeWords(): String {
         .joinToString(" ") { it.lowercase().replaceFirstChar { char -> char.uppercase() } }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen(
     navController: NavController
@@ -576,10 +662,14 @@ fun MainScreen(
         )
     )
 
+    val authViewModel: AuthViewModel = viewModel()
+
+
     val smartCollectionsState by viewModel.smartCollections.collectAsState()
     val forYouProductsState by viewModel.forYouProducts.collectAsState()
     val userName by viewModel.userName.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val isLogged = authViewModel.authState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.getName()
@@ -588,7 +678,7 @@ fun MainScreen(
     }
 
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController = navControllerBottom) }
+        bottomBar = { BottomNavigationBar(navController = navControllerBottom, isLogged) }
     ) {
         NavHost(
             navController = navControllerBottom,

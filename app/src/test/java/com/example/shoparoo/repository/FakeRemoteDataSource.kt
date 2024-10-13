@@ -12,6 +12,9 @@ import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testProduct1
 import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testProduct2
 import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testProduct3
 import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testSmartCollectionProduct
+import com.example.shoparoo.ui.homeScreen.viewModel.mockData3.createMockDraftOrderResponse
+import com.example.shoparoo.ui.homeScreen.viewModel.mockData3.mockDraftOrderRequesttobeUpdated
+import com.example.shoparoo.ui.homeScreen.viewModel.mockData3.mockProductItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -41,12 +44,17 @@ class FakeRemoteDataSource : RemoteDataSource {
         }
     }
 
+
     override suspend fun deleteDraftOrder(id: Long) {
         draftOrders.removeIf { it.id == id }
     }
 
     override fun getProductsFromBrandsId(collectionId: String): Flow<Product> {
         TODO("Not yet implemented")
+
+    override fun getSingleProductFromId(id: String): Flow<SingleProduct> = flow {
+        emit(mockProductItem)
+
     }
 
     override fun getSingleProductFromId(id: String): Flow<SingleProduct> {
@@ -73,8 +81,14 @@ class FakeRemoteDataSource : RemoteDataSource {
     }
 
 
+
+    override fun getDraftOrder(): Flow<DraftOrderResponse>  = flow {
+      emit(createMockDraftOrderResponse())
+    }
+
+
     override suspend fun updateDraftOrder(draftOrderDetails: DraftOrderRequest) {
-        TODO("Not yet implemented")
+        mockDraftOrderRequesttobeUpdated = draftOrderDetails
     }
 
     override fun getOrders(): Flow<OrderResponse> {

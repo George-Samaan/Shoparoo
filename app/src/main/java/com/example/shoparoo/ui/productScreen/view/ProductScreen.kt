@@ -4,7 +4,9 @@ package com.example.shoparoo.ui.productScreen.view
 
 //noinspection UsingMaterialAndMaterial3Libraries
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -56,11 +58,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.shoparoo.R
+import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
+import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
+import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.ui.Favourites.FavouritesViewModel
+import com.example.shoparoo.ui.Favourites.FavouritesViewModelFactory
 import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.homeScreen.view.ProductCard
 import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
@@ -90,6 +97,20 @@ fun ProductsScreen(
     var isFilteringComplete by remember { mutableStateOf(false) }
 
 
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val fav by favViewModel.productItems.collectAsState()
+    Log.i("FavouritesViewModel", "ProductItems: $fav")
+    LaunchedEffect(Unit) {
+        favViewModel.getFavourites()
+    }
+
+
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
@@ -108,7 +129,7 @@ fun ProductsScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp, null)
+            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp, 1f)
         }
     } else {
         // Reset isGridVisible and loading state on initial load
@@ -220,7 +241,8 @@ fun ProductsScreen(
                         navController,
                         selectedCurrency,
                         conversionRate,
-                        currencySymbols
+                        currencySymbols,
+                        viewModel = favViewModel
                     )
                 }
             }
@@ -228,6 +250,7 @@ fun ProductsScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProductGrid(
     filteredProducts: List<ProductsItem>,
@@ -263,8 +286,7 @@ fun ProductGrid(
                 currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$"),
                 inFav = inFav,
                 onClickDeleteFav = { viewModel!!.getFavourites(true, product.id!!) },
-                //  onClickAddFav = {  }
-
+                id = product.id!!
 
             )
         }
