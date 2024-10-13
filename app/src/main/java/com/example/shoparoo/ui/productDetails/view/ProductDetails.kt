@@ -41,6 +41,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.filled.StarRate
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -77,17 +78,14 @@ import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
-import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.ImagesItem
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
 import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
-import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
 import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModel
 import com.example.shoparoo.ui.productDetails.viewModel.ProductDetailsViewModelFactory
-import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
-import com.example.shoparoo.ui.theme.darkGreen
+import com.example.shoparoo.ui.theme.grey
 import com.example.shoparoo.ui.theme.primary
 import com.smarttoolfactory.ratingbar.RatingBar
 import com.smarttoolfactory.ratingbar.model.Shimmer
@@ -98,6 +96,8 @@ import kotlin.random.Random
 fun ProductDetails(id: String, navController: NavHostController) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
+
     val viewModel: ProductDetailsViewModel = viewModel(
         factory = ProductDetailsViewModelFactory(
             repository = RepositoryImpl(
@@ -106,19 +106,15 @@ fun ProductDetails(id: String, navController: NavHostController) {
         )
     )
     val ui = viewModel.singleProductDetail.collectAsState()
-    val order = viewModel.userOrder.collectAsState()
     val isFav = viewModel.isFav.collectAsState()
+
     LaunchedEffect(Unit) {
         viewModel.getSingleProductDetail(id)
     }
 
-    var itemsIncart by remember { mutableStateOf(0) }
     when (ui.value) {
         is ApiState.Loading -> {
             Log.i("ProductDetails", "Loading")
-            Box(Modifier.padding(top = 70.dp)) {
-                LoadingIndicator()
-            }
         }
 
         is ApiState.Failure -> {
@@ -127,51 +123,26 @@ fun ProductDetails(id: String, navController: NavHostController) {
 
         is ApiState.Success -> {
             val data = ui.value as ApiState.Success
-            productInfo(
-                data.data as SingleProduct,
-                navController,
-                viewModel,
-                isFav.value,
-                itemsIncart
-            )
+            ProductInfo(data.data as SingleProduct, navController, viewModel, isFav.value)
         }
     }
-
-    when (order.value) {
-        is ApiState.Loading -> {
-            Log.i("ProductDetails", "Loading")
-        }
-
-        is ApiState.Failure -> {
-            Log.i("ProductDetails", "Error ${(order.value as ApiState.Failure).message}")
-        }
-
-        is ApiState.Success -> {
-            val gg = order.value as ApiState.Success
-            val data = gg.data as DraftOrderDetails
-            itemsIncart = data.line_items[0].quantity
-            Log.i("ProductDetailsUserOrderrrrrrrrr", "Success ${data.line_items.size}")
-        }
-    }
-
 }
 
 @Composable
-private fun productInfo(
+private fun ProductInfo(
     singleProductDetail: SingleProduct,
     navController: NavHostController,
     viewModel: ProductDetailsViewModel,
     isFav: Boolean,
-    itemsIncart: Int,
-
-    ) {
+) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-    val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
+    val selectedCurrency = remember { sharedPreferences.getString("currency", "EGP") ?: "EGP" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
     val selected = remember { mutableStateOf(singleProductDetail.product!!.variants!![0]) }
     val isLoggedIn = AuthViewModel().authState.collectAsState()
     val descriptionVisible = remember { mutableStateOf(false) }
+    val showDialog = remember { mutableStateOf(false) } // State to control dialog visibility
 
     // Trigger the animation when the product info is loaded
     LaunchedEffect(singleProductDetail) {
@@ -193,10 +164,10 @@ private fun productInfo(
         Column(
             modifier = Modifier.padding(start = 25.dp, end = 25.dp, bottom = 25.dp)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             Text(
-                text = singleProductDetail.product.title!!.capitalizeWords(),
-                fontSize = 27.sp,
+                text = singleProductDetail.product!!.title!!,
+                fontSize = 25.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .align(Alignment.Start)
@@ -204,55 +175,41 @@ private fun productInfo(
             )
             ReviewSection()
             StockAndPrice(selected, selectedCurrency, conversionRate)
-            VariantSection(singleProductDetail.product.variants, selected)
+            VariantSection(singleProductDetail.product!!.variants, selected)
 
-
+            // Animated Description Section
             AnimatedVisibility(
                 visible = descriptionVisible.value,
                 enter = slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn(),
                 exit = fadeOut()
             ) {
-                DescriptionSection(singleProductDetail.product.bodyHtml)
+                DescriptionSection(singleProductDetail.product!!.bodyHtml)
             }
         }
 
         Spacer(modifier = Modifier.weight(1f))
-
         BottomSection(
             onClickCart = {
-                Log.i(
-                    "ProductDetail",
-                    "Cartclickeddd   ${selected.value!!.inventoryQuantity}    $itemsIncart"
-                )
                 if (selected.value!!.inventoryQuantity!! < 1) {
                     Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
-                } else if (itemsIncart == selected.value!!.inventoryQuantity!!) {
-                    Toast.makeText(
-                        context,
-                        "you've already added $itemsIncart ",
-                        Toast.LENGTH_SHORT
-                    ).show()
                 } else {
-                    if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
-                        Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT)
-                            .show()
-                        navController.navigate("login")
+                    if (isLoggedIn.value == AuthState.UnAuthenticated) {
+                        showDialog.value = true // Show dialog if not authenticated
                     } else {
                         viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
-                        //   Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
                     }
                 }
             },
             onClickFav = {
-                if (isLoggedIn.value != AuthState.Authenticated) { //this is bullshit but i'll change it later
-                    Toast.makeText(context, "Please login to favourites", Toast.LENGTH_SHORT).show()
-                    navController.navigate("login")
+                if (isLoggedIn.value == AuthState.UnAuthenticated) {
+                    showDialog.value = true // Show dialog if not authenticated
                 } else {
                     viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
-//                        if (!isFav)
-//                         //   Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
-//                        else
-//                         //   Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                    if (!isFav)
+                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                    else
+                        Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
                 }
             },
             buttonColors = if (isFav) {
@@ -270,12 +227,21 @@ private fun productInfo(
                     disabledContainerColor = Color(0xFF000000),
                 )
             },
-            isFav = isFav
+            isFav = isFav,
+            isLoggedIn = isLoggedIn.value // Pass the authentication state
         )
-
     }
 
-
+    // Show the login dialog if required
+    if (showDialog.value) {
+        LoginDialog(
+            onDismiss = { showDialog.value = false },
+            onLogin = {
+                // Handle the login logic here
+                // For example, you might want to call a login function or redirect to the login screen
+            }
+        )
+    }
 }
 
 
@@ -283,7 +249,7 @@ private fun productInfo(
 fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
     val imageVisible = remember { mutableStateOf(false) }
 
-
+    // Trigger the animation when the ProductImg is loaded
     LaunchedEffect(Unit) {
         imageVisible.value = true
     }
@@ -294,7 +260,7 @@ fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
             .height(300.dp)
             .padding(top = 30.dp, start = 5.dp)
     ) {
-
+        // Animated Visibility to slide in from the right
         AnimatedVisibility(
             visible = imageVisible.value,
             enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(),
@@ -343,12 +309,12 @@ fun ReviewSection() {
     val reviews = remember { getRandomReviews(Random.nextInt(2, 22)) }
     val reviewVisible = remember { mutableStateOf(false) }
 
-
+    // Trigger the animation when the ReviewSection is loaded
     LaunchedEffect(Unit) {
         reviewVisible.value = true
     }
 
-
+    // Animate the review section sliding in from the right
     AnimatedVisibility(
         visible = reviewVisible.value,
         enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(),
@@ -446,7 +412,6 @@ private fun StockAndPrice(
         exit = fadeOut()
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .padding(10.dp)
                 .fillMaxWidth()
@@ -454,13 +419,14 @@ private fun StockAndPrice(
             Text(
                 text = (selected.value!!.inventoryQuantity).toString() + " item left",
                 fontSize = 17.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = if (selected.value!!.inventoryQuantity!! > 6) darkGreen else Color.Red
+                fontWeight = FontWeight.Bold,
+                color = if (selected.value!!.inventoryQuantity!! > 10) Color.Gray else Color.Red
             )
             Spacer(Modifier.weight(1f))
             Text(
-                text = formattedPrice + " " + currencySymbols[selectedCurrency],
-                fontSize = 19.sp,
+                text = formattedPrice + " " + currencySymbols[selectedCurrency]
+                    ?: " $", //"${"%.2f".format(price)} ${currencySymbols[selectedCurrency] ?: " $"}",
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
             )
         }
@@ -602,23 +568,21 @@ fun DescriptionSection(bodyHtml: String?) {
             .offset(x = offsetX)
     ) {
         Text(
-            text = "Description:",
+            text = "Description",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 5.dp, top = 5.dp, bottom = 15.dp)
         )
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFEFEFEF), RoundedCornerShape(8.dp))
-                .padding(12.dp),
             text = bodyHtml ?: "",
             fontSize = 18.sp,
             color = MaterialTheme.colorScheme.onSurface,
             lineHeight = 28.sp,
             fontWeight = FontWeight.Normal,
-
-            )
+            modifier = Modifier
+                .background(Color(0xFFEFEFEF), RoundedCornerShape(8.dp))
+                .padding(12.dp)
+        )
     }
 }
 
@@ -627,9 +591,11 @@ fun BottomSection(
     onClickCart: () -> Unit,
     onClickFav: () -> Unit,
     buttonColors: ButtonColors,
-    isFav: Boolean
+    isFav: Boolean, // Pass isFav to determine filled state
+    isLoggedIn: AuthState // Pass the authentication state
 ) {
     var isAnimatingFav by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
     // Trigger the animation when the button is clicked
     val iconScale by animateFloatAsState(targetValue = if (isAnimatingFav) 1.5f else 1f)
@@ -642,6 +608,7 @@ fun BottomSection(
             isAnimatingFav = false
         }
     }
+
     var isAnimating by remember { mutableStateOf(false) }
 
     // Trigger the animation when the button is clicked
@@ -657,7 +624,6 @@ fun BottomSection(
         }
     }
 
-
     Row(
         Modifier
             .fillMaxWidth()
@@ -668,8 +634,12 @@ fun BottomSection(
         // Add to Cart button
         Button(
             onClick = {
+                if (isLoggedIn == AuthState.UnAuthenticated) {
+                    showDialog = true // Show dialog if not authenticated
+                } else {
+                    onClickCart()
+                }
                 isAnimating = true
-                onClickCart()
             },
             colors = ButtonDefaults.buttonColors(primary),
             modifier = Modifier
@@ -696,13 +666,16 @@ fun BottomSection(
         // Favorite button
         Button(
             onClick = {
-                isAnimatingFav = true
-                onClickFav()
+                if (isLoggedIn == AuthState.UnAuthenticated) {
+                    showDialog = true // Show dialog if not authenticated
+                } else {
+                    isAnimatingFav = true
+                    onClickFav()
+                }
             },
             colors = buttonColors,
             modifier = Modifier
                 .padding(horizontal = 10.dp)
-                .size(50.dp)
                 .weight(1f)
         ) {
             Icon(
@@ -712,6 +685,16 @@ fun BottomSection(
                 modifier = Modifier.scale(iconScale) // Apply scale animation
             )
         }
+    }
+
+    // Show the login dialog if required
+    if (showDialog) {
+        LoginDialog(
+            onDismiss = { showDialog = false },
+            onLogin = {
+                // Handle the login logic here
+            }
+        )
     }
 }
 
@@ -730,4 +713,33 @@ private fun colorSetter(variant: VariantsItem?): Color {
         "burgandy" -> return Color(0xFF800020)
         else -> return Color.Transparent
     }
+}
+
+@Composable
+fun LoginDialog(
+    onDismiss: () -> Unit,
+    onLogin: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Authentication Required") },
+        text = { Text("You must log in to access this feature.") },
+        confirmButton = {
+            Button(onClick = {
+                onLogin()
+                onDismiss()
+            }, colors = ButtonDefaults.buttonColors(primary)) {
+                Text("Login")
+            }
+        },
+        containerColor = Color.White,
+        dismissButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(grey)
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
 }
