@@ -227,6 +227,7 @@ fun filterByUser(
         if (draftOrder.email == "FAV_" + userMail) {
             UserdraftOrder = draftOrder
             favExists = true
+            break
         }
     }
     return Pair(favExists, UserdraftOrder)

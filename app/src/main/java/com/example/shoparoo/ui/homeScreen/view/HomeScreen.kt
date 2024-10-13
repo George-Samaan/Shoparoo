@@ -80,6 +80,7 @@ import com.example.shoparoo.ui.Favourites.FavouritesViewModel
 import com.example.shoparoo.ui.Favourites.FavouritesViewModelFactory
 import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.auth.view.ReusableLottie
+import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.categoriesScreen.view.CategoriesScreen
 import com.example.shoparoo.ui.categoriesScreen.viewModel.CategoriesViewModel
@@ -143,7 +144,6 @@ fun HomeScreenDesign(
     } else {
         val context = LocalContext.current
         val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-
         val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
         val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
@@ -170,9 +170,6 @@ fun HomeScreenDesign(
                     Header(userName, onFavouriteClick, onSearchClick = {
                         navController.navigate("search")
                     })
-                }
-                item {
-                    // SearchBar(query, onQueryChange,navController,viewModel)
                 }
                 item {
                     CouponsSliderWithIndicator(
@@ -342,7 +339,6 @@ fun BrandsSection(navController: NavController, smartCollections: List<SmartColl
                             brandImage = collection.image?.src!!,
                             onClick = {
                                 // Log the ID of the clicked brand
-
                                 Log.d("BrandsSection", "Clicked brand ID: ${collection.id}")
                                 navController.navigate("brand/${collection.id}/${collection.title}")
                             }
@@ -395,7 +391,13 @@ fun ForYouSection(
     conversionRate: Float,
     currencySymbols: Map<String, String>
 ) {
-
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
     val randomProducts = remember { products.shuffled().take(5) }
     val visible = remember { mutableStateOf(false) }
     LaunchedEffect(randomProducts) {
@@ -438,7 +440,8 @@ fun ForYouSection(
                         productImage = product.images?.get(0)?.src,
                         onClick = { navController.navigate("productDetails/${product.id}") },
                         currencySymbol = currencySymbols[selectedCurrency] ?: "$",
-                        id = product.id!!
+                        id = product.id!!,
+                        viewModel =  favViewModel,
                     )
                 }
             }
@@ -456,8 +459,9 @@ fun ProductCard(
     productImage: String?,
     currencySymbol: String,
     onClick: () -> Unit,
-    inFav: Boolean = false,
+    viewModel: FavouritesViewModel,
     id : Long ,
+    inFav: Boolean = false,
     onClickDeleteFav: () -> Unit = {}, // Callback for the delete icon
 
 ) {
@@ -481,6 +485,14 @@ fun ProductCard(
     )
     val fav by favViewModel.productItems.collectAsState()
         Log.i("FavouritesViewModel", "ProductItems: $fav")
+    val authViewModel: AuthViewModel = viewModel()
+    val isLoggedIn = authViewModel.authState.collectAsState()
+
+    val favItems by viewModel.productItems.collectAsState()
+    LaunchedEffect(favItems) {
+       // viewModel.getFavourites()
+    }
+
 
 
     Card(
@@ -534,8 +546,8 @@ fun ProductCard(
                         .size(24.dp)
                         .clickable { showDialog = true }
                 )
-            } else {
-                var isFav = false //handle this from the api and handle guest mode
+            } else if (isLoggedIn.value == AuthState.Authenticated || isLoggedIn.value == AuthState.UnVerified) {
+                var isFav by remember { mutableStateOf(false) }
                 fav.let {
                     for (item in it) {
                         if (item.id == id) {
@@ -558,21 +570,20 @@ fun ProductCard(
                         .padding(8.dp)
                         .size(24.dp)
                         .clickable {
-                            val vibrationEffect1 =
-                                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                          val vibrationEffect1 =  VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
                             vibrator.cancel()
                             vibrator.vibrate(vibrationEffect1)
-                            favViewModel.addFav(id)
-//                           if (isFav) {
-//                               Toast.makeText(context, "Removed to Favourites", Toast.LENGTH_SHORT).show()
-//                           } else {
-//                               Toast.makeText(context, "Added from Favourites", Toast.LENGTH_SHORT).show()
-//                           }
-//                           if (isFav) {
-//                                 showDialog = true
-//                           } else {
-//                               favViewModel.addFav(id)
-//                           }
+                            viewModel.addFav(id)
+/*                           if (isFav) {
+                               Toast.makeText(context, "Removed to Favourites", Toast.LENGTH_SHORT).show()
+                           } else {
+                               Toast.makeText(context, "Added from Favourites", Toast.LENGTH_SHORT).show()
+                           }
+                           if (isFav) {
+                                 showDialog = true
+                           } else {
+                               favViewModel.addFav(id)
+                           }*/
                         }
                 )
             }
