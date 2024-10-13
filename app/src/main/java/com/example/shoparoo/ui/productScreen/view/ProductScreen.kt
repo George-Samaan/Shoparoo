@@ -119,7 +119,7 @@ fun ProductsScreen(
     val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
 
-    val currencySymbols = mapOf(
+    val currencySymbols = mapOf( //handle galal currency for now
         "EGP" to "$ ",
         "USD" to "EGP "
     )
@@ -287,7 +287,9 @@ fun ProductGrid(
                 currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$"),
                 inFav = inFav,
                 onClickDeleteFav = { viewModel!!.getFavourites(true, product.id!!) },
-                id = product.id!!
+                id = product.id!!,
+                viewModel = viewModel!!
+
 
             )
         }
