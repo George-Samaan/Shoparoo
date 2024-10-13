@@ -47,7 +47,7 @@ class FakeRepository : Repository {
         TODO("Not yet implemented")
     }
 
-    override fun getSingleProductFromId(id: String): Flow<SingleProduct> {
+    override fun getSingleProductById(id: String): Flow<SingleProduct> {
         TODO("Not yet implemented")
     }
 

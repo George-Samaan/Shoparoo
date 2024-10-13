@@ -4,7 +4,9 @@ package com.example.shoparoo.ui.productScreen.view
 
 //noinspection UsingMaterialAndMaterial3Libraries
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -248,6 +250,7 @@ fun ProductsScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProductGrid(
     filteredProducts: List<ProductsItem>,
@@ -283,7 +286,6 @@ fun ProductGrid(
                 currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$"),
                 inFav = inFav,
                 onClickDeleteFav = { viewModel!!.getFavourites(true, product.id!!) },
-                  onClickAddFav = {  },
                 id = product.id!!
 
             )

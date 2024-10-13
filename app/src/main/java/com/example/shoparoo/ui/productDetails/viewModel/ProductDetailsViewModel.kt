@@ -42,7 +42,7 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
     fun getSingleProductDetail(productId: String) {
         viewModelScope.launch {
             _singleProductDetail.value = ApiState.Loading
-            repository.getSingleProductFromId(productId).catch {
+            repository.getSingleProductById(productId).catch {
                 _singleProductDetail.value = ApiState.Failure(it.message ?: "Unknown Error")
                 Log.i("ProductDetailsviewModel", "Error ${it.message}")
             }.collect {

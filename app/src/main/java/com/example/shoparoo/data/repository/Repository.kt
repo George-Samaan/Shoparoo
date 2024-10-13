@@ -15,7 +15,7 @@ interface Repository {
 
     fun getProductsFromBrandsId(collectionId: String): Flow<Product>
 
-    fun getSingleProductFromId(id: String): Flow<SingleProduct>
+    fun getSingleProductById(id: String): Flow<SingleProduct>
 
     // categories section
     fun getWomenProducts(): Flow<Product>
