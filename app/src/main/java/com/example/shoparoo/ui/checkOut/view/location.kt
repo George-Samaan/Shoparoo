@@ -73,6 +73,8 @@ fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long, ) {
         if (isGranted) {
             getLocation(context) { address ->
                 locationText = address ?: "Unable to fetch address"
+                val shippingAddress = ShippingAddress(address1 = locationText)
+                viewModel.updateShippingAddress(draftOrderId, shippingAddress)
             }
         } else {
             locationText = "Location permission denied"
