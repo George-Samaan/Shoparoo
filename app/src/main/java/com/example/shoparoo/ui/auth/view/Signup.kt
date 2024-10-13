@@ -122,7 +122,7 @@ fun Signup(navController: NavHostController) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 15.dp)
+                .padding(start = 15.dp, top = 30.dp)
         ) {
             Box(
                 modifier = Modifier
