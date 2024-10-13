@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -486,13 +485,13 @@ fun ProductCard(
 
     Card(
         modifier = Modifier
-            .width(170.dp)
-            .height(240.dp)
-            .padding(6.dp)
+            .width(175.dp)
+            .height(235.dp)
+            .padding(4.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFAEFEEEE)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -501,8 +500,8 @@ fun ProductCard(
                     contentDescription = productName,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(150.dp),
-                    contentScale = ContentScale.Crop
+                        .height(160.dp),
+                    contentScale = ContentScale.FillBounds
                 )
                 Text(
                     text = productName.capitalizeWords(),
@@ -559,7 +558,8 @@ fun ProductCard(
                         .padding(8.dp)
                         .size(24.dp)
                         .clickable {
-                          val vibrationEffect1 =  VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                            val vibrationEffect1 =
+                                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
                             vibrator.cancel()
                             vibrator.vibrate(vibrationEffect1)
                             favViewModel.addFav(id)

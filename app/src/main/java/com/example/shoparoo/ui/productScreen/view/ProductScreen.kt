@@ -77,6 +77,7 @@ import kotlinx.coroutines.delay
 import networkListener
 import kotlin.math.roundToInt
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProductsScreen(
     brandId: String,

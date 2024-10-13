@@ -3,12 +3,16 @@
 package com.example.shoparoo.ui.categoriesScreen.view
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -63,6 +67,7 @@ import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
 import networkListener
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
@@ -225,8 +230,8 @@ fun CategoriesScreen(viewModel: CategoriesViewModel, navController: NavControlle
 
                     AnimatedVisibility(
                         visible = isReady && isFilteringComplete,
-                        enter = scaleIn(animationSpec = tween(durationMillis = 600)),
-                        exit = scaleOut(animationSpec = tween(durationMillis = 600))
+                        enter = scaleIn(animationSpec = tween(durationMillis = 600)) + slideInHorizontally(),
+                        exit = scaleOut(animationSpec = tween(durationMillis = 600)) + slideOutHorizontally()
                     ) {
                         ProductGrid(
                             filteredProducts,
