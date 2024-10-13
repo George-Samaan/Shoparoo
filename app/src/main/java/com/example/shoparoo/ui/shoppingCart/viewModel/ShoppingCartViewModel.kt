@@ -44,15 +44,15 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-/*    fun applyDiscountToDraftOrder(draftOrderId: Long, discount: AppliedDiscount) {
-        viewModelScope.launch {
-            val draftOrder = _draftOrderDetails.value?.copy(applied_discount = discount)
-            if (draftOrder != null) {
-                val updatedDraftOrder = repository.updateDraftOrder(DraftOrderRequest(draftOrder))
-                _draftOrderDetails.value = updatedDraftOrder as? DraftOrderDetails
+    /*    fun applyDiscountToDraftOrder(draftOrderId: Long, discount: AppliedDiscount) {
+            viewModelScope.launch {
+                val draftOrder = _draftOrderDetails.value?.copy(applied_discount = discount)
+                if (draftOrder != null) {
+                    val updatedDraftOrder = repository.updateDraftOrder(DraftOrderRequest(draftOrder))
+                    _draftOrderDetails.value = updatedDraftOrder as? DraftOrderDetails
+                }
             }
-        }
-    }*/
+        }*/
 
     fun applyDiscountToDraftOrder(draftOrderId: Long, discount: AppliedDiscount) {
         viewModelScope.launch {
