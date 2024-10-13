@@ -158,9 +158,10 @@ fun CreditCardItem() {
     var isExpirationYearValid by remember { mutableStateOf(true) }
     var isCvvValid by remember { mutableStateOf(true) }
 
-    val currentYear =
-        Calendar.getInstance().get(Calendar.YEAR) % 100 // get last two digits of the year
-    val viewModel: ShoppingCartViewModel = viewModel(
+     val currentYear = Calendar.getInstance().get(Calendar.YEAR) % 100 // get last two digits of the year
+    val baseYear = 19
+
+    val shoppingCartViewModel: ShoppingCartViewModel = viewModel(
         factory = ShoppingCartViewModelFactory(
             repository = RepositoryImpl(
                 remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
@@ -248,7 +249,7 @@ fun CreditCardItem() {
         Spacer(modifier = Modifier.height(16.dp))
 
 
-        // Expiration Date Fields (MM/YY)
+      /*  // Expiration Date Fields (MM/YY)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             OutlinedTextField(
                 value = expirationMonth,
@@ -270,8 +271,9 @@ fun CreditCardItem() {
                 value = expirationYear,
                 onValueChange = {
                     expirationYear = it
-                    isExpirationYearValid = it.length == 2 && it.toIntOrNull()
-                        ?.let { year -> year >= currentYear } ?: false
+                    isExpirationYearValid = it.length == 2 && expirationYear.toIntOrNull()?.let { year ->
+                        year in baseYear..59
+                    } ?: false
                 },
                 label = { Text("YY") },
                 shape = RoundedCornerShape(25.dp),
@@ -283,15 +285,6 @@ fun CreditCardItem() {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }
-
-        if (!isExpirationMonthValid) {
-            Text(
-                text = "Invalid expiration month",
-                color = Color.Red,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
-
         if (!isExpirationYearValid) {
             Text(
                 text = "Invalid expiration year",
@@ -300,18 +293,81 @@ fun CreditCardItem() {
             )
         }
 
+        if (!isExpirationMonthValid) {
+            Text(
+                text = "Invalid expiration month",
+                color = Color.Red,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }*/
+        // Expiration Date Fields (MM/YY)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Column(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = expirationMonth,
+                    onValueChange = {
+                        expirationMonth = it
+                        isExpirationMonthValid = it.length == 2 && it.toIntOrNull() in 1..12
+                    },
+                    label = { Text("MM") },
+                    shape = RoundedCornerShape(25.dp),
+                    modifier = Modifier.padding(end = 8.dp),
+                    singleLine = true,
+                    isError = !isExpirationMonthValid,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+
+                if (!isExpirationMonthValid) {
+                    Text(
+                        text = "Invalid expiration month",
+                        color = Color.Red,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = expirationYear,
+                    onValueChange = {
+                        expirationYear = it
+                        isExpirationYearValid = it.length == 2 && expirationYear.toIntOrNull()?.let { year ->
+                            year in baseYear..59
+                        } ?: false
+                    },
+                    label = { Text("YY") },
+                    shape = RoundedCornerShape(25.dp),
+                    modifier = Modifier.padding(start = 8.dp),
+                    singleLine = true,
+                    isError = !isExpirationYearValid,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+
+                if (!isExpirationYearValid) {
+                    Text(
+                        text = "Invalid expiration year",
+                        color = Color.Red,
+                        modifier = Modifier.padding(start = 20.dp)
+                    )
+                }
+            }
+        }
+
+
+
+
+
         Spacer(modifier = Modifier.height(32.dp))
 
 
         CheckoutButtonCheck(
             selectedPaymentMethod = selectedPaymentMethod,
-            viewModel = viewModel,
+            shoppingCartViewModel,
             cardHolderName = cardHolderName, cardNumber = cardNumber,
             expirationMonth = expirationMonth, expirationYear = expirationYear
         )
     }
 }
-
 
 @Composable
 fun CheckoutButtonCheck(
