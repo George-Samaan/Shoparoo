@@ -71,6 +71,8 @@ import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
+import com.example.shoparoo.ui.Favourites.FavouritesViewModel
+import com.example.shoparoo.ui.Favourites.FavouritesViewModelFactory
 import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
@@ -108,8 +110,22 @@ fun HomeScreenDesign(
     bottomNavController: NavController,
     navController: NavController,
 
-    ) {
-    val isNetworkAvailable = networkListener()
+    )
+{
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val fav by favViewModel.productItems.collectAsState()
+    Log.i("FavouritesViewModel", "ProductItems: $fav")
+    LaunchedEffect(Unit) {
+        favViewModel.getFavourites()
+    }
+
+   val isNetworkAvailable = networkListener()
     if (!isNetworkAvailable.value) {
         // Show No Internet connection message
         Box(
@@ -413,7 +429,8 @@ fun ForYouSection(
                         productPrice = formattedPrice,
                         productImage = product.images?.get(0)?.src,
                         onClick = { navController.navigate("productDetails/${product.id}") },
-                        currencySymbol = currencySymbols[selectedCurrency] ?: "$"
+                        currencySymbol = currencySymbols[selectedCurrency] ?: "$",
+                        id = product.id!!
                     )
                 }
             }
@@ -430,8 +447,10 @@ fun ProductCard(
     currencySymbol: String,
     onClick: () -> Unit,
     inFav: Boolean = false,
+    id : Long ,
     onClickDeleteFav: () -> Unit = {}, // Callback for the delete icon
-    onClickAddFav: () -> Unit = {} // Callback for the add to favorites icon
+    onClickAddFav: () -> Unit = {}, // Callback for the add to favorites icon
+
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
@@ -443,6 +462,17 @@ fun ProductCard(
             isLoading = false
         }
     }
+
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val fav by favViewModel.productItems.collectAsState()
+        Log.i("FavouritesViewModel", "ProductItems: $fav")
+
 
     Card(
         modifier = Modifier
@@ -496,7 +526,17 @@ fun ProductCard(
                         .clickable { showDialog = true }
                 )
             } else {
-                val isFav = true //handle this from the api and handle guest mode
+                var isFav = false //handle this from the api and handle guest mode
+                fav.let {
+                    for (item in it) {
+                        if (item.id == id) {
+                            isFav = true
+                            break
+                        } else {
+                            isFav = false
+                        }
+                    }
+                }
                 Icon(
                     if (isFav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                     contentDescription = "Add to Favorites",
@@ -505,7 +545,13 @@ fun ProductCard(
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
                         .size(24.dp)
-                        .clickable { onClickAddFav() }
+                        .clickable {
+                           if (isFav) {
+                                 showDialog = true
+                           } else {
+                               favViewModel.addFav(id)
+                           }
+                        }
                 )
             }
         }

@@ -56,11 +56,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.shoparoo.R
+import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
+import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
+import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.ui.Favourites.FavouritesViewModel
+import com.example.shoparoo.ui.Favourites.FavouritesViewModelFactory
 import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.homeScreen.view.ProductCard
 import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
@@ -88,6 +93,20 @@ fun ProductsScreen(
     var isInitialLoad by remember { mutableStateOf(true) }
     var isReady by remember { mutableStateOf(false) }
     var isFilteringComplete by remember { mutableStateOf(false) }
+
+
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val fav by favViewModel.productItems.collectAsState()
+    Log.i("FavouritesViewModel", "ProductItems: $fav")
+    LaunchedEffect(Unit) {
+        favViewModel.getFavourites()
+    }
 
 
     val context = LocalContext.current
@@ -220,7 +239,8 @@ fun ProductsScreen(
                         navController,
                         selectedCurrency,
                         conversionRate,
-                        currencySymbols
+                        currencySymbols,
+                        viewModel = favViewModel
                     )
                 }
             }
@@ -263,8 +283,8 @@ fun ProductGrid(
                 currencySymbol = currencySymbols.getOrDefault(selectedCurrency, "$"),
                 inFav = inFav,
                 onClickDeleteFav = { viewModel!!.getFavourites(true, product.id!!) },
-                //  onClickAddFav = {  }
-
+                  onClickAddFav = {  },
+                id = product.id!!
 
             )
         }

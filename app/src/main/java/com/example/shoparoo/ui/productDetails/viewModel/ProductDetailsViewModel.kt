@@ -152,7 +152,7 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         }
     }
 
-    private fun filterFavDraftOrder(
+     fun filterFavDraftOrder(
         draftOrderDetails: DraftOrderDetails,
         theSingleProduct: SingleProduct,
         variant: VariantsItem,
