@@ -38,7 +38,7 @@ data class ShippingAddress(
 data class DraftOrderDetails(
     val id: Long?=null,
     var line_items: MutableList<LineItem>,  // Items in the draft order
-    val email: String? = null,          // Customer details
+    var email: String? = null,          // Customer details
     val note: String? = null,       // Optional: Notes for the order
     val tags: String? = null, // Optional: Tags to categorize the order
     val invoice_url: String? = null,

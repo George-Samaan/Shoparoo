@@ -8,6 +8,10 @@ import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testProduct1
 import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testProduct2
 import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testProduct3
 import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testSmartCollectionProduct
+import com.example.shoparoo.ui.homeScreen.viewModel.mockData3.createMockDraftOrderResponse
+import com.example.shoparoo.ui.homeScreen.viewModel.mockData3.mockDraftOrderRequest
+import com.example.shoparoo.ui.homeScreen.viewModel.mockData3.mockDraftOrderRequesttobeUpdated
+import com.example.shoparoo.ui.homeScreen.viewModel.mockData3.mockProductItem
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -60,21 +64,49 @@ class RepositoryTest {
     }
 
 
-    // test draft order (get & delete)
+    /*    @Test
+        fun test_get_draft_order() = runTest {
+            val draftOrderResponse = repository.getDraftOrder()
+            val draftOrderDetails = draftOrderResponse.first().draft_orders
+            assertEquals(1, draftOrderDetails.size)
+            assertEquals("Test Email", draftOrderDetails[0].email)
+        }
+
+        @Test
+        fun test_delete_draft_order() = runTest {
+            var draftOrderResponse = repository.getDraftOrder()
+            assertEquals(1, draftOrderResponse.first().draft_orders.size)
+            repository.deleteDraftOrder(1L)
+            draftOrderResponse = repository.getDraftOrder()
+            assertEquals(0, draftOrderResponse.first().draft_orders.size)
+        }*/
+
+
     @Test
-    fun test_get_draft_order() = runTest {
-        val draftOrderResponse = repository.getDraftOrder()
-        val draftOrderDetails = draftOrderResponse.first().draft_orders
-        assertEquals(1, draftOrderDetails.size)
-        assertEquals("Test Email", draftOrderDetails[0].email)
+    fun test_get_draft_order_assert_size() = runTest {
+        val draftOrder = repository.getDraftOrder()
+        val checkSize = draftOrder.first()
+        assertEquals(checkSize, createMockDraftOrderResponse())
+    }
+
+
+    @Test
+    fun test_get_draft_order_matches_expected_response() = runTest {
+        val draftOrder = repository.getDraftOrder()
+        val actualData = draftOrder.first()
+        assertEquals(actualData, createMockDraftOrderResponse())
     }
 
     @Test
-    fun test_delete_draft_order() = runTest {
-        var draftOrderResponse = repository.getDraftOrder()
-        assertEquals(1, draftOrderResponse.first().draft_orders.size)
-        repository.deleteDraftOrder(1L)
-        draftOrderResponse = repository.getDraftOrder()
-        assertEquals(0, draftOrderResponse.first().draft_orders.size)
+    fun test_get_single_product_from_id() = runTest {
+        val singleProduct = repository.getSingleProductById("123")
+        val actualProductId = singleProduct.first().product?.id
+        assertEquals(actualProductId, mockProductItem.product?.id)
+    }
+
+    @Test
+    fun update_draft_order() = runTest {
+        repository.updateDraftOrder(mockDraftOrderRequest)
+        assertEquals(mockDraftOrderRequest, mockDraftOrderRequesttobeUpdated)
     }
 }

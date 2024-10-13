@@ -32,7 +32,7 @@ fun Splash(navController: NavController) {
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        ReusableLottie(R.raw.splash, null, size = 400.dp, null)
+        ReusableLottie(R.raw.splash, null, size = 400.dp, 1f)
     }
     val viewModel = viewModel<AuthViewModel>()
     var item = viewModel.authState.collectAsState()

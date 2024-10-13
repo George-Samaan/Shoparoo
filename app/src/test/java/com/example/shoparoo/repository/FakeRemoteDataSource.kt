@@ -12,6 +12,9 @@ import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testProduct1
 import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testProduct2
 import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testProduct3
 import com.example.shoparoo.ui.homeScreen.viewModel.MockData.testSmartCollectionProduct
+import com.example.shoparoo.ui.homeScreen.viewModel.mockData3.createMockDraftOrderResponse
+import com.example.shoparoo.ui.homeScreen.viewModel.mockData3.mockDraftOrderRequesttobeUpdated
+import com.example.shoparoo.ui.homeScreen.viewModel.mockData3.mockProductItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -34,12 +37,11 @@ class FakeRemoteDataSource : RemoteDataSource {
         emit(testForYouProduct)
     }
 
-
-    override fun getDraftOrder(): Flow<DraftOrderResponse> {
-        return flow {
-            emit(DraftOrderResponse(draft_orders = draftOrders))
-        }
-    }
+    /*    override fun getDraftOrder(): Flow<DraftOrderResponse> {
+            return flow {
+                emit(DraftOrderResponse(draft_orders = draftOrders))
+            }
+        }*/
 
     override suspend fun deleteDraftOrder(id: Long) {
         draftOrders.removeIf { it.id == id }
@@ -49,8 +51,8 @@ class FakeRemoteDataSource : RemoteDataSource {
         TODO("Not yet implemented")
     }
 
-    override fun getSingleProductFromId(id: String): Flow<SingleProduct> {
-        TODO("Not yet implemented")
+    override fun getSingleProductFromId(id: String): Flow<SingleProduct> = flow {
+        emit(mockProductItem)
     }
 
     override fun getSalesProducts(): Flow<Product> {
@@ -71,16 +73,17 @@ class FakeRemoteDataSource : RemoteDataSource {
     override suspend fun createDraftOrder(createDraftOrder: DraftOrderRequest) {
         TODO("Not yet implemented")
     }
-
+    override fun getDraftOrder(): Flow<DraftOrderResponse>  = flow {
+      emit(createMockDraftOrderResponse())
+    }
 
     override suspend fun updateDraftOrder(draftOrderDetails: DraftOrderRequest) {
-        TODO("Not yet implemented")
+        mockDraftOrderRequesttobeUpdated = draftOrderDetails
     }
 
     override fun getOrders(): Flow<OrderResponse> {
         TODO("Not yet implemented")
     }
-
 
     override suspend fun deleteDraftOrder(draftOrderId: String) {
         TODO("Not yet implemented")

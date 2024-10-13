@@ -16,6 +16,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -30,6 +31,8 @@ import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
+import com.example.shoparoo.ui.Favourites.FavouritesViewModel
+import com.example.shoparoo.ui.Favourites.FavouritesViewModelFactory
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.productScreen.view.ProductGrid
@@ -40,6 +43,22 @@ import com.example.shoparoo.ui.theme.primary
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Search(navController: NavController) {
+
+
+    val favViewModel: FavouritesViewModel = viewModel(
+        factory = FavouritesViewModelFactory(
+            repository = RepositoryImpl(
+                remoteDataSource = RemoteDataSourceImpl(apiService = ApiClient.retrofit)
+            )
+        )
+    )
+    val fav by favViewModel.productItems.collectAsState()
+    Log.i("FavouritesViewModel", "ProductItems: $fav")
+    LaunchedEffect(Unit) {
+        favViewModel.getFavourites()
+    }
+
+
 
     val viewModel: HomeViewModel = viewModel(
         factory = HomeViewModelFactory(
@@ -99,14 +118,19 @@ fun Search(navController: NavController) {
             is ApiState.Success -> {
                 Log.i("Searchdddddddd", "Success")
                 val products = (allProducts.value as ApiState.Success).data as List<ProductsItem>
-                filterItems(products, searchQuery.value, navController)
+                filterItems(products, searchQuery.value, navController, favViewModel)
             }
         }
     }
 }
 
 @Composable
-fun filterItems(products: List<ProductsItem>, query: String, navController: NavController) {
+fun filterItems(
+    products: List<ProductsItem>,
+    query: String,
+    navController: NavController,
+    favViewModel: FavouritesViewModel
+) {
     var filteredProducts: MutableList<ProductsItem> = mutableListOf()
     for (product in products) {
         if (product.title!!.contains(query, ignoreCase = true)) {
@@ -115,5 +139,8 @@ fun filterItems(products: List<ProductsItem>, query: String, navController: NavC
             Log.i("SearchFilter", "Filtered products: $filteredProducts")
         }
     }
-    ProductGrid(filteredProducts, navController, "gg", 1.0f, emptyMap(), false)
+    ProductGrid(filteredProducts, navController,
+        "gg", 1.0f, emptyMap(), false,
+        viewModel = favViewModel
+        )
 }

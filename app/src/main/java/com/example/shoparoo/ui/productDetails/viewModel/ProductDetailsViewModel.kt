@@ -1,12 +1,10 @@
 package com.example.shoparoo.ui.productDetails.viewModel
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.shoparoo.data.network.ApiState
-import com.example.shoparoo.data.network.currencyApi
 import com.example.shoparoo.data.repository.Repository
 import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.DraftOrderRequest
@@ -15,10 +13,7 @@ import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.model.Property
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
-import com.example.shoparoo.utils.Constants
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -37,16 +32,17 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
     private val _draftOrder = MutableStateFlow<ApiState>(ApiState.Loading)
     val draftOrder = _draftOrder.asStateFlow()
 
+    private val _userOrder = MutableStateFlow<ApiState>(ApiState.Loading)
+    val userOrder = _userOrder.asStateFlow()
+
     val userMail by lazy {
         FirebaseAuth.getInstance().currentUser?.email
     }
 
-
-
     fun getSingleProductDetail(productId: String) {
         viewModelScope.launch {
             _singleProductDetail.value = ApiState.Loading
-            repository.getSingleProductFromId(productId).catch {
+            repository.getSingleProductById(productId).catch {
                 _singleProductDetail.value = ApiState.Failure(it.message ?: "Unknown Error")
                 Log.i("ProductDetailsviewModel", "Error ${it.message}")
             }.collect {
@@ -79,6 +75,49 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         }
     }
 
+    /*    fun filterByUser(
+            draftOrdersResponse: DraftOrderResponse,
+            theSingleProduct: SingleProduct,
+            varient: VariantsItem,
+            isCart: Boolean,
+            infav: Boolean = false
+        ) {
+
+            Log.i("ProductDetailsviewModel", "filter by user ${userMail}")
+            var user: DraftOrderDetails? = null
+            var check: Boolean = false
+
+            if (isCart) {
+                for (draftOrder in draftOrdersResponse.draft_orders!!) {
+                    if (draftOrder.email == userMail) {
+                        // filterByItem(id, draftOrder)
+                        Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
+                        Log.i("ProductDetailsviewModel", "Draft Order Found ${draftOrder}")
+
+                        user = draftOrder
+                        check = true
+                    }
+                }
+            } else {
+                for (draftOrder in draftOrdersResponse.draft_orders!!) {
+                    if (draftOrder.email == "FAV_" + userMail) {
+                        Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
+                        Log.i("ProductDetailsviewModel", "Draft Order Found ${draftOrder}")
+                        user = draftOrder
+                        check = true
+                    }
+                }
+            }
+
+            if (check) {
+                if (isCart)
+                    filterByItem(user!!, varient, theSingleProduct, isCart)
+                else
+                    filterFavDraftOrder(user!!, theSingleProduct, varient, infav)
+            } else if (!infav)
+                createDraftOrder(theSingleProduct, varient, isCart)
+        }*/
+
     fun filterByUser(
         draftOrdersResponse: DraftOrderResponse,
         theSingleProduct: SingleProduct,
@@ -86,78 +125,76 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         isCart: Boolean,
         infav: Boolean = false
     ) {
-
-        Log.i("ProductDetailsviewModel", "filter by user ${userMail}")
+        val emailPrefix = if (isCart) "" else "FAV_"
+        val targetEmail = emailPrefix + userMail
         var user: DraftOrderDetails? = null
-        var check: Boolean = false
 
-        if (isCart) {
-            for (draftOrder in draftOrdersResponse.draft_orders!!) {
-                if (draftOrder.email == userMail) {
-                    // filterByItem(id, draftOrder)
-                    Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
-                    Log.i("ProductDetailsviewModel", "Draft Order Found ${draftOrder}")
-
-                    user = draftOrder
-                    check = true
-                }
-            }
-        } else {
-            for (draftOrder in draftOrdersResponse.draft_orders!!) {
-                if (draftOrder.email == "FAV_" + userMail) {
-                    Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
-                    Log.i("ProductDetailsviewModel", "Draft Order Found ${draftOrder}")
-                    user = draftOrder
-                    check = true
-                }
+        draftOrdersResponse.draft_orders.forEach { draftOrder ->
+            if (draftOrder.email == targetEmail) {
+                Log.i("ProductDetailsviewModel", "filter by user ${draftOrder.email}")
+                Log.i("ProductDetailsviewModel", "Draft Order Found $draftOrder")
+                user = draftOrder
+                return@forEach // Exit the loop early if found
             }
         }
-
-        /*
-        //
-        //        if (user != null && isCart)
-        //            filterByItem(user, varient, theSingleProduct, isCart)
-        //        else if (user != null && !isCart) {
-        //          updateFavDraftOrder(user, theSingleProduct, varient)
-        //        }
-        //        else {
-        //            createDraftOrder(theSingleProduct, varient, isCart)
-        //        }
-
-                */
-
-
-        if (check) {
-            if (isCart)
-                filterByItem(user!!, varient, theSingleProduct, isCart)
-            else
-                FilterFavDraftOrder(user!!, theSingleProduct, varient, infav)
-        } else if (!infav)
-            createDraftOrder(theSingleProduct, varient, isCart)
+        _userOrder.value =
+            user?.let { ApiState.Success(it) } ?: ApiState.Failure("Draft order not found")
+        user?.let {
+            if (isCart) {
+                filterByItem(it, varient, theSingleProduct, isCart)
+            } else {
+                filterFavDraftOrder(it, theSingleProduct, varient, infav)
+            }
+        } ?: run {
+            if (!infav) {
+                createDraftOrder(theSingleProduct, varient, isCart)
+            }
+        }
     }
 
-    private fun FilterFavDraftOrder(
+     fun filterFavDraftOrder(
         draftOrderDetails: DraftOrderDetails,
         theSingleProduct: SingleProduct,
-        varient: VariantsItem,
+        variant: VariantsItem,
         infav: Boolean = false
     ) {
-        var item: DraftOrderDetails? = null
-        var myLineItem: LineItem? = null
-        for (line_item in draftOrderDetails.line_items) {
-            if (line_item.product_id == varient.productId && line_item.variant_id == varient.id.toString())
-                item = draftOrderDetails        //item already exists in the favourites
-            myLineItem = line_item
+        val myLineItem = draftOrderDetails.line_items.find {
+            it.product_id == variant.productId && it.variant_id == variant.id.toString()
         }
 
-        if (infav && item != null) {
-            _isFav.value = true
-        } else if (infav && item == null) {
-            _isFav.value = false
+        if (infav) {
+            _isFav.value = myLineItem != null
         } else {
-            UpdateFavDraftOrder(draftOrderDetails, item, myLineItem, theSingleProduct, varient)
+            UpdateFavDraftOrder(draftOrderDetails, draftOrderDetails.takeIf { myLineItem != null }, myLineItem, theSingleProduct, variant)
         }
     }
+
+
+    /*
+
+        private fun FilterFavDraftOrder(
+            draftOrderDetails: DraftOrderDetails,
+            theSingleProduct: SingleProduct,
+            varient: VariantsItem,
+            infav: Boolean = false
+        ) {
+            var item: DraftOrderDetails? = null
+            var myLineItem: LineItem? = null
+            for (line_item in draftOrderDetails.line_items) {
+                if (line_item.product_id == varient.productId && line_item.variant_id == varient.id.toString())
+                    item = draftOrderDetails        //item already exists in the favourites
+                myLineItem = line_item
+            }
+
+            if (infav && item != null) {
+                _isFav.value = true
+            } else if (infav && item == null) {
+                _isFav.value = false
+            } else {
+                UpdateFavDraftOrder(draftOrderDetails, item, myLineItem, theSingleProduct, varient)
+            }
+        }
+    */
 
     private fun UpdateFavDraftOrder(
         draftOrderDetails: DraftOrderDetails,
@@ -195,64 +232,45 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         }
     }
 
-
-/*
-
-    private fun UpdateFavDraftOrder(draftOrderDetails: DraftOrderDetails, item: DraftOrderDetails?, myLineItem: LineItem?, theSingleProduct: SingleProduct, varient: VariantsItem
-    ) {
-        if (item != null) {
-            // If the item already exists in favorites, remove it
-            Log.i("xoxoxoxoxox", "Update draft order - removing from favorites")
-            _isFav.value = false
-            draftOrderDetails.line_items.remove(myLineItem)
-
-            if (draftOrderDetails.line_items.isEmpty()) {
-                viewModelScope.launch {
-                    repository.deleteDraftOrder(draftOrderDetails.id!!)
-                }
-            } else {
-                // Otherwise, update the draft order without the removed item
-                viewModelScope.launch {
-                    val order = DraftOrderRequest(draftOrderDetails)
-                    repository.updateDraftOrder(order)
-                }
-            }
-        } else {
-            // If the item does not exist, add it to favorites
-            Log.i("xoxoxoxoxox", "Adding item to favorites")
-            draftOrderDetails.line_items.add(setLineItem(theSingleProduct, varient))
-            _isFav.value = true
-            viewModelScope.launch {
-                val order = DraftOrderRequest(draftOrderDetails)
-                repository.updateDraftOrder(order)
-            }
-        }
-    }
-*/
-
-
     fun filterByItem(
         draftOrder: DraftOrderDetails,
         varient: VariantsItem,
         theSingleProduct: SingleProduct,
         inCart: Boolean
     ) {
-        var exists = false
-        var line: LineItem? = null
-        for (line_item in draftOrder.line_items) {
-            if (line_item.variant_id == varient.id.toString()){
-                exists = true
-                line = line_item
-                break
-            }
-
-        }
-        if (exists) {
-            updateDraftOrderItemCount(draftOrder,line!!)
-        } else {
+        val line = draftOrder.line_items.find { it.variant_id == varient.id.toString() }
+        if (line != null ) {
+            updateDraftOrderItemCount(draftOrder, line,varient.inventoryQuantity)
+        } else  {
             updateDraftOrder(draftOrder, varient, theSingleProduct)
         }
     }
+
+
+    /*
+
+        fun filterByItem(
+            draftOrder: DraftOrderDetails,
+            varient: VariantsItem,
+            theSingleProduct: SingleProduct,
+            inCart: Boolean
+        ) {
+            var exists = false
+            var line: LineItem? = null
+            for (line_item in draftOrder.line_items) {
+                if (line_item.variant_id == varient.id.toString()){
+                    exists = true
+                    line = line_item
+                    break
+                }
+            }
+            if (exists) {
+                updateDraftOrderItemCount(draftOrder,line!!)
+            } else {
+                updateDraftOrder(draftOrder, varient, theSingleProduct)
+            }
+        }
+    */
 
     private fun updateDraftOrder(draftOrder: DraftOrderDetails, varient: VariantsItem, theSingleProduct: SingleProduct) {
         draftOrder.line_items.add(setLineItem(theSingleProduct, varient))
@@ -262,8 +280,14 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
         }
     }
 
-    fun updateDraftOrderItemCount(draftOrder: DraftOrderDetails, line: LineItem) {
-        draftOrder.line_items.find { it.variant_id == line.variant_id }?.quantity = line.quantity + 1
+    fun updateDraftOrderItemCount(
+        draftOrder: DraftOrderDetails,
+        line: LineItem,
+        inventoryQuantity: Int?
+    ) {
+        // draftOrder.line_items.find { (it.variant_id == line.variant_id )}?.quantity = line.quantity + 1
+        draftOrder.line_items.find { (it.variant_id == line.variant_id )}?.quantity =
+            if (line.quantity + 1 > inventoryQuantity!!) inventoryQuantity else line.quantity + 1
         viewModelScope.launch {
             val order = DraftOrderRequest(draftOrder)
             repository.updateDraftOrder(order)
@@ -284,32 +308,6 @@ class ProductDetailsViewModel(private val repository: Repository) : ViewModel() 
                 )
             )
             repository.createDraftOrder(order)
-        }
-    }
-
-    fun fetchConversionRate(context: Context, selectedCurrency: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response = currencyApi.getRates(Constants.currencyApi)
-                if (response.isSuccessful) {
-                    val rates = response.body()?.rates
-                    rates?.let {
-                        conversionRate = it[selectedCurrency] ?: 1.0
-                        updatePrices(context, conversionRate)
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    private fun updatePrices(context: Context, conversionRate: Double) {
-        val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-        sharedPreferences.edit().putFloat("conversionRate", conversionRate.toFloat()).apply()
-
-        CoroutineScope(Dispatchers.Main).launch {
-            // Call necessary composables to update UI
         }
     }
 

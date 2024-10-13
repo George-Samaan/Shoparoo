@@ -4,7 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,9 +23,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -31,9 +39,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -64,7 +74,6 @@ fun ShoppingCartScreen(
     val cartItems by viewModel.cartItems.collectAsState()
     val isLoading = remember { mutableStateOf(true) }
 
-
     LaunchedEffect(Unit) {
         isLoading.value = true
         viewModel.getCartItems()
@@ -72,19 +81,52 @@ fun ShoppingCartScreen(
         isLoading.value = false
     }
 
+    Scaffold {
         if (isLoading.value) {
-            Scaffold {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    LoadingIndicator()
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingIndicator()
             }
         } else if (cartItems.isEmpty()) {
-            Scaffold {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            ) {
+                Text(
+                    text = "Cart",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp,
+                    color = primary,
+                    textAlign = TextAlign.Center
+                )
+                Column(
+                    Modifier
+                        .padding(top = 80.dp)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    //   Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favourites", modifier = Modifier.size(300.dp))
+
+                    ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
+                    androidx.compose.material.Text(
+                        text = "No Items Found",
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                item {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
@@ -100,24 +142,8 @@ fun ShoppingCartScreen(
                             textAlign = TextAlign.Center,
                         )
                     }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize().fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        ReusableLottie(R.raw.cart, null, size = 400.dp, speed = 0.66f)
-                        Text(
-                            text = "No Items Found",
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
                 }
+
             }
         } else {
             Scaffold {
@@ -156,21 +182,18 @@ fun ShoppingCartScreen(
                             CheckoutButton(navControllerBottom, totalItems, viewModel)
                         }
                     }
-
                 }
             }
         }
-
+    }
 }
 
-@SuppressLint("DefaultLocale")
 @Composable
-fun ProductList(
-    cartItems: List<LineItem>,
+fun ProductListItem(
+    lineItem: LineItem,
     viewModel: ShoppingCartViewModel,
-    navController: NavController,
+    navController: NavController
 ) {
-
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
@@ -182,41 +205,45 @@ fun ProductList(
         "USD" to "EGP "
     )
 
+    val imageUrl = lineItem.properties[0].value
+    val productPrice = lineItem.price.toDoubleOrNull()
+    val priceConverted = productPrice?.times(conversionRate)
+    val formattedPrice = String.format("%.2f", priceConverted)
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        cartItems.forEach { lineItem ->
-            val imageUrl = lineItem.properties[0].value
+    var isVisible by remember { mutableStateOf(false) }
 
-            val productPrice = lineItem.price.toDoubleOrNull()
-            val priceConverted = productPrice?.times(conversionRate)
-            val formattedPrice = String.format("%.2f", priceConverted)
+    LaunchedEffect(Unit) {
+        isVisible = true
+    }
 
-
-            ProductItem(
-                imageUrl = imageUrl,
-                productName = lineItem.title.capitalizeWords(),
-                productBrand = lineItem.vendor?.capitalizeWords() ?: "Unknown Brand",
-                price = "${currencySymbols[selectedCurrency]}${formattedPrice}",
-                quantity = lineItem.quantity,
-                onIncrement = {
-                    val currentQ = lineItem.quantity
-                    if (currentQ >=5){
-                        Toast.makeText(context,"Capacity full for you", Toast.LENGTH_SHORT).show()
-                    }else{
-                        viewModel.increaseQuantity(lineItem)
-                    }
-
-                },
-                onDecrement = {
-                    viewModel.decreaseQuantity(lineItem)
-                },
-                onRemove = {
-                    viewModel.removeItem(lineItem)
-                },
-                lineItem.product_id,
-                navController,
-            )
-        }
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = scaleIn(animationSpec = tween(durationMillis = 800)),
+        exit = scaleOut(animationSpec = tween(durationMillis = 800))
+    ) {
+        ProductItem(
+            imageUrl = imageUrl,
+            productName = lineItem.title.capitalizeWords(),
+            productBrand = lineItem.vendor?.capitalizeWords() ?: "Unknown Brand",
+            price = "${currencySymbols[selectedCurrency]}${formattedPrice}",
+            quantity = lineItem.quantity,
+            onIncrement = {
+                val currentQ = lineItem.quantity
+                if (currentQ >= 5) {
+                    Toast.makeText(context, "Capacity full for you", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.increaseQuantity(lineItem)
+                }
+            },
+            onDecrement = {
+                viewModel.decreaseQuantity(lineItem)
+            },
+            onRemove = {
+                viewModel.removeItem(lineItem)
+            },
+            productId = lineItem.product_id,
+            navController = navController
+        )
     }
 }
 
@@ -233,62 +260,77 @@ fun ProductItem(
     onRemove: () -> Unit,
     productId: Long? = null,
     navController: NavController
-    ) {
-
-    Row(
+) {
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp)
-            .background(Color(0xFFF5F5F5), RoundedCornerShape(10.dp))
-            .padding(10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(15.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
     ) {
-        AsyncImage(
-            model = imageUrl,
-            contentDescription = productName,
+        Row(
             modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .clickable {
-                    Log.i("ProductItem", "Product ID: $productId")
-                    navController.navigate("productDetails/$productId")
-                },
-            contentScale = ContentScale.Crop
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = productName,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = primary
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = productName,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .clickable {
+                        Log.i("ProductItem", "Product ID: $productId")
+                        navController.navigate("productDetails/$productId")
+                    },
+                contentScale = ContentScale.Crop
             )
-            Spacer(modifier = Modifier.height(5.dp))
 
-            Text(
-                text = productBrand,
-                color = Color.Gray,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = productName,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = primary
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Text(
+                    text = productBrand,
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Text(
+                    text = price,
+                    color = Color.Gray,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.W400
+                )
+            }
+
+            QuantitySelector(
+                quantity = quantity,
+                onIncrement = onIncrement,
+                onDecrement = onDecrement
             )
-            Spacer(modifier = Modifier.height(5.dp))
 
-            Text(text = price, color = Color.Gray, fontSize = 16.sp, fontWeight = FontWeight.W400)
+            Icon(
+                painter = painterResource(id = R.drawable.ic_delete),
+                contentDescription = "Remove",
+                tint = Color.Red,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(30.dp)
+                    .clickable { onRemove() }
+            )
         }
-
-        QuantitySelector(quantity = quantity, onIncrement = onIncrement, onDecrement = onDecrement)
-
-        Icon(
-            painter = painterResource(id = R.drawable.ic_delete),
-            contentDescription = "Remove",
-            tint = Color.Red,
-            modifier = Modifier
-                .padding(8.dp)
-                .size(30.dp)
-                .clickable { onRemove() }
-        )
     }
 }
 
@@ -327,10 +369,26 @@ fun CheckoutButton(
     totalItems: Int,
     viewModel: ShoppingCartViewModel
 ) {
+    val context = LocalContext.current
+    val scale = remember { Animatable(1f) }
 
-    if (totalItems == 15){
-        Toast.makeText(LocalContext.current, "Capacity full for you", Toast.LENGTH_SHORT).show()
+    LaunchedEffect(totalItems) {
+        if (totalItems > 0) {
+            scale.animateTo(
+                targetValue = 1.1f,
+                animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+            )
+            scale.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+            )
+        }
     }
+
+    if (totalItems == 15) {
+        Toast.makeText(context, "Capacity full for you", Toast.LENGTH_SHORT).show()
+    }
+
     Button(
         onClick = {
             navController.navigate("checkout")
@@ -339,7 +397,8 @@ fun CheckoutButton(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .height(50.dp),
+            .height(50.dp)
+            .scale(scale.value),
         shape = RoundedCornerShape(25.dp),
         colors = ButtonDefaults.buttonColors(primary)
     ) {
