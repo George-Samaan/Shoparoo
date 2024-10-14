@@ -3,6 +3,8 @@ package com.example.shoparoo.ui.settingsScreen.view
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -58,6 +60,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
@@ -104,7 +107,7 @@ fun ProfileScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-             .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState())
             .background(Color(0xFFF7F7F7))
     ) {
         // Profile Header with background
@@ -388,47 +391,23 @@ fun ContactUs() {
 
     Column(modifier = Modifier.padding(10.dp)) {
 
+
         Row {
-            Text(text = stringResource(R.string.contact_number_text), fontSize = 14.sp)
+            Text(text = "Contact Us: ", fontSize = 14.sp)
             Spacer(modifier = Modifier.width(5.dp))
             Text(
-                text = stringResource(R.string.contact_number),
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .clickable {
-                        val clip = ClipData.newPlainText(
-                            "Contact Number",
-                            getString(context, R.string.contact_number)
-                        )
-                        clipboardManager.setPrimaryClip(clip)
-                        Toast
-                            .makeText(
-                                context,
-                                "Copied to clipboard!",
-                                Toast.LENGTH_SHORT
-                            )
-                            .show()
-                    }
-            )
-        }
-        Row {
-            Text(text = stringResource(R.string.email_text), fontSize = 14.sp)
-            Spacer(modifier = Modifier.width(5.dp))
-            Text(
-                text = stringResource(R.string.email_contact),
-                fontSize = 14.sp,
+                text = "Here",
+                //stringResource(R.string.email_contact),
+                fontSize = 14.sp, fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .padding(bottom = 20.dp)
                     .clickable {
-                        val clip = ClipData.newPlainText(
-                            "Email Contact",
-                            getString(context, R.string.email_contact)
-                        )
-                        clipboardManager.setPrimaryClip(clip)
-                        Toast
-                            .makeText(context, "Copied to clipboard!", Toast.LENGTH_SHORT)
-                            .show()
+                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                            data = Uri.parse("mailto:Shoparoo@gmail.com")
+                            putExtra(Intent.EXTRA_SUBJECT, "Subject here")
+                            putExtra(Intent.EXTRA_TEXT, "Body of the email here")
+                        }
+                        startActivity(context, intent, null)
                     }
             )
         }
