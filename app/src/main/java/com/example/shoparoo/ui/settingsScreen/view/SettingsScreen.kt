@@ -136,7 +136,7 @@ fun ProfileScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
             SettingsCardItem(
                 title = stringResource(R.string.contact_us),
-                icon = R.drawable.ic_contact_us,
+                icon = R.drawable.baseline_email_24,
                 onClick = { showContactUsSheet.value = !showContactUsSheet.value }
             )
         }
@@ -496,17 +496,64 @@ fun AboutUs() {
         "Galal Ahmed Galal",
         "Ahmed Gamal Mahmoud"
     )
-    LazyColumn {
-        items(names) {
-            Row(
+    val context = LocalContext.current
+
+            Row (
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 10.dp, horizontal = 20.dp)
             ) {
-                Text(text = it)
+                Text(
+                    text = "Developed by: ",
+                )
+                Column {
+                    Text(
+                        "Ahmed Gamal ",
+                        Modifier.clickable {
+                            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                data = Uri.parse("mailto:agamal00500@gmail.com")
+                                putExtra(Intent.EXTRA_SUBJECT, "Subject here")
+                                putExtra(Intent.EXTRA_TEXT, "Body of the email here")
+                            }
+                            startActivity(context, intent, null)
+                        },
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+
+                        )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Text(
+                        "Galal Ahmed ",
+                        Modifier.clickable {
+                            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                data = Uri.parse("mailto:ga71387@gmail.com")
+                                putExtra(Intent.EXTRA_SUBJECT, "Subject here")
+                                putExtra(Intent.EXTRA_TEXT, "Body of the email here")
+                            }
+                            startActivity(context, intent, null)
+                        },
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+
+                        )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Text(
+                        "George michel ", Modifier.clickable {
+                            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                data = Uri.parse("mailto:georgesmichel2009@gmail.com")
+                                putExtra(Intent.EXTRA_SUBJECT, "Subject here")
+                                putExtra(Intent.EXTRA_TEXT, "Body of the email here")
+                            }
+                            startActivity(context, intent, null)
+                        },
+                        fontSize = 16.sp,
+                       fontWeight = FontWeight.Bold
+
+                    )
+                }
             }
-        }
-    }
+
+
 }
 
 @Composable
