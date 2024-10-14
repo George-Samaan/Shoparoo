@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -59,6 +60,13 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.androidx.junit.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -66,4 +74,75 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    // Navigation
+    implementation("androidx.navigation:navigation-compose:2.8.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
+    //ViewModel
+    implementation("androidx.lifecycle:lifecycle-runtime-compose-android:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
+
+
+
+    // Slider
+    implementation("com.google.accompanist:accompanist-pager:0.36.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.32.0") // For indicators
+    //retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    //coil for images
+    implementation("io.coil-kt:coil-compose:2.0.0")
+
+    //SwipeToRefresh
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0") // Check for the latest version
+
+    //google icons
+    implementation("androidx.compose.material:material-icons-extended-android:1.7.2")
+
+
+    //rating bar
+    implementation("com.github.SmartToolFactory:Compose-RatingBar:1.1.1")
+    implementation("com.github.SmartToolFactory:Compose-RatingBar:1.0.0")
+    implementation("com.github.a914-gowtham:compose-ratingbar:1.3.12")
+
+    //Animation
+    implementation("com.airbnb.android:lottie-compose:6.0.0")
+    implementation("com.github.stevdza-san:OneTapCompose:1.0.14")
+
+    //implementation ("com.paymob.accept:acceptsdk:2.3.5")
+
+    implementation("androidx.webkit:webkit:1.5.0")
+
+    // OkHttp Logging (optional, for debugging)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
+
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    implementation("com.github.mumayank:AirLocation:2.5.2")
+
+    implementation("com.github.KeepSafe:TapTargetView:1.13.2")
+
+
+    // Testing
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("androidx.test:core:1.4.0")
+    testImplementation("org.robolectric:robolectric:4.10")
+    testImplementation("androidx.arch.core:core-testing:2.1.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("androidx.test.ext:junit:1.1.3")
+    testImplementation("org.robolectric:robolectric:4.7.3")
+
+    // Mockito for mocking
+    testImplementation ("org.mockito:mockito-core:3.12.4")
+    testImplementation ("org.mockito:mockito-inline:3.12.4")
+    testImplementation ("org.mockito.kotlin:mockito-kotlin:4.0.0")
+
+    testImplementation ("app.cash.turbine:turbine:0.5.2")
+
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
+
+
 }
