@@ -189,9 +189,9 @@ fun HomeScreenDesign(
                     is ApiState.Failure -> {
                         item {
                             Text(
-                                text = "Error fetching brands",
+                                text = "Error fetching Data ... Swipe To Refresh",
                                 color = Color.Red,
-                                modifier = Modifier.padding(16.dp)
+                                modifier = Modifier.padding(20.dp)
                             )
                         }
                     }
@@ -209,17 +209,7 @@ fun HomeScreenDesign(
                 }
                 when (forYouProductsState) {
                     is ApiState.Loading -> {}
-                    is ApiState.Failure -> {
-                        item {
-                            val errorMessage = (forYouProductsState)
-                            Text(
-                                text = "Error fetching products: $errorMessage",
-                                color = Color.Red,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    }
-
+                    is ApiState.Failure -> {}
                     is ApiState.Success -> {
                         val forYouProducts = (forYouProductsState).data
                         item {
@@ -574,7 +564,8 @@ fun ProductCard(
                         .padding(8.dp)
                         .size(animatedSize.dp) // Use the animated size
                         .clickable {
-                            val vibrationEffect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                            val vibrationEffect =
+                                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
                             vibrator.cancel()
                             vibrator.vibrate(vibrationEffect)
                             isFav = !isFav
