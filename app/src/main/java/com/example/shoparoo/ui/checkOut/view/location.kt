@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.example.shoparoo.ui.checkOut
+package com.example.shoparoo.ui.checkOut.view
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -141,14 +141,15 @@ fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long, ) {
         Column(modifier = Modifier.padding(start = 10.dp)) {
             Text(
                 text = locationText,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp
             )
             // Edit manually button
             Spacer(modifier = Modifier.height(5.dp))
             Text(
                 text = "Edit Location",
                 color = Color.Blue,
+                fontSize = 16.sp,
                 modifier = Modifier.clickable { showManualDialog = true }
             )
         }
@@ -343,6 +344,19 @@ fun LocationPickerMap(onLocationPicked: (String) -> Unit) {
                 googleMap.uiSettings.isZoomControlsEnabled = true
                 googleMap.uiSettings.isMyLocationButtonEnabled = true
 
+                val egyptLatLng = com.google.android.gms.maps.model.LatLng(30.033333, 31.233334)
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(egyptLatLng, 6f)
+                googleMap.animateCamera(cameraUpdate, 2000, null)
+
+                // Short Click: Animate and zoom in
+                googleMap.setOnMapClickListener { latLng ->
+                    googleMap.clear()
+                    googleMap.addMarker(MarkerOptions().position(latLng))
+
+                    val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 11f)
+                    googleMap.animateCamera(cameraUpdate, 2000, null)
+                }
+
                 googleMap.setOnMapLongClickListener { latLng ->
                     val addresses: List<Address>?
 
@@ -352,6 +366,9 @@ fun LocationPickerMap(onLocationPicked: (String) -> Unit) {
                             val address = addresses[0].getAddressLine(0)
                             googleMap.clear()
                             googleMap.addMarker(MarkerOptions().position(latLng).title(address))
+
+                            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 14f)
+                            googleMap.animateCamera(cameraUpdate, 2000, null)
                             onLocationPicked(address)
                         }
                     } catch (e: IOException) {
@@ -359,6 +376,7 @@ fun LocationPickerMap(onLocationPicked: (String) -> Unit) {
                     }
                 }
 
+                // Handle search functionality
                 if (searchQuery.isNotEmpty()) {
                     val addresses = geocoder.getFromLocationName(searchQuery, 1)
                     if (!addresses.isNullOrEmpty()) {
@@ -369,7 +387,9 @@ fun LocationPickerMap(onLocationPicked: (String) -> Unit) {
                         )
                         googleMap.clear()
                         googleMap.addMarker(MarkerOptions().position(latLng).title(location.getAddressLine(0)))
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+
+                        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 12f)
+                        googleMap.animateCamera(cameraUpdate, 2000, null)
                         searchError = false
                     } else {
                         searchError = true
@@ -378,7 +398,7 @@ fun LocationPickerMap(onLocationPicked: (String) -> Unit) {
             }
         }
 
-        // Search Bar
+        // Search Bar UI
         SearchBar(
             searchQuery = searchQuery,
             onSearchQueryChange = { searchQuery = it },

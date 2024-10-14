@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.checkOut
+package com.example.shoparoo.ui.checkOut.view
 
 import android.content.Context
 import androidx.compose.foundation.background

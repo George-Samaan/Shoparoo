@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.checkOut
+package com.example.shoparoo.ui.checkOut.view
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Row
@@ -87,7 +87,10 @@ fun ApplyCoupons(
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(primary)
         ) {
-            Text(text = "Apply", color = Color.White)
+            Text(
+                text = "Apply",
+                color = Color.White,
+            )
         }
     }
 }

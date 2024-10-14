@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -21,6 +20,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.shoparoo.R
+import com.example.shoparoo.ui.checkOut.view.AppHeader
+import com.example.shoparoo.ui.checkOut.view.ApplyCoupons
+import com.example.shoparoo.ui.checkOut.view.CheckoutButtonCheck
+import com.example.shoparoo.ui.checkOut.view.ChoosePaymentMethod
+import com.example.shoparoo.ui.checkOut.view.Location
+import com.example.shoparoo.ui.checkOut.view.OrderSummary
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -71,9 +76,6 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
                     val address = order.shipping_address
                     Log.d("CheckoutScreen", "Address: $address")
 
-
-
-
                     OrderSummary(
                         subtotal = subtotal,
                         totalTax = totalTax,
@@ -83,7 +85,6 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
                 }
                 viewModel.getDraftOrderDetails()
             }
-
 
             item { Spacer(modifier = Modifier.height(16.dp)) }
 

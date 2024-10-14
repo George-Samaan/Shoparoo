@@ -58,6 +58,7 @@ import com.example.shoparoo.ui.ordersScreen.viewModel.OrdersViewModel
 import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.theme.darkGreen
 import com.example.shoparoo.ui.theme.primary
+import networkListener
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -65,67 +66,86 @@ import java.util.Locale
 fun OrderScreen(
     orderViewModel: OrdersViewModel,
 ) {
-    LaunchedEffect(Unit) {
-        orderViewModel.getOrders()
-    }
+    val isNetworkAvailable = networkListener()
 
-    val ordersState by orderViewModel.orders.collectAsState()
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp, start = 55.dp)
+    if (!isNetworkAvailable.value) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Orders",
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                color = primary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(end = 50.dp)
-            )
+            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp, 1f)
         }
-        Spacer(modifier = Modifier.size(16.dp))
-        when (ordersState) {
-            is ApiState.Loading -> {
-                LoadingIndicator()
+    } else {
+        LaunchedEffect(Unit) {
+            orderViewModel.getOrders()
+        }
+
+        val ordersState by orderViewModel.orders.collectAsState()
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, start = 55.dp)
+            ) {
+                Text(
+                    text = "Orders",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp,
+                    color = primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(end = 50.dp)
+                )
             }
+            Spacer(modifier = Modifier.size(16.dp))
+            when (ordersState) {
+                is ApiState.Loading -> {
+                    LoadingIndicator()
+                }
 
-            is ApiState.Success -> {
-                val orders = (ordersState as ApiState.Success).data as? List<Order> ?: emptyList()
-                Log.d("OrdersScreen", "Orders loaded: $orders")
-                if (orders.isEmpty()) {
-                    Column(
-                        Modifier
-                            .padding(top = 45.dp)
-                            .fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-
-//                        Spacer(Modifier.padding(top = 120.dp))
-                        ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
-                        androidx.compose.material.Text(
-                            text = "No Items Found",
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp),
-                            textAlign = TextAlign.Center
-                        )
+                is ApiState.Success -> {
+                    val orders =
+                        (ordersState as ApiState.Success).data as? List<Order> ?: emptyList()
+                    Log.d("OrdersScreen", "Orders loaded: $orders")
+                    if (orders.isEmpty()) {
+                        Column(
+                            Modifier
+                                .padding(top = 45.dp)
+                                .fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
+                            Text(
+                                text = "No Items Found",
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 16.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    } else {
+                        OrderList(orders)
                     }
-                } else
-                    OrderList(orders)
-            }
+                }
 
-            is ApiState.Failure -> {
-                val errorMessage = (ordersState as ApiState.Failure).message
-                Log.d("OrdersScreen", "Failed to load orders: $errorMessage")
+                is ApiState.Failure -> {
+                    val errorMessage = (ordersState as ApiState.Failure).message
+                    Log.d("OrdersScreen", "Failed to load orders: $errorMessage")
+                    Text(
+                        text = "Failed to load orders",
+                        color = Color.Red,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }

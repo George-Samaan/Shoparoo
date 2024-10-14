@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.example.shoparoo.ui.checkOut
+package com.example.shoparoo.ui.checkOut.view
 
 import android.util.Log
 import android.widget.Toast
@@ -74,7 +74,7 @@ fun ChoosePaymentMethod(
             "Choose Payment Method",
             modifier = Modifier.fillMaxWidth(),
             fontWeight = FontWeight.Bold,
-            fontSize = 16.sp
+            fontSize = 18.sp
         )
         Spacer(Modifier.height(10.dp))
 
@@ -102,11 +102,11 @@ fun ChoosePaymentMethod(
                 "Cash on delivery",
                 modifier = Modifier
                     .padding(start = 5.dp),
-                fontSize = 14.sp
+                fontSize = 16.sp
             )
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(15.dp))
 
         // Credit or Debit Card option
         Row(
@@ -132,7 +132,7 @@ fun ChoosePaymentMethod(
                 "Credit or Debit Card",
                 modifier = Modifier
                     .padding(start = 5.dp),
-                fontSize = 14.sp
+                fontSize = 16.sp
             )
         }
 
@@ -450,7 +450,8 @@ fun CheckoutButtonCheck(
 
     // Handle the button click
     Row(horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(16.dp)
         ) {
         Button(
@@ -516,7 +517,7 @@ fun CheckoutButtonCheck(
             } else {
                 Text(
                     buttonText,
-                    fontSize = 20.sp
+                    fontSize = 18.sp
                 )
             }
 

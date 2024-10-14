@@ -32,8 +32,8 @@ import com.example.shoparoo.data.db.remote.RemoteDataSourceImpl
 import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
-import com.example.shoparoo.ui.Favourites.FavouritesViewModel
-import com.example.shoparoo.ui.Favourites.FavouritesViewModelFactory
+import com.example.shoparoo.ui.Favourites.viewModel.FavouritesViewModel
+import com.example.shoparoo.ui.Favourites.viewModel.FavouritesViewModelFactory
 import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.productScreen.view.ProductGrid

@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.settingsScreen
+package com.example.shoparoo.ui.settingsScreen.view
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -76,6 +76,7 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import networkListener
 
 
 @Composable
@@ -89,6 +90,8 @@ fun ProfileScreen(navController: NavController) {
     val savedCurrency = getCurrencyPreference(context)
     var selectedCurrency by remember { mutableStateOf(savedCurrency) }
     val showSignOutDialog = remember { mutableStateOf(false) }
+    val isNetworkAvailable = networkListener()
+
 
 
 
@@ -138,10 +141,19 @@ fun ProfileScreen(navController: NavController) {
                 Currency(
                     selectedCurrency = selectedCurrency,
                     onCurrencySelected = { currency ->
-                        selectedCurrency = currency
-                        saveCurrencyPreference(context, currency)
-                        //   Toast.makeText(context, "Currency changed to $currency", Toast.LENGTH_SHORT).show()
-                        showCurrencySheet = false
+                        if (!isNetworkAvailable.value) {
+                            Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            selectedCurrency = currency
+                            saveCurrencyPreference(context, currency)
+                            Toast.makeText(
+                                context,
+                                "Currency changed to $currency",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            showCurrencySheet = false
+                        }
                     }
                 )
             }
@@ -166,18 +178,23 @@ fun ProfileScreen(navController: NavController) {
         }
         val authViewModel = viewModel<AuthViewModel>()
         val isSignedIn by authViewModel.authState.collectAsState()
-        SignOutButton(showSignOutDialog = showSignOutDialog,isSignedIn,navController)
+        SignOutButton(showSignOutDialog = showSignOutDialog, isSignedIn, navController)
         if (showSignOutDialog.value) {
             SignOutConfirmationDialog(
                 onDismiss = { showSignOutDialog.value = false },
                 onConfirm = {
-                    showSignOutDialog.value = false
-                    authViewModel.signOut()
-                    navController.navigate("login") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
+                    if (!isNetworkAvailable.value) {
+                        Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Signing out...", Toast.LENGTH_SHORT).show()
+                        showSignOutDialog.value = false
+                        authViewModel.signOut()
+                        navController.navigate("login") {
+                            popUpTo(navController.graph.startDestinationId) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
                         }
-                        launchSingleTop = true
                     }
                 }
             )
@@ -207,7 +224,7 @@ fun SignOutButton(
             .clickable {
                 if (isSignedIn == AuthState.Authenticated || isSignedIn == AuthState.UnVerified)
                     showSignOutDialog.value = true
-                else{
+                else {
                     navController.navigate("login") {
                         popUpTo(navController.graph.startDestinationId) {
                             inclusive = true
@@ -545,7 +562,7 @@ fun Currency(selectedCurrency: String, onCurrencySelected: (String) -> Unit) {
 
 
     LazyColumn {
-        items(currencies) { (currency, flag,actual ) ->
+        items(currencies) { (currency, flag, actual) ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

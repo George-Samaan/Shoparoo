@@ -1,6 +1,7 @@
 package com.example.shoparoo.ui.Favourites
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.shoparoo.ui.Favourites.viewModel.FavouritesViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.FakeRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

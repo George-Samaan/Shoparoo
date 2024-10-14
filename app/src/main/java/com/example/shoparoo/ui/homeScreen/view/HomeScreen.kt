@@ -76,8 +76,8 @@ import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
 import com.example.shoparoo.model.SmartCollectionsItem
-import com.example.shoparoo.ui.Favourites.FavouritesViewModel
-import com.example.shoparoo.ui.Favourites.FavouritesViewModelFactory
+import com.example.shoparoo.ui.Favourites.viewModel.FavouritesViewModel
+import com.example.shoparoo.ui.Favourites.viewModel.FavouritesViewModelFactory
 import com.example.shoparoo.ui.auth.view.LoginScreen
 import com.example.shoparoo.ui.auth.view.ReusableLottie
 import com.example.shoparoo.ui.auth.viewModel.AuthState
@@ -96,7 +96,7 @@ import com.example.shoparoo.ui.ordersScreen.viewModel.OrdersViewModelFactory
 import com.example.shoparoo.ui.productScreen.view.ProductsScreen
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModel
 import com.example.shoparoo.ui.productScreen.viewModel.ProductViewModelFactory
-import com.example.shoparoo.ui.settingsScreen.ProfileScreen
+import com.example.shoparoo.ui.settingsScreen.view.ProfileScreen
 import com.example.shoparoo.ui.shoppingCart.view.ShoppingCartScreen
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModelFactory
@@ -460,7 +460,7 @@ fun ProductCard(
     currencySymbol: String,
     onClick: () -> Unit,
     viewModel: FavouritesViewModel,
-    id : Long ,
+    id: Long,
     inFav: Boolean = false,
     onClickDeleteFav: () -> Unit = {}, // Callback for the delete icon
 
@@ -570,11 +570,12 @@ fun ProductCard(
                         .padding(8.dp)
                         .size(24.dp)
                         .clickable {
-                          val vibrationEffect1 =  VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                            val vibrationEffect1 =
+                                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
                             vibrator.cancel()
                             vibrator.vibrate(vibrationEffect1)
                             viewModel.addFav(id)
-/*                           if (isFav) {
+                            /*                           if (isFav) {
                                Toast.makeText(context, "Removed to Favourites", Toast.LENGTH_SHORT).show()
                            } else {
                                Toast.makeText(context, "Added from Favourites", Toast.LENGTH_SHORT).show()

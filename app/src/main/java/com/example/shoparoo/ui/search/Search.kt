@@ -45,8 +45,8 @@ import com.example.shoparoo.data.network.ApiClient
 import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.ProductsItem
-import com.example.shoparoo.ui.Favourites.FavouritesViewModel
-import com.example.shoparoo.ui.Favourites.FavouritesViewModelFactory
+import com.example.shoparoo.ui.Favourites.viewModel.FavouritesViewModel
+import com.example.shoparoo.ui.Favourites.viewModel.FavouritesViewModelFactory
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
 import com.example.shoparoo.ui.productScreen.view.LoadingIndicator

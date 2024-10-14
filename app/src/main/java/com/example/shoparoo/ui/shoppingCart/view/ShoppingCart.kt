@@ -62,6 +62,7 @@ import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
+import networkListener
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -73,83 +74,92 @@ fun ShoppingCartScreen(
 ) {
     val cartItems by viewModel.cartItems.collectAsState()
     val isLoading = remember { mutableStateOf(true) }
+    val isNetworkAvailable = networkListener()
 
-    LaunchedEffect(Unit) {
-        isLoading.value = true
-        viewModel.getCartItems()
-        delay(900)
-        isLoading.value = false
-    }
-
-    Scaffold {
-        if (isLoading.value) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                LoadingIndicator()
-            }
-        } else if (cartItems.isEmpty()) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-            ) {
-                Text(
-                    text = "Cart",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp,
-                    color = primary,
-                    textAlign = TextAlign.Center
-                )
-                Column(
-                    Modifier
-                        .padding(top = 80.dp)
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+    if (!isNetworkAvailable.value) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp, 1f)
+        }
+    } else {
+        LaunchedEffect(Unit) {
+            isLoading.value = true
+            viewModel.getCartItems()
+            delay(900)
+            isLoading.value = false
+        }
+        Scaffold {
+            if (isLoading.value) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    //   Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favourites", modifier = Modifier.size(300.dp))
-
-                    ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
-                    androidx.compose.material.Text(
-                        text = "No Items Found",
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    LoadingIndicator()
                 }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                item {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp)
+            } else if (cartItems.isEmpty()) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                ) {
+                    Text(
+                        text = "Cart",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp,
+                        color = primary,
+                        textAlign = TextAlign.Center
+                    )
+                    Column(
+                        Modifier
+                            .padding(top = 80.dp)
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = "Cart",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp,
-                            color = primary,
-                            textAlign = TextAlign.Center,
+                        //   Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favourites", modifier = Modifier.size(300.dp))
+
+                        ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
+                        androidx.compose.material.Text(
+                            text = "No Items Found",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-                items(cartItems) { lineItem ->
-                    ProductListItem(lineItem, viewModel, navController)
-                }
-                item {
-                    val totalItems = cartItems.sumOf { it.quantity }
-                    CheckoutButton(navControllerBottom, totalItems, viewModel)
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    item {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 10.dp)
+                        ) {
+                            Text(
+                                text = "Cart",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 22.sp,
+                                color = primary,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                    items(cartItems) { lineItem ->
+                        ProductListItem(lineItem, viewModel, navController)
+                    }
+                    item {
+                        val totalItems = cartItems.sumOf { it.quantity }
+                        CheckoutButton(navControllerBottom, totalItems, viewModel)
+                    }
                 }
             }
         }

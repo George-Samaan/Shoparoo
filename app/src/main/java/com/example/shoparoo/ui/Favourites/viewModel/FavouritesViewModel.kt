@@ -1,4 +1,4 @@
-package com.example.shoparoo.ui.Favourites
+package com.example.shoparoo.ui.Favourites.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
