@@ -74,7 +74,7 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
             val draftOrder = _draftOrderDetails.value?.copy(shipping_address = address)
             if (draftOrder != null) {
                 val updatedDraftOrder = repository.updateDraftOrder(DraftOrderRequest(draftOrder))
-                _draftOrderDetails.value = updatedDraftOrder as? DraftOrderDetails
+//                _draftOrderDetails.value = updatedDraftOrder as? DraftOrderDetails
             }
         }
     }
