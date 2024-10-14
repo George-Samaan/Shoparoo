@@ -1,6 +1,7 @@
 package com.example.shoparoo.ui.auth.view
 
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,9 +27,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Lifecycle.*
+import androidx.lifecycle.Lifecycle.State.*
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.shoparoo.R
+import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 
 
@@ -44,8 +53,31 @@ fun UnVerified(navController: NavHostController) {
 
         val context = LocalContext.current
         val viewModel = viewModel<AuthViewModel>()
+    /*    val lifecycleOwner = LocalLifecycleOwner.current
+        val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
+        val authViewModel = viewModel<AuthViewModel>()
+        val authState by authViewModel.authState.collectAsState()
 
-
+        LaunchedEffect(lifecycleState) {
+            // Do something with your state
+            // You may want to use DisposableEffect or other alternatives
+            // instead of LaunchedEffect
+            when (lifecycleState) {
+                Lifecycle.State.DESTROYED -> {}
+                Lifecycle.State.INITIALIZED -> {}
+                Lifecycle.State.CREATED -> {}
+                Lifecycle.State.STARTED -> {}
+                Lifecycle.State.RESUMED -> {
+                    authViewModel.refreshVerification()
+                }
+            }
+        }
+        if(authState== AuthState.Authenticated ){
+            navController.navigate("home") {
+                popUpTo("splash") { inclusive = true }
+            }
+        }
+*/
         Box(
             modifier = Modifier
                 .fillMaxWidth()

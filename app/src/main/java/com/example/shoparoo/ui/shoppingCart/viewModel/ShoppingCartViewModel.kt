@@ -32,6 +32,9 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
     val _draftOrderDetails = MutableStateFlow<DraftOrderDetails?>(null)
     val draftOrderDetails = _draftOrderDetails.asStateFlow()
 
+    val _shippingAddress = MutableStateFlow<Pair<String,String>>(Pair("",""))
+    val shippingAddress = _shippingAddress.asStateFlow()
+
     fun getDraftOrderDetails() {
         viewModelScope.launch {
             repository.getDraftOrder()
@@ -204,6 +207,7 @@ class ShoppingCartViewModel(private val repository: Repository) : ViewModel() {
                 if (document != null) {
                      location = document.data?.get("location").toString()
                      phoneNum = document.data?.get("phoneNum").toString()
+                    _shippingAddress.value = Pair(location, phoneNum)
                     Log.d("ShoppingCartViewModel", "Location: $location, Phone Number: $phoneNum")
                 } else {
                     Log.d("ShoppingCartViewModel", "No such document")

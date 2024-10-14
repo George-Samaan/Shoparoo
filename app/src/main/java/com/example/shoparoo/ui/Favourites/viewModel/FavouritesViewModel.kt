@@ -108,7 +108,7 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
         viewModelScope.launch {
             _draftOrderFav.value = ApiState.Loading
             repository.getDraftOrder().catch {
-                _draftOrderFav.value = ApiState.Failure(it.message ?: "Unknown Error")
+               // _draftOrderFav.value = ApiState.Failure(it.message ?: "Unknown Error")
             }.collect {
                 _draftOrderFav.value = ApiState.Success(it)
                 var filter = filterByUser(it, userMail)
