@@ -46,12 +46,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
+import com.example.shoparoo.R
 import com.example.shoparoo.model.ShippingAddress
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.example.shoparoo.ui.theme.grey
@@ -93,7 +95,7 @@ fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long) {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             getLocation(context) { address ->
-                locationText = address ?: "Unable to fetch address"
+                locationText = address ?: context.getString(R.string.unable_to_fetch_address)
             }
         } else {
             permissionLauncher.launch(permission)
@@ -140,11 +142,6 @@ fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long) {
             contentAlignment = Alignment.Center
         ) {
             Text(text = "📍", fontSize = 28.sp)
-            /*Image(
-                painter = painterResource(id = R.drawable.ic_location),
-                contentDescription = stringResource(R.string.back),
-                modifier = Modifier.size(24.dp)
-            )*/
         }
         Column(modifier = Modifier.padding(start = 10.dp)) {
             Text(
@@ -186,7 +183,7 @@ fun ManualLocationInputDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Enter Location Details",
+                    text = stringResource(R.string.enter_location_details),
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp,
                     modifier = Modifier.padding(bottom = 10.dp)
@@ -203,28 +200,28 @@ fun ManualLocationInputDialog(
                     shape = RoundedCornerShape(25.dp),
                 )
                 if (isError && streetName.isBlank()) {
-                    ErrorText("Street Name cannot be empty")
+                    ErrorText(stringResource(R.string.street_name_cannot_be_empty))
                 }
 
                 // Building Name/Number Field
                 OutlinedTextField(
                     value = buildingNumber,
                     onValueChange = { buildingNumber = it },
-                    label = { Text("Building Name/Number") },
+                    label = { Text(stringResource(R.string.building_name_number)) },
                     isError = isError && buildingNumber.isBlank(),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(25.dp),
                 )
                 if (isError && buildingNumber.isBlank()) {
-                    ErrorText("Building Name/Number cannot be empty")
+                    ErrorText(stringResource(R.string.building_name_number_cannot_be_empty))
                 }
 
                 // Floor/Villa Number Field
                 OutlinedTextField(
                     value = floorNumber,
                     onValueChange = { floorNumber = it },
-                    label = { Text("Floor/Villa Number") },
+                    label = { Text(stringResource(R.string.floor_villa_number)) },
                     isError = isError && floorNumber.isBlank(),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
@@ -232,7 +229,7 @@ fun ManualLocationInputDialog(
 
                     )
                 if (isError && floorNumber.isBlank()) {
-                    ErrorText("Floor/Villa Number cannot be empty")
+                    ErrorText(stringResource(R.string.floor_villa_number_cannot_be_empty))
                 }
 
                 // Add and Cancel Buttons
@@ -312,7 +309,7 @@ fun SearchBar(searchQuery: String, onSearchQueryChange: (String) -> Unit, search
         TextField(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
-            label = { Text("Search here ") },
+            label = { Text(stringResource(R.string.search_here)) },
             isError = searchError,
             modifier = Modifier
                 .fillMaxWidth()
@@ -329,7 +326,7 @@ fun SearchBar(searchQuery: String, onSearchQueryChange: (String) -> Unit, search
         )
         if (searchError) {
             Text(
-                text = "Location not found",
+                text = stringResource(R.string.location_not_found),
                 color = Color.Red,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(top = 4.dp)
@@ -422,7 +419,7 @@ fun LocationPickerMap(onLocationPicked: (String) -> Unit) {
         )
 
         Text(
-            text = "Long press to choose location",
+            text = stringResource(R.string.long_press_to_choose_location),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(16.dp)

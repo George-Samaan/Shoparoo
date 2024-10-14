@@ -17,9 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.shoparoo.R
 import com.example.shoparoo.ui.theme.primary
 
 @Composable
@@ -60,7 +62,7 @@ fun OrderSummary(
             .padding(16.dp)
     ) {
         Text(
-            text = "Order Summary",
+            text = stringResource(R.string.order_summary),
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
             color = primary

@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -123,7 +124,7 @@ fun OrderScreen(
                         ) {
                             ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
                             Text(
-                                text = "No Items Found",
+                                text = stringResource(R.string.no_items_foundd),
                                 fontSize = 30.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier
@@ -283,9 +284,10 @@ fun OrderItem(order: Order, navController: NavController) {
                                             Image(
                                                 painter = rememberAsyncImagePainter(model = property.value),
                                                 contentDescription = null,
-                                                modifier = Modifier.clickable {
-                                                    navController.navigate("productDetails/${lineItem.product_id}")
-                                                }
+                                                modifier = Modifier
+                                                    .clickable {
+                                                        navController.navigate("productDetails/${lineItem.product_id}")
+                                                    }
                                                     .size(80.dp)
                                                     .padding(end = 8.dp)
                                             )

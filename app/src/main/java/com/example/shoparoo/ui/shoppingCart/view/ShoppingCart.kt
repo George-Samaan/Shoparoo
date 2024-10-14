@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -71,7 +72,6 @@ import com.example.shoparoo.ui.theme.grey
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
 import networkListener
-import kotlin.concurrent.thread
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -131,8 +131,6 @@ fun ShoppingCartScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        //   Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favourites", modifier = Modifier.size(300.dp))
-
                         ReusableLottie(R.raw.cart, null, size = 400.dp, 0.66f)
                         androidx.compose.material.Text(
                             text = "No Items Found",
@@ -224,7 +222,10 @@ fun ProductListItem(
             onIncrement = {
                 val currentQ = lineItem.quantity
                 if (currentQ >= 5) {
-                    Toast.makeText(context, "Capacity full for you", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.capacity_full_for_you), Toast.LENGTH_SHORT
+                    ).show()
                 } else {
                     viewModel.increaseQuantity(lineItem)
                 }
@@ -283,7 +284,6 @@ fun ProductItem(
             )
 
             Spacer(modifier = Modifier.width(16.dp))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = productName,
@@ -292,7 +292,6 @@ fun ProductItem(
                     color = primary
                 )
                 Spacer(modifier = Modifier.height(5.dp))
-
                 Text(
                     text = productBrand,
                     color = Color.Gray,
@@ -300,7 +299,6 @@ fun ProductItem(
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(modifier = Modifier.height(5.dp))
-
                 Text(
                     text = price,
                     color = Color.Gray,
@@ -308,13 +306,11 @@ fun ProductItem(
                     fontWeight = FontWeight.W400
                 )
             }
-
             QuantitySelector(
                 quantity = quantity,
                 onIncrement = onIncrement,
                 onDecrement = onDecrement
             )
-
             Icon(
                 painter = painterResource(id = R.drawable.ic_delete),
                 contentDescription = "Remove",
@@ -386,9 +382,6 @@ fun CheckoutButton(
     val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
 
     LaunchedEffect(lifecycleState) {
-        // Do something with your state
-        // You may want to use DisposableEffect or other alternatives
-        // instead of LaunchedEffect
         when (lifecycleState) {
             Lifecycle.State.DESTROYED -> {}
             Lifecycle.State.INITIALIZED -> {}
@@ -414,14 +407,12 @@ fun CheckoutButton(
     }
 
     if (totalItems == 15) {
-        Toast.makeText(context, "Capacity full for you", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, stringResource(R.string.capacity_full_for_youu), Toast.LENGTH_SHORT)
+            .show()
     }
 
     Button(
         onClick = {
-            //authViewModel.refreshVerification()
-            Log.e("xxx", "isauthuntivated ${isAuthenticated}")
-
             if (authState == AuthState.Authenticated) {
                 navControllerBottom.navigate("checkout")
             } else {
@@ -448,14 +439,14 @@ fun UnAuthorisedUser(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Authentication Required") },
-        text = { Text("You must verify your mail to access this feature.") },
+        title = { Text(stringResource(R.string.authentication_required)) },
+        text = { Text(stringResource(R.string.you_must_verify_your_mail_to_access_this_feature)) },
         confirmButton = {
             Button(onClick = {
                 onLogin()
                 onDismiss()
             }, colors = ButtonDefaults.buttonColors(primary)) {
-                Text("Verify")
+                Text(stringResource(R.string.verify))
             }
         },
         containerColor = Color.White,
@@ -464,7 +455,7 @@ fun UnAuthorisedUser(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(grey)
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

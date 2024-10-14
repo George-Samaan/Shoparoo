@@ -89,10 +89,17 @@ fun CouponsSliderWithIndicator(
                         .clip(RoundedCornerShape(28.dp))
                         .clickable {
                             if (imageList[page] == R.drawable.discount) {
-                                val clip = ClipData.newPlainText("Coupon Code", couponText)
+                                val clip = ClipData.newPlainText(
+                                    context.getString(R.string.coupon_code),
+                                    couponText
+                                )
                                 clipBoardManager.setPrimaryClip(clip)
                                 Toast
-                                    .makeText(context, "Coupon Code Copied", Toast.LENGTH_SHORT)
+                                    .makeText(
+                                        context,
+                                        context.getString(R.string.coupon_code_copied),
+                                        Toast.LENGTH_SHORT
+                                    )
                                     .show()
                             }
                         },

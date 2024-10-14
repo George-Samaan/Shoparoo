@@ -17,7 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.shoparoo.R
 import com.example.shoparoo.model.AppliedDiscount
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.example.shoparoo.ui.theme.primary
@@ -53,12 +55,15 @@ fun ApplyCoupons(
             onClick = {
                 // Check if the coupon is already applied
                 if (appliedDiscount != null) {
-                    Toast.makeText(context, "Coupon already applied", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.coupon_already_applied), Toast.LENGTH_SHORT
+                    ).show()
                     return@Button
                 }
 
                 val discountValue =
-                    if (couponText.value.isNotEmpty() && couponText.value == "Shoparoo20") {
+                    if (couponText.value.isNotEmpty() && couponText.value == context.getString(R.string.shoparoo20)) {
                         0.20 // 20% discount
                     } else {
                         0.0
@@ -67,7 +72,7 @@ fun ApplyCoupons(
                 if (discountValue > 0.0) {
                     val discount = AppliedDiscount(
                         value = discountValue * 100,
-                        value_type = "percentage",
+                        value_type = context.getString(R.string.percentage),
                         amount = discountValue
                     )
                     viewModel.applyDiscountToDraftOrder(draftOrderId, discount)
@@ -78,7 +83,10 @@ fun ApplyCoupons(
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
-                    Toast.makeText(context, "Invalid Coupon Code", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.invalid_coupon_code), Toast.LENGTH_SHORT
+                    ).show()
                     onApplyCoupon(0.0)
                 }
             },
@@ -88,7 +96,7 @@ fun ApplyCoupons(
             colors = ButtonDefaults.buttonColors(primary)
         ) {
             Text(
-                text = "Apply",
+                text = stringResource(R.string.apply),
                 color = Color.White,
             )
         }

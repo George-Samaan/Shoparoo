@@ -62,6 +62,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -180,7 +181,7 @@ fun HomeScreenDesign(
                             R.drawable.nike_ads,
                             R.drawable.discount
                         ),
-                        couponText = "Shoparoo20"
+                        couponText = stringResource(R.string.Shoparoo)
                     )
                 }
                 when (smartCollectionsState) {
@@ -188,7 +189,7 @@ fun HomeScreenDesign(
                     is ApiState.Failure -> {
                         item {
                             Text(
-                                text = "Error fetching Data ... Swipe To Refresh",
+                                text = stringResource(R.string.error_fetching_data_swipe_to_refresh),
                                 color = Color.Red,
                                 modifier = Modifier.padding(20.dp)
                             )
@@ -403,7 +404,7 @@ fun ForYouSection(
             .padding(start = 16.dp, end = 16.dp)
     ) {
         Text(
-            text = "For You",
+            text = stringResource(R.string.for_you),
             fontWeight = FontWeight.Bold,
             fontSize = 21.sp,
             modifier = Modifier.padding(bottom = 16.dp)
@@ -484,8 +485,6 @@ fun ProductCard(
     LaunchedEffect(favItems) {
         // viewModel.getFavourites()
     }
-
-
 
     Card(
         modifier = Modifier
@@ -571,14 +570,18 @@ fun ProductCard(
                             if (isFav) {
                                 viewModel.addFav(id)
                                 Toast
-                                    .makeText(context, "Adding to Favorites", Toast.LENGTH_SHORT)
+                                    .makeText(
+                                        context,
+                                        context.getString(R.string.adding_to_favorites),
+                                        Toast.LENGTH_SHORT
+                                    )
                                     .show()
                             } else {
                                 viewModel.addFav(id) // Assuming you have a removeFav method
                                 Toast
                                     .makeText(
                                         context,
-                                        "Removing from Favorites",
+                                        context.getString(R.string.removing_from_favorites),
                                         Toast.LENGTH_SHORT
                                     )
                                     .show()
@@ -593,8 +596,20 @@ fun ProductCard(
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Remove from Favorites", fontWeight = FontWeight.Bold) },
-            text = { Text("Are you sure you want to remove $productName from favorites?") },
+            title = {
+                Text(
+                    stringResource(R.string.remove_from_favorites),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.are_you_sure_you_want_to_remove_from_favorites,
+                        productName
+                    )
+                )
+            },
             confirmButton = {
                 if (isLoading) {
                     CircularProgressIndicator(
@@ -708,8 +723,6 @@ fun MainScreen(
                         } else {
                             navController.navigate("login")
                         }
-                        //navController.navigate("favourites")
-
                     },
 
                     smartCollectionsState,
@@ -745,14 +758,10 @@ fun MainScreen(
             composable(BottomNav.orders.route) {
                 OrderScreen(orderViewModel = orderViewModel, navController)
             }
-//            composable("settings") { SettingsScreen(navControllerBottom) }
             composable("login") { LoginScreen(navControllerBottom) }
             composable(BottomNav.Profile.route) {
                 ProfileScreen(navController)
             }
-//            composable("settings") {
-//                SettingsScreen(navControllerBottom)
-//            }
             composable("checkout") {
                 CheckoutScreen(navControllerBottom, shoppingCartViewModel)
             }

@@ -145,36 +145,6 @@ data class Fulfillment(
     val updated_at: String?
 )
 
-/*data class LineItem(
-    val attributed_staffs: List<AttributedStaff>?,
-    val fulfillable_quantity: Int?,
-    val fulfillment_service: String?,
-    val fulfillment_status: String?,
-    val grams: Int?,
-    val id: Long?,
-    val price: String?,
-    val product_id: Long?,
-    val quantity: Int?,
-    val current_quantity: Int?,
-    val requires_shipping: Boolean?,
-    val sku: String?,
-    val title: String?,
-    val variant_id: Long?,
-    val variant_title: String?,
-    val vendor: String?,
-    val name: String?,
-    val gift_card: Boolean?,
-    val price_set: MoneySet?,
-    val properties: List<Property>?,
-    val taxable: Boolean?,
-    val tax_lines: List<TaxLine>?,
-    val total_discount: String?,
-    val total_discount_set: MoneySet?,
-    val discount_allocations: List<DiscountAllocation>?,
-    val origin_location: OriginLocation?,
-    val duties: List<Duty>?
-)*/
-
 data class AttributedStaff(
     val id: String?,
     val quantity: Int?

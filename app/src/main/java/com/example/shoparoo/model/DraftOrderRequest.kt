@@ -1,15 +1,16 @@
 package com.example.shoparoo.model
 
 data class LineItem(
-    val id :Long?=null,
+    val id: Long? = null,
     val product_id: Long? = null,  // Shopify draft order ID
     val title: String,              // The product name
     val price: String,              // The price of the product
     var quantity: Int,              // The quantity of the product
     val variant_id: String,           // Shopify variant ID (for color/size variants)
-    val properties:List<Property>, // Additional properties like size, color
-    val vendor:String?=null
+    val properties: List<Property>, // Additional properties like size, color
+    val vendor: String? = null
 )
+
 data class Property(
     val name: String,
     val value: String
@@ -36,7 +37,7 @@ data class ShippingAddress(
 
 
 data class DraftOrderDetails(
-    val id: Long?=null,
+    val id: Long? = null,
     var line_items: MutableList<LineItem>,  // Items in the draft order
     var email: String? = null,          // Customer details
     val note: String? = null,       // Optional: Notes for the order
@@ -46,7 +47,7 @@ data class DraftOrderDetails(
     val total_price: String? = null,
     val subtotal_price: String? = null,
     val total_tax: String? = null,
-    val applied_discount: AppliedDiscount? = null , // Discount applied to the order
+    val applied_discount: AppliedDiscount? = null, // Discount applied to the order
     val shipping_address: ShippingAddress? = null   // Shipping address details
 )
 

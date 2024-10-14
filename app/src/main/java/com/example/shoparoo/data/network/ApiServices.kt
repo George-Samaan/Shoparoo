@@ -68,10 +68,8 @@ interface ApiServices {
     @GET("orders.json")
     suspend fun getOrders(): Response<OrderResponse>
 
-
     @DELETE("draft_orders/{id}.json")
     suspend fun deleteDraftOrder(@Path("id") draftOrderId: String)
-
 
     @PUT("draft_orders/{id}/complete.json")
     suspend fun addToCompleteOrder(

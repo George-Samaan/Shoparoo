@@ -75,20 +75,22 @@ fun Signup(navController: NavHostController) {
     LaunchedEffect(item.value) {
         when (item.value) {
             is AuthState.Authenticated -> {
-                //Toast.makeText(context, "Successful sign up, Confirm your email", Toast.LENGTH_SHORT).show()
                 navController.navigate("login")
                 isLoading = false
             }
 
             is AuthState.UnAuthenticated -> {
-               // Toast.makeText(context, "Sign up failed", Toast.LENGTH_SHORT).show()
                 isLoading = false
             }
 
             AuthState.Loading -> isLoading = true
             AuthState.UnVerified -> Unit
             AuthState.Error -> {
-                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.login_failed),
+                    Toast.LENGTH_SHORT
+                ).show()
                 isLoading = false
             }
         }
@@ -149,7 +151,7 @@ fun Signup(navController: NavHostController) {
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    "Sign up to Shoparo",
+                    stringResource(R.string.sign_up_to_shoparo),
                     fontSize = 36.sp,
                     fontWeight = FontWeight.Bold,
                     color = primary,
@@ -260,9 +262,9 @@ private fun NameFields(
         )
     }
     if (nameValue.value.isEmpty() && Validation)
-        Row("Don't leave this field empty")
+        Row(stringResource(R.string.don_t_leave_this_field_empty))
     else if (Validation && name == "Email")
-        Text("Enter correct $name", color = Color.Red)
+        Text(stringResource(R.string.enter_correct, name), color = Color.Red)
 }
 
 @Composable
@@ -300,7 +302,7 @@ private fun LocationField(
         )
     }
     if (nameValue.value.isEmpty() && Validation)
-        Row("Don't leave this field empty")
+        Row(stringResource(R.string.don_t_leave_this_field_empty))
     else if (Validation && name == "Email")
         Text("Enter correct $name", color = Color.Red)
 }
@@ -312,7 +314,7 @@ private fun PhoneField(
 ) {
     Column {
         OutlinedTextField(
-            label = { Text("Enter Phone Number") },
+            label = { Text(stringResource(R.string.enter_phone_number)) },
             leadingIcon = {
                 Icon(
                     Icons.Filled.Phone, contentDescription = null,
@@ -332,29 +334,20 @@ private fun PhoneField(
     }
     // Error message if validation fails
     if (phoneValue.value.isEmpty() && Validation) {
-        Row("Don't leave this field empty")
+        Row(stringResource(R.string.don_t_leave_this_field_empty))
     } else if (Validation && !isValidPhoneNumber(phoneValue.value)) {
-        Text("Enter a valid phone number", color = Color.Red)
+        Text(stringResource(R.string.enter_a_valid_phone_number), color = Color.Red)
     }
 }
 
 private fun isValidPhoneNumber(phoneNumber: String): Boolean {
-    // Remove spaces, dashes, and other formatting characters
     val cleanedPhoneNumber = phoneNumber.replace(Regex("[\\s-]"), "")
-
-    // Check if the phone number contains only digits or starts with a "+"
     if (!cleanedPhoneNumber.startsWith("+") && cleanedPhoneNumber.any { !it.isDigit() }) {
         return false
     }
-
-    // Basic validation: length and starting conditions
     return when {
-        // Example: validating local number format of 11 digits
         cleanedPhoneNumber.length == 11 && cleanedPhoneNumber.all { it.isDigit() } -> true
-
-        // Example: validating international number format starting with "+"
         cleanedPhoneNumber.startsWith("+") && cleanedPhoneNumber.length in 12..15 -> true
-
         else -> false
     }
 }
@@ -399,11 +392,11 @@ fun PasswordField(
 
     )
     if (textValue.value.isEmpty() && Validation)
-        Row("Don't leave this field empty")
+        Row(stringResource(R.string.don_t_leave_this_field_empty))
     else if (Validation && title == "password")
-        Text("enter valid password", color = Color.Red)
+        Text(stringResource(R.string.enter_valid_password), color = Color.Red)
     else if (Validation && title == "Confirm Password")
-        Text("passwords don't match", color = Color.Red)
+        Text(stringResource(R.string.passwords_don_t_match), color = Color.Red)
 }
 
 @Composable

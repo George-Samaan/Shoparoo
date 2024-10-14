@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -71,7 +72,7 @@ fun ChoosePaymentMethod(
             .padding(16.dp)
     ) {
         Text(
-            "Choose Payment Method",
+            stringResource(R.string.choose_payment_method),
             modifier = Modifier.fillMaxWidth(),
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp
@@ -129,7 +130,7 @@ fun ChoosePaymentMethod(
                 modifier = Modifier.size(24.dp)
             )
             Text(
-                "Credit or Debit Card",
+                stringResource(R.string.credit_or_debit_card),
                 modifier = Modifier
                     .padding(start = 5.dp),
                 fontSize = 16.sp
@@ -159,8 +160,7 @@ fun CreditCardItem() {
     var isExpirationYearValid by remember { mutableStateOf(true) }
     var isCvvValid by remember { mutableStateOf(true) }
 
-    val currentYear =
-        Calendar.getInstance().get(Calendar.YEAR) % 100 // get last two digits of the year
+    Calendar.getInstance().get(Calendar.YEAR) % 100 // get last two digits of the year
     val baseYear = 19
 
     val shoppingCartViewModel: ShoppingCartViewModel = viewModel(
@@ -183,7 +183,7 @@ fun CreditCardItem() {
                 cardHolderName = it
                 isCardHolderNameValid = cardHolderName.isNotBlank()
             },
-            label = { Text("Name on card") },
+            label = { Text(stringResource(R.string.name_on_card)) },
             shape = RoundedCornerShape(25.dp),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -194,7 +194,7 @@ fun CreditCardItem() {
 
         if (!isCardHolderNameValid) {
             Text(
-                text = "Name on card cannot be empty",
+                text = stringResource(R.string.name_on_card_cannot_be_empty),
                 color = Color.Red,
                 modifier = Modifier.padding(start = 8.dp)
             )
@@ -208,7 +208,7 @@ fun CreditCardItem() {
                 cardNumber = it
                 isCardNumberValid = it.length == 16 && it.all { char -> char.isDigit() }
             },
-            label = { Text("Card number") },
+            label = { Text(stringResource(R.string.card_number)) },
             shape = RoundedCornerShape(25.dp),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -218,7 +218,7 @@ fun CreditCardItem() {
 
         if (!isCardNumberValid) {
             Text(
-                text = "Card number must be 16 digits",
+                text = stringResource(R.string.card_number_must_be_16_digits),
                 color = Color.Red,
                 modifier = Modifier.padding(start = 8.dp)
             )
@@ -233,7 +233,7 @@ fun CreditCardItem() {
                 cvv = it
                 isCvvValid = it.length == 3 && it.all { char -> char.isDigit() }
             },
-            label = { Text("CVV number") },
+            label = { Text(stringResource(R.string.cvv_number)) },
             shape = RoundedCornerShape(25.dp),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -243,7 +243,7 @@ fun CreditCardItem() {
 
         if (!isCvvValid) {
             Text(
-                text = "CVV number must be 3 digits",
+                text = stringResource(R.string.cvv_number_must_be_3_digits),
                 color = Color.Red,
                 modifier = Modifier.padding(start = 8.dp)
             )
@@ -251,59 +251,6 @@ fun CreditCardItem() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-
-        /*  // Expiration Date Fields (MM/YY)
-          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-              OutlinedTextField(
-                  value = expirationMonth,
-                  onValueChange = {
-                      expirationMonth = it
-                      isExpirationMonthValid = it.length == 2 && it.toIntOrNull() in 1..12
-                  },
-                  label = { Text("MM") },
-                  shape = RoundedCornerShape(25.dp),
-                  modifier = Modifier
-                      .weight(1f)
-                      .padding(end = 8.dp),
-                  singleLine = true,
-                  isError = !isExpirationMonthValid,
-                  keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-              )
-
-              OutlinedTextField(
-                  value = expirationYear,
-                  onValueChange = {
-                      expirationYear = it
-                      isExpirationYearValid = it.length == 2 && expirationYear.toIntOrNull()?.let { year ->
-                          year in baseYear..59
-                      } ?: false
-                  },
-                  label = { Text("YY") },
-                  shape = RoundedCornerShape(25.dp),
-                  modifier = Modifier
-                      .weight(1f)
-                      .padding(start = 8.dp),
-                  singleLine = true,
-                  isError = !isExpirationYearValid,
-                  keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-              )
-          }
-          if (!isExpirationYearValid) {
-              Text(
-                  text = "Invalid expiration year",
-                  color = Color.Red,
-                  modifier = Modifier.padding(start = 8.dp)
-              )
-          }
-
-          if (!isExpirationMonthValid) {
-              Text(
-                  text = "Invalid expiration month",
-                  color = Color.Red,
-                  modifier = Modifier.padding(start = 8.dp)
-              )
-          }*/
-        // Expiration Date Fields (MM/YY)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column(modifier = Modifier.weight(1f)) {
                 OutlinedTextField(
@@ -312,7 +259,7 @@ fun CreditCardItem() {
                         expirationMonth = it
                         isExpirationMonthValid = it.length == 2 && it.toIntOrNull() in 1..12
                     },
-                    label = { Text("MM") },
+                    label = { Text(stringResource(R.string.mm)) },
                     shape = RoundedCornerShape(25.dp),
                     modifier = Modifier.padding(end = 8.dp),
                     singleLine = true,
@@ -322,7 +269,7 @@ fun CreditCardItem() {
 
                 if (!isExpirationMonthValid) {
                     Text(
-                        text = "Invalid expiration month",
+                        text = stringResource(R.string.invalid_expiration_month),
                         color = Color.Red,
                         modifier = Modifier.padding(start = 8.dp)
                     )
@@ -348,7 +295,7 @@ fun CreditCardItem() {
 
                 if (!isExpirationYearValid) {
                     Text(
-                        text = "Invalid expiration year",
+                        text = stringResource(R.string.invalid_expiration_year),
                         color = Color.Red,
                         modifier = Modifier.padding(start = 20.dp)
                     )
@@ -356,13 +303,7 @@ fun CreditCardItem() {
             }
         }
 
-
-
-
-
         Spacer(modifier = Modifier.height(32.dp))
-
-
         CheckoutButtonCheck(
             selectedPaymentMethod = selectedPaymentMethod,
             shoppingCartViewModel,
@@ -490,9 +431,12 @@ fun CheckoutButtonCheck(
     if (showConfirmationDialog) {
         AlertDialog(
             onDismissRequest = { showConfirmationDialog = false },
-            title = { Text("Confirm Order", fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.confirm_order), fontWeight = FontWeight.Bold) },
             text = {
-                Text("Are you sure you want to place this order?", fontSize = 16.sp)
+                Text(
+                    stringResource(R.string.are_you_sure_you_want_to_place_this_order),
+                    fontSize = 16.sp
+                )
             },
             confirmButton = {
                 Button(
@@ -509,7 +453,11 @@ fun CheckoutButtonCheck(
                                 isProcessing = true
                                 completeOrderIfPossible()
                             } else {
-                                Toast.makeText(context, "Invalid Card Details", Toast.LENGTH_SHORT)
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.invalid_card_details),
+                                    Toast.LENGTH_SHORT
+                                )
                                     .show()
                             }
                         } else if (selectedPaymentMethod == "cash") {
@@ -525,7 +473,7 @@ fun CheckoutButtonCheck(
                     },
                     colors = ButtonDefaults.buttonColors(primary)
                 ) {
-                    Text("Yes, Place Order")
+                    Text(stringResource(R.string.yes_place_order))
                 }
             },
             dismissButton = {
@@ -544,10 +492,15 @@ fun CheckoutButtonCheck(
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Order Limit Exceeded", fontWeight = FontWeight.Bold) },
+            title = {
+                Text(
+                    stringResource(R.string.order_limit_exceeded),
+                    fontWeight = FontWeight.Bold
+                )
+            },
             text = {
                 Text(
-                    "Cash on Delivery is not available for orders exceeding 1500 EGP. Please choose another payment method.",
+                    stringResource(R.string.cash_on_delivery_is_not_available_for_orders_exceeding_1500_egp_please_choose_another_payment_method),
                     fontSize = 15.sp
                 )
             },
@@ -570,7 +523,11 @@ fun CheckoutButtonCheck(
             isProcessing = false
             paymentSuccess = true
             if (selectedPaymentMethod == "cash") {
-                Toast.makeText(context, "Order placed with Cash on Delivery", Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.order_placed_with_cash_on_delivery),
+                    Toast.LENGTH_SHORT
+                )
                     .show()
             } else if (selectedPaymentMethod == "card" && validateCardDetails(
                     cardHolderName,
@@ -579,7 +536,11 @@ fun CheckoutButtonCheck(
                     expirationYear
                 )
             ) {
-                Toast.makeText(context, "Order placed with Credit/Debit Card", Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.order_placed_with_credit_debit_card),
+                    Toast.LENGTH_SHORT
+                )
                     .show()
             }
         }
@@ -587,7 +548,8 @@ fun CheckoutButtonCheck(
 
     // Show success message for card payment
     if (paymentSuccess && selectedPaymentMethod == "card") {
-        Toast.makeText(context, "Payment successful", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, stringResource(R.string.payment_successful), Toast.LENGTH_SHORT)
+            .show()
     }
 }
 

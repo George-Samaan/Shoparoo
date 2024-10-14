@@ -29,14 +29,10 @@ interface RemoteDataSource {
 
     //orders section
     fun getOrders(): Flow<OrderResponse>
-
     suspend fun deleteDraftOrder(id: Long)
 
   
     //delete draft order
     suspend fun deleteDraftOrder(draftOrderId: String)
-
     suspend fun addToCompleteOrder(id: String)
-
-
 }

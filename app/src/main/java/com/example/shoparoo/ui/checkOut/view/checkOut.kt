@@ -68,8 +68,6 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
                     val totalTax = order.total_tax?.toDoubleOrNull() ?: 0.0
                     val discount = order.applied_discount?.amount ?: 0.0
                     val total = (order.total_price?.toDoubleOrNull() ?: 0.0) - totalDiscount
-//                    val address = order.shipping_address
-//                    Log.d("CheckoutScreen", "Address: $address")
 
                     OrderSummary(
                         subtotal = subtotal,
@@ -78,7 +76,6 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
                         total = total
                     )
                 }
-//                viewModel.getDraftOrderDetails()
             }
 
             item { Spacer(modifier = Modifier.height(16.dp)) }

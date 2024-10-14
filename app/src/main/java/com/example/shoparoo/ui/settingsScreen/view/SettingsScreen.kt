@@ -1,6 +1,5 @@
 package com.example.shoparoo.ui.settingsScreen.view
 
-import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -59,7 +58,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.getString
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -94,15 +92,12 @@ fun ProfileScreen(navController: NavController) {
     var showAboutUsSheet by remember { mutableStateOf(false) }
     val showContactUsSheet = remember { mutableStateOf(false) }
     val context = LocalContext.current
-
     val savedCurrency = getCurrencyPreference(context)
     var selectedCurrency by remember { mutableStateOf(savedCurrency) }
     val showSignOutDialog = remember { mutableStateOf(false) }
     val isNetworkAvailable = networkListener()
     val authViewModel = viewModel<AuthViewModel>()
     val isSignedIn by authViewModel.authState.collectAsState()
-
-
 
     Column(
         modifier = Modifier
@@ -141,9 +136,7 @@ fun ProfileScreen(navController: NavController) {
             )
         }
 
-
         Spacer(modifier = Modifier.weight(1f))
-
         // Bottom Sheets and Dialogs
         if (showCurrencySheet) {
             BottomSheet(onDismiss = { showCurrencySheet = false }) {
@@ -151,7 +144,11 @@ fun ProfileScreen(navController: NavController) {
                     selectedCurrency = selectedCurrency,
                     onCurrencySelected = { currency ->
                         if (!isNetworkAvailable.value) {
-                            Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT)
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.no_internet_connection),
+                                Toast.LENGTH_SHORT
+                            )
                                 .show()
                         } else {
                             selectedCurrency = currency
@@ -191,9 +188,16 @@ fun ProfileScreen(navController: NavController) {
                 onDismiss = { showSignOutDialog.value = false },
                 onConfirm = {
                     if (!isNetworkAvailable.value) {
-                        Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.no_internet_connection),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     } else {
-                        Toast.makeText(context, "Signing out...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.signing_out), Toast.LENGTH_SHORT
+                        ).show()
                         showSignOutDialog.value = false
                         authViewModel.signOut()
                         navController.navigate("login") {
@@ -261,14 +265,6 @@ fun SignOutButton(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-//        Text(
-//            text = stringResource(R.string.sign_out),
-//            color = Color.White,
-//            fontSize = 18.sp,
-//            textAlign = TextAlign.Center,
-//            fontWeight = FontWeight.Bold,
-//            modifier = Modifier.align(Alignment.Center)
-//        )
     }
 }
 
@@ -278,14 +274,14 @@ fun SignOutConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Sign Out",
+                text = stringResource(R.string.sign_outt),
                 color = Color.Black,
                 fontWeight = FontWeight.Bold
             )
         },
         text = {
             Text(
-                text = "Are you sure you want to sign out?",
+                text = stringResource(R.string.are_you_sure_you_want_to_sign_outt),
                 color = Color.Black
             )
         },
@@ -298,7 +294,7 @@ fun SignOutConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
             )
             {
                 Text(
-                    text = "Sign Out",
+                    text = stringResource(R.string.sign_outt),
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
@@ -418,8 +414,6 @@ fun ContactUs() {
 fun SettingsCardItem(title: String, icon: Int, onClick: () -> Unit) {
     // Create an animatable scale value
     val scale = remember { Animatable(0.9f) } // Start with a slightly smaller scale value
-
-    // Trigger the animation when the item is composed
     LaunchedEffect(Unit) {
         // Animate to the target value of 1f over the specified duration
         scale.animateTo(
@@ -430,7 +424,6 @@ fun SettingsCardItem(title: String, icon: Int, onClick: () -> Unit) {
             )
         )
     }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -444,7 +437,6 @@ fun SettingsCardItem(title: String, icon: Int, onClick: () -> Unit) {
                 onClickLabel = title,
             )
     ) {
-        // Apply scaling to the Row inside the Box
         Row(
             modifier = Modifier
                 .scale(scale.value) // Scale the Row
@@ -491,67 +483,61 @@ fun BottomSheet(onDismiss: () -> Unit, content: @Composable () -> Unit) {
 
 @Composable
 fun AboutUs() {
-    val names = listOf(
-        "George Michel Louis",
-        "Galal Ahmed Galal",
-        "Ahmed Gamal Mahmoud"
-    )
     val context = LocalContext.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp, horizontal = 20.dp)
+    ) {
+        Text(
+            text = "Developed by: ",
+        )
+        Column {
+            Text(
+                "Ahmed Gamal ",
+                Modifier.clickable {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:agamal00500@gmail.com")
+                        putExtra(Intent.EXTRA_SUBJECT, "Subject here")
+                        putExtra(Intent.EXTRA_TEXT, "Body of the email here")
+                    }
+                    startActivity(context, intent, null)
+                },
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
 
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp, horizontal = 20.dp)
-            ) {
-                Text(
-                    text = "Developed by: ",
                 )
-                Column {
-                    Text(
-                        "Ahmed Gamal ",
-                        Modifier.clickable {
-                            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                data = Uri.parse("mailto:agamal00500@gmail.com")
-                                putExtra(Intent.EXTRA_SUBJECT, "Subject here")
-                                putExtra(Intent.EXTRA_TEXT, "Body of the email here")
-                            }
-                            startActivity(context, intent, null)
-                        },
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
+            Spacer(modifier = Modifier.height(5.dp))
+            Text(
+                "Galal Ahmed ",
+                Modifier.clickable {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:ga71387@gmail.com")
+                        putExtra(Intent.EXTRA_SUBJECT, "Subject here")
+                        putExtra(Intent.EXTRA_TEXT, "Body of the email here")
+                    }
+                    startActivity(context, intent, null)
+                },
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
 
-                        )
-                    Spacer(modifier = Modifier.height(5.dp))
-                    Text(
-                        "Galal Ahmed ",
-                        Modifier.clickable {
-                            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                data = Uri.parse("mailto:ga71387@gmail.com")
-                                putExtra(Intent.EXTRA_SUBJECT, "Subject here")
-                                putExtra(Intent.EXTRA_TEXT, "Body of the email here")
-                            }
-                            startActivity(context, intent, null)
-                        },
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
+                )
+            Spacer(modifier = Modifier.height(5.dp))
+            Text(
+                "George Michel ", Modifier.clickable {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:georgesmichel2009@gmail.com")
+                        putExtra(Intent.EXTRA_SUBJECT, "Subject here")
+                        putExtra(Intent.EXTRA_TEXT, "Body of the email here")
+                    }
+                    startActivity(context, intent, null)
+                },
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
 
-                        )
-                    Spacer(modifier = Modifier.height(5.dp))
-                    Text(
-                        "George Michel ", Modifier.clickable {
-                            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                data = Uri.parse("mailto:georgesmichel2009@gmail.com")
-                                putExtra(Intent.EXTRA_SUBJECT, "Subject here")
-                                putExtra(Intent.EXTRA_TEXT, "Body of the email here")
-                            }
-                            startActivity(context, intent, null)
-                        },
-                        fontSize = 16.sp,
-                       fontWeight = FontWeight.Bold
-
-                    )
-                }
-            }
+            )
+        }
+    }
 
 
 }
@@ -560,7 +546,6 @@ fun AboutUs() {
 fun Language() {
     val languages = listOf(
         Pair("English", "\uD83C\uDDFA\uD83C\uDDF8")
-        //Pair("Arabic", "\uD83C\uDDEA\uD83C\uDDEC")
     )
 
     LazyColumn {
@@ -588,16 +573,9 @@ fun Language() {
 fun Currency(selectedCurrency: String, onCurrencySelected: (String) -> Unit) {
     val context = LocalContext.current
     val currencies = listOf(
-        //  Pair("EGP", "\uD83C\uDDEA\uD83C\uDDEC" ),
-        //  Pair("USD", "\uD83C\uDDFA\uD83C\uDDF8" ),
-
-
         Triple("EGP", "\uD83C\uDDEA\uD83C\uDDEC", "USD"),
         Triple("USD", "\uD83C\uDDFA\uD83C\uDDF8", "EGP")
     )
-
-
-
 
     LazyColumn {
         items(currencies) { (currency, flag, actual) ->

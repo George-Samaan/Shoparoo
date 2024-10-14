@@ -97,7 +97,6 @@ fun ProductsScreen(
     var isReady by remember { mutableStateOf(false) }
     var isFilteringComplete by remember { mutableStateOf(false) }
 
-
     val favViewModel: FavouritesViewModel = viewModel(
         factory = FavouritesViewModelFactory(
             repository = RepositoryImpl(
@@ -111,14 +110,11 @@ fun ProductsScreen(
         favViewModel.getFavourites()
     }
 
-
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
-    // Get saved currency and conversion rate from SharedPreferences
     val selectedCurrency = remember { sharedPreferences.getString("currency", "USD") ?: "USD" }
     val conversionRate = remember { sharedPreferences.getFloat("conversionRate", 1.0f) }
-
     val currencySymbols = mapOf( //handle galal currency for now
         "EGP" to "$ ",
         "USD" to "EGP "
@@ -133,14 +129,12 @@ fun ProductsScreen(
             ReusableLottie(R.raw.no_internet, R.drawable.white_bg, 400.dp, 1f)
         }
     } else {
-        // Reset isGridVisible and loading state on initial load
         LaunchedEffect(Unit) {
             if (isInitialLoad) {
                 isGridVisible = false
                 isInitialLoad = false
             }
         }
-
         LaunchedEffect(brandId) {
             isReady = false
             viewModel.getProductsFromBrandsId(brandId)
@@ -408,9 +402,13 @@ fun PriceSlider(
 @Composable
 fun ProductInfoMessage(isEmpty: Boolean, convertedSliderValue: Int, currencySymbol: String) {
     val message = if (isEmpty) {
-        "No products found. Try adjusting your filters."
+        stringResource(R.string.no_products_found_try_adjusting_your_filters)
     } else {
-        "Adjust the slider to filter products by price. Currently showing products under $convertedSliderValue $currencySymbol"
+        stringResource(
+            R.string.adjust_the_slider_to_filter_products_by_price_currently_showing_products_under,
+            convertedSliderValue,
+            currencySymbol
+        )
     }
 
     Text(

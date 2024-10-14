@@ -1,11 +1,11 @@
 package com.example.shoparoo.data.network
 
 import com.example.shoparoo.model.CurrencyResponse
-import retrofit2.http.GET
-import retrofit2.http.Query
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.Response
+import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface CurrencyApi {
     @GET("rates/latest")

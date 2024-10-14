@@ -81,7 +81,6 @@ import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.ImagesItem
-import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
 import com.example.shoparoo.ui.auth.viewModel.AuthState
@@ -130,10 +129,9 @@ fun ProductDetails(id: String, navController: NavHostController) {
         is ApiState.Success -> {
             val gg = order.value as ApiState.Success
             val data = gg.data as DraftOrderDetails
-            // itemsIncart = data.line_items[0].quantity
 
             for (item in data.line_items) {
-                if (item.product_id.toString() == id ) {
+                if (item.product_id.toString() == id) {
                     itemsIncart = item.quantity
 
                 }
@@ -243,13 +241,13 @@ private fun ProductInfo(
                 } else if (itemsIncart >= 5) {
                     Toast.makeText(
                         context,
-                        "you've already reached the maximum amount for this item",
+                        context.getString(R.string.you_ve_already_reached_the_maximum_amount_for_this_item),
                         Toast.LENGTH_SHORT
                     ).show()
                 } else if (itemsIncart >= selected.value!!.inventoryQuantity!!) {
                     Toast.makeText(
                         context,
-                        "no more stock available",
+                        context.getString(R.string.no_more_stock_available),
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
@@ -257,7 +255,10 @@ private fun ProductInfo(
                         showDialog = true
                     } else {
                         viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
-                        Toast.makeText(context, "Adding to cart", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.adding_to_cart), Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             },
@@ -268,9 +269,15 @@ private fun ProductInfo(
                 } else {
                     viewModel.getDraftOrder(singleProductDetail, selected.value!!, false)
                     if (!isFav)
-                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.added_to_favorites), Toast.LENGTH_SHORT
+                        ).show()
                     else
-                        Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.removed_from_favorites), Toast.LENGTH_SHORT
+                        ).show()
                 }
             },
             buttonColors = if (isFav) {
@@ -313,8 +320,6 @@ private fun ProductInfo(
 @Composable
 fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
     val imageVisible = remember { mutableStateOf(false) }
-
-
     LaunchedEffect(Unit) {
         imageVisible.value = true
     }
@@ -325,7 +330,6 @@ fun ProductImg(onClick: () -> Unit, images: List<ImagesItem?>?) {
             .height(300.dp)
             .padding(top = 30.dp, start = 5.dp)
     ) {
-
         AnimatedVisibility(
             visible = imageVisible.value,
             enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(),
@@ -374,13 +378,9 @@ fun ReviewSection() {
     val showContactUsSheet = remember { mutableStateOf(false) }
     val reviews = remember { getRandomReviews(Random.nextInt(2, 22)) }
     val reviewVisible = remember { mutableStateOf(false) }
-
-
     LaunchedEffect(Unit) {
         reviewVisible.value = true
     }
-
-
     AnimatedVisibility(
         visible = reviewVisible.value,
         enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(),
@@ -462,15 +462,12 @@ private fun StockAndPrice(
     val priceInUSD = selected.value?.price?.toFloatOrNull() ?: 0f
     val convertedPrice = priceInUSD * conversionRate
     val formattedPrice = String.format("%.2f", convertedPrice)
-
-
     val stockPriceVisible = remember { mutableStateOf(false) }
 
     // Trigger the animation when StockAndPrice is loaded
     LaunchedEffect(Unit) {
         stockPriceVisible.value = true
     }
-
     // Animate the stock and price section sliding in from the right
     AnimatedVisibility(
         visible = stockPriceVisible.value,
@@ -503,12 +500,10 @@ private fun StockAndPrice(
 fun VariantSection(variants: List<VariantsItem?>?, selected: MutableState<VariantsItem?>) {
     val scrollState = rememberScrollState()
     val variantSectionVisible = remember { mutableStateOf(false) }
-
     // Trigger the animation when VariantSection is loaded
     LaunchedEffect(Unit) {
         variantSectionVisible.value = true
     }
-
     // Animate the variant section sliding in from the right
     AnimatedVisibility(
         visible = variantSectionVisible.value,

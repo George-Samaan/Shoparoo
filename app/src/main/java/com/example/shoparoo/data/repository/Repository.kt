@@ -12,9 +12,7 @@ import kotlinx.coroutines.flow.Flow
 interface Repository {
     fun getSmartCollections(): Flow<SmartCollections>
     fun getForYouProducts(): Flow<Product>
-
     fun getProductsFromBrandsId(collectionId: String): Flow<Product>
-
     fun getSingleProductById(id: String): Flow<SingleProduct>
 
     // categories section
@@ -22,7 +20,6 @@ interface Repository {
     fun getSalesProducts(): Flow<Product>
     fun getMensProducts(): Flow<Product>
     fun getKidsProducts(): Flow<Product>
-
     fun saveCurrencyPreference(currency: String)
     fun getCurrencyPreference(): String
 
@@ -32,12 +29,11 @@ interface Repository {
     fun getDraftOrder(): Flow<DraftOrderResponse>
     suspend fun updateDraftOrder(draftOrderDetails: DraftOrderRequest)
     suspend fun deleteDraftOrder(id: Long)
+
     //orders
     fun getOrders(): Flow<OrderResponse>
     suspend fun addToCompleteOrder(id: String)
 
     //delete draft order
     suspend fun deleteDraftOrder(draftOrderId: String)
-
-
 }

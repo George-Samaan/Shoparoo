@@ -1,5 +1,7 @@
 package com.example.shoparoo.ui.nav
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
@@ -16,6 +18,7 @@ import com.example.shoparoo.ui.splash.Splash
 
 //import com.example.shoparoo.ui.settingsScreen.SettingsScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 @Preview
 fun Navigation() {

@@ -4,8 +4,6 @@ package com.example.shoparoo.ui.auth.view
 import android.widget.Toast
 import androidx.annotation.RawRes
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -79,12 +77,9 @@ fun LoginScreen(navController: NavHostController) {
             is AuthState.Authenticated -> {
                 navController.navigate("home")
                 isLoading = false
-             //   Toast.makeText(context, "Welcome Back!", Toast.LENGTH_SHORT).show()
-
             }
 
             is AuthState.UnAuthenticated -> {
-              //  Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
                 isLoading = false
             }
 
@@ -96,7 +91,11 @@ fun LoginScreen(navController: NavHostController) {
 
             AuthState.Error -> {
                 isLoading = false
-                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.login_failed),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -119,7 +118,7 @@ fun LoginScreen(navController: NavHostController) {
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    "Existing User ? Sign in",
+                    stringResource(R.string.existing_user_sign_in),
                     fontSize = 37.sp,
                     fontWeight = FontWeight.Bold,
                     color = primary,
@@ -154,7 +153,7 @@ fun LoginScreen(navController: NavHostController) {
                 singleLine = true
             )
             if (emailValidation)
-                Row("Don't leave your email empty")
+                Row(stringResource(R.string.don_t_leave_your_email_empty))
             OutlinedTextField(
                 value = passwordValue.value,
                 onValueChange = {
@@ -188,13 +187,8 @@ fun LoginScreen(navController: NavHostController) {
                 singleLine = true
             )
             if (passValidation)
-                Row("Don't leave your password empty")
+                Row(stringResource(R.string.don_t_leave_your_password_empty))
             Spacer(modifier = Modifier.height(25.dp))
-            val buttonSize by animateDpAsState(
-                targetValue = if (isLoading) 50.dp else 444.dp,
-                animationSpec = tween(durationMillis = 500)
-            )
-
 
             Button(
                 colors = ButtonDefaults.buttonColors(primary),
@@ -242,42 +236,17 @@ fun LoginScreen(navController: NavHostController) {
                 }
             }
 
-            /*Spacer(modifier = Modifier.padding(top = 15.dp , start = 25.dp, end = 25.dp))
-              HorizontalDivider()
-            val state = rememberOneTapSignInState()
-            OneTapSignInWithGoogle(
-                state = state,
-                clientId = stringResource(R.string.outh_id),
-                onTokenIdReceived = { tokenId ->
-                    Log.d("LOG", tokenId)
-                    Toast.makeText(context, "ggggg", Toast.LENGTH_SHORT).show()
-                   viewModel.authState.value = AuthState.Authenticated
-                },
-                onDialogDismissed = { message ->
-                    Log.d("LOG", message)
-                    Toast.makeText(context, "xdxdxdxd", Toast.LENGTH_SHORT).show()
-
-                    viewModel.authState.value = AuthState.Failed
-                }
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            OneTapGoogleButton(
-                clientId = "YOUR_CLIENT_ID",
-                theme = GoogleButtonTheme.Neutral
-            )*/
-
-
             Row(
                 modifier = Modifier.padding(top = 25.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Don't have an account?", Modifier.padding(end = 5.dp),
+                    stringResource(R.string.don_t_have_an_account), Modifier.padding(end = 5.dp),
                     fontSize = 17.sp
                 )
                 Text(
-                    "Register Now", fontSize = 18.sp, color = primary,
+                    stringResource(R.string.register_now), fontSize = 18.sp, color = primary,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .clickable {
@@ -324,7 +293,7 @@ fun ReusableLottie(
             .background(Color.Transparent)
     ) {
         // Background Image
-        if (backgroundImageRes != null){
+        if (backgroundImageRes != null) {
             Image(
                 painter = painterResource(backgroundImageRes!!),
                 contentDescription = null,
@@ -332,7 +301,6 @@ fun ReusableLottie(
             )
         }
 
-        // Lottie Animation
         LottieAnimation(
             composition = composition,
             progress = progress,
