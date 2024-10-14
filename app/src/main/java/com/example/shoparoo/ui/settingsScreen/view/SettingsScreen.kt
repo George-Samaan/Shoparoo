@@ -538,7 +538,7 @@ fun AboutUs() {
                         )
                     Spacer(modifier = Modifier.height(5.dp))
                     Text(
-                        "George michel ", Modifier.clickable {
+                        "George Michel ", Modifier.clickable {
                             val intent = Intent(Intent.ACTION_SENDTO).apply {
                                 data = Uri.parse("mailto:georgesmichel2009@gmail.com")
                                 putExtra(Intent.EXTRA_SUBJECT, "Subject here")
