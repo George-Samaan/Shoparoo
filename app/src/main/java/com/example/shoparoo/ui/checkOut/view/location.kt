@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -53,6 +54,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import com.example.shoparoo.model.ShippingAddress
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
+import com.example.shoparoo.ui.theme.grey
+import com.example.shoparoo.ui.theme.primary
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
@@ -61,7 +64,7 @@ import java.io.IOException
 import java.util.Locale
 
 @Composable
-fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long, ) {
+fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long) {
     val context = LocalContext.current
     var locationText by remember { mutableStateOf("Fetching location...") }
     var showMap by remember { mutableStateOf(false) }
@@ -84,12 +87,17 @@ fun Location(viewModel: ShoppingCartViewModel, draftOrderId: Long, ) {
     // Check and request permission on first composition
     LaunchedEffect(Unit) {
         val permission = Manifest.permission.ACCESS_FINE_LOCATION
-        if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                context,
+                permission
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             getLocation(context) { address ->
                 locationText = address ?: "Unable to fetch address"
             }
         } else {
             permissionLauncher.launch(permission)
+            viewModel.updateShippingAddress(draftOrderId, ShippingAddress(locationText))
         }
     }
 
@@ -180,7 +188,7 @@ fun ManualLocationInputDialog(
                 Text(
                     text = "Enter Location Details",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    fontSize = 22.sp,
                     modifier = Modifier.padding(bottom = 10.dp)
                 )
 
@@ -191,7 +199,8 @@ fun ManualLocationInputDialog(
                     label = { Text("Street Name") },
                     isError = isError && streetName.isBlank(),
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    shape = RoundedCornerShape(25.dp),
                 )
                 if (isError && streetName.isBlank()) {
                     ErrorText("Street Name cannot be empty")
@@ -204,7 +213,8 @@ fun ManualLocationInputDialog(
                     label = { Text("Building Name/Number") },
                     isError = isError && buildingNumber.isBlank(),
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    shape = RoundedCornerShape(25.dp),
                 )
                 if (isError && buildingNumber.isBlank()) {
                     ErrorText("Building Name/Number cannot be empty")
@@ -217,8 +227,10 @@ fun ManualLocationInputDialog(
                     label = { Text("Floor/Villa Number") },
                     isError = isError && floorNumber.isBlank(),
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
+                    singleLine = true,
+                    shape = RoundedCornerShape(25.dp),
+
+                    )
                 if (isError && floorNumber.isBlank()) {
                     ErrorText("Floor/Villa Number cannot be empty")
                 }
@@ -232,7 +244,8 @@ fun ManualLocationInputDialog(
                 ) {
                     OutlinedButton(
                         onClick = { onDismiss() },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(grey)
                     ) {
                         Text("Cancel")
                     }
@@ -246,7 +259,8 @@ fun ManualLocationInputDialog(
                                 isError = true
                             }
                         },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(primary)
                     ) {
                         Text("Confirm")
                     }
@@ -386,7 +400,9 @@ fun LocationPickerMap(onLocationPicked: (String) -> Unit) {
                             location.longitude
                         )
                         googleMap.clear()
-                        googleMap.addMarker(MarkerOptions().position(latLng).title(location.getAddressLine(0)))
+                        googleMap.addMarker(
+                            MarkerOptions().position(latLng).title(location.getAddressLine(0))
+                        )
 
                         val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 12f)
                         googleMap.animateCamera(cameraUpdate, 2000, null)
@@ -446,5 +462,6 @@ fun rememberMapViewWithLifecycle(): MapView {
 
     return mapView
 }
+
 
 

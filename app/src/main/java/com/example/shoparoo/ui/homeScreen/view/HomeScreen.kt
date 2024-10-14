@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -100,6 +101,7 @@ import com.example.shoparoo.ui.settingsScreen.view.ProfileScreen
 import com.example.shoparoo.ui.shoppingCart.view.ShoppingCartScreen
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModelFactory
+import com.example.shoparoo.ui.theme.grey
 import com.example.shoparoo.ui.theme.primary
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -117,8 +119,7 @@ fun HomeScreenDesign(
     bottomNavController: NavController,
     navController: NavController,
 
-    )
-{
+    ) {
     val favViewModel: FavouritesViewModel = viewModel(
         factory = FavouritesViewModelFactory(
             repository = RepositoryImpl(
@@ -132,7 +133,7 @@ fun HomeScreenDesign(
         favViewModel.getFavourites()
     }
 
-   val isNetworkAvailable = networkListener()
+    val isNetworkAvailable = networkListener()
     if (!isNetworkAvailable.value) {
         // Show No Internet connection message
         Box(
@@ -441,7 +442,7 @@ fun ForYouSection(
                         onClick = { navController.navigate("productDetails/${product.id}") },
                         currencySymbol = currencySymbols[selectedCurrency] ?: "$",
                         id = product.id!!,
-                        viewModel =  favViewModel,
+                        viewModel = favViewModel,
                     )
                 }
             }
@@ -484,13 +485,13 @@ fun ProductCard(
         )
     )
     val fav by favViewModel.productItems.collectAsState()
-        Log.i("FavouritesViewModel", "ProductItems: $fav")
+    Log.i("FavouritesViewModel", "ProductItems: $fav")
     val authViewModel: AuthViewModel = viewModel()
     val isLoggedIn = authViewModel.authState.collectAsState()
 
     val favItems by viewModel.productItems.collectAsState()
     LaunchedEffect(favItems) {
-       // viewModel.getFavourites()
+        // viewModel.getFavourites()
     }
 
 
@@ -558,11 +559,11 @@ fun ProductCard(
                         }
                     }
                 }
-               val  context = LocalContext.current
+                val context = LocalContext.current
                 val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                 Icon(
                     if (isFav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                  //  Icons.Filled.Favorite,
+                    //  Icons.Filled.Favorite,
                     contentDescription = "Add to Favorites",
                     tint = Color.Red,
                     modifier = Modifier
@@ -606,17 +607,20 @@ fun ProductCard(
                         color = Color.Gray
                     )
                 } else {
-                    TextButton(onClick = {
+                    Button(onClick = {
                         onClickDeleteFav()
                         isLoading = true // Set loading state to true
-                    }) {
-                        Text("Yes", color = Color.Black)
+                    }, colors = androidx.compose.material3.ButtonDefaults.buttonColors(primary)) {
+                        Text("Yes", color = Color.White)
                     }
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("No", color = Color.Black)
+                TextButton(
+                    onClick = { showDialog = false },
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(grey)
+                ) {
+                    Text("No", color = Color.White)
                 }
             },
             containerColor = Color.White,

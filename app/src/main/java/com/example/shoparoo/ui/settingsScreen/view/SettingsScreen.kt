@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -71,6 +72,8 @@ import com.example.shoparoo.ui.auth.viewModel.AuthState
 import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModel
 import com.example.shoparoo.ui.homeScreen.viewModel.HomeViewModelFactory
+import com.example.shoparoo.ui.theme.grey
+import com.example.shoparoo.ui.theme.primary
 import com.example.shoparoo.utils.Constants
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
@@ -283,24 +286,32 @@ fun SignOutConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
             )
         },
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            Button(
+                onClick = onConfirm,
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    primary
+                )
+            )
+            {
                 Text(
                     text = "Sign Out",
-                    color = Color.Black,
+                    color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(grey)
+            ) {
                 Text(
                     text = "Cancel",
-                    color = Color.Black
+                    color = Color.White
                 )
             }
         },
         containerColor = Color.White,
-        //   shape = RoundedCornerShape(16.dp)
     )
 }
 

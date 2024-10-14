@@ -22,8 +22,6 @@ import androidx.navigation.NavController
 import com.example.shoparoo.R
 import com.example.shoparoo.ui.checkOut.view.AppHeader
 import com.example.shoparoo.ui.checkOut.view.ApplyCoupons
-import com.example.shoparoo.ui.checkOut.view.CheckoutButtonCheck
-import com.example.shoparoo.ui.checkOut.view.ChoosePaymentMethod
 import com.example.shoparoo.ui.checkOut.view.Location
 import com.example.shoparoo.ui.checkOut.view.OrderSummary
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
@@ -42,7 +40,6 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
 
     var selectedPaymentMethod by remember { mutableStateOf("cash") }
     var showAddCreditCardScreen by remember { mutableStateOf(false) }
-
 
     Scaffold {
         LazyColumn(
@@ -65,7 +62,6 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
                     totalDiscount = discount
                 }
             }
-
 
             item {
                 draftOrderDetails?.let { order ->
@@ -112,8 +108,4 @@ fun CheckoutScreen(navController: NavController, viewModel: ShoppingCartViewMode
         }
     }
 }
-
-
-
-
 
