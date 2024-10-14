@@ -116,6 +116,7 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
                     getProductDataById(filter.second!!, id)
                 } else {
                     createDraftOrderFav(id)
+                    getFavourites()
                 }
             }
         }
@@ -179,14 +180,14 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
 
                 viewModelScope.launch { //item is the only one in fav  -> remove from fav & delete draft order
                     repository.deleteDraftOrder(draftOrderDetails.id!!)
-                   // getFavourites()
+                    getFavourites()
                 }
             } else {
                 _productItems.value = _productItems.value.filter { it.id != theSingleProduct.product!!.id }.toMutableList()
                 viewModelScope.launch { //item is not the only one in fav -> remove from fav
                     val order = DraftOrderRequest(draftOrderDetails)
                     repository.updateDraftOrder(order)
-                   // getFavourites()
+                    getFavourites()
                 }
             }
         } else {   //item is not in fav and there exists another items -> add to fav
@@ -196,7 +197,7 @@ class FavouritesViewModel(private val repository: Repository) : ViewModel() {
             viewModelScope.launch {
                 val order = DraftOrderRequest(draftOrderDetails)
                 repository.updateDraftOrder(order)
-              //  getFavourites()
+                getFavourites()
             }
         }
     }

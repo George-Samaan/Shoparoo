@@ -9,8 +9,10 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.Image
@@ -561,34 +563,40 @@ fun ProductCard(
                 }
                 val context = LocalContext.current
                 val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                val animatedSize by animateFloatAsState(if (isFav) 25f else 20f)
+
                 Icon(
                     if (isFav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                    //  Icons.Filled.Favorite,
                     contentDescription = "Add to Favorites",
-                    tint = Color.Red,
+                    tint = if (isFav) Color.Red else Color.Gray,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
-                        .size(24.dp)
+                        .size(animatedSize.dp) // Use the animated size
                         .clickable {
-                            val vibrationEffect1 =
-                                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                            val vibrationEffect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
                             vibrator.cancel()
-                            vibrator.vibrate(vibrationEffect1)
-                            viewModel.addFav(id)
-                            /*                           if (isFav) {
-                               Toast.makeText(context, "Removed to Favourites", Toast.LENGTH_SHORT).show()
-                           } else {
-                               Toast.makeText(context, "Added from Favourites", Toast.LENGTH_SHORT).show()
-                           }
-                           if (isFav) {
-                                 showDialog = true
-                           } else {
-                               favViewModel.addFav(id)
-                           }*/
+                            vibrator.vibrate(vibrationEffect)
+                            isFav = !isFav
+                            if (isFav) {
+                                viewModel.addFav(id)
+                                Toast
+                                    .makeText(context, "Adding to Favorites", Toast.LENGTH_SHORT)
+                                    .show()
+                            } else {
+                                viewModel.addFav(id) // Assuming you have a removeFav method
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "Removing from Favorites",
+                                        Toast.LENGTH_SHORT
+                                    )
+                                    .show()
+                            }
                         }
                 )
             }
+
         }
     }
 
@@ -699,7 +707,7 @@ fun MainScreen(
         NavHost(
             navController = navControllerBottom,
             startDestination = BottomNav.Home.route,
-            modifier = Modifier.padding(it)
+            modifier = Modifier.padding(it),
         ) {
             composable(BottomNav.Home.route) {
                 HomeScreenDesign(
@@ -740,7 +748,7 @@ fun MainScreen(
                 )
             }
             composable(BottomNav.orders.route) {
-                OrderScreen(orderViewModel = orderViewModel)
+                OrderScreen(orderViewModel = orderViewModel, navController)
             }
 //            composable("settings") { SettingsScreen(navControllerBottom) }
             composable("login") { LoginScreen(navControllerBottom) }

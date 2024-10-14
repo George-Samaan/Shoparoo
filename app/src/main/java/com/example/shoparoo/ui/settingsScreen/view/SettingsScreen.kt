@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -94,14 +96,15 @@ fun ProfileScreen(navController: NavController) {
     var selectedCurrency by remember { mutableStateOf(savedCurrency) }
     val showSignOutDialog = remember { mutableStateOf(false) }
     val isNetworkAvailable = networkListener()
-
+    val authViewModel = viewModel<AuthViewModel>()
+    val isSignedIn by authViewModel.authState.collectAsState()
 
 
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            //  .verticalScroll(rememberScrollState())
+             .verticalScroll(rememberScrollState())
             .background(Color(0xFFF7F7F7))
     ) {
         // Profile Header with background
@@ -179,8 +182,6 @@ fun ProfileScreen(navController: NavController) {
                 ContactUs()
             }
         }
-        val authViewModel = viewModel<AuthViewModel>()
-        val isSignedIn by authViewModel.authState.collectAsState()
         SignOutButton(showSignOutDialog = showSignOutDialog, isSignedIn, navController)
         if (showSignOutDialog.value) {
             SignOutConfirmationDialog(

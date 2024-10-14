@@ -81,6 +81,7 @@ import com.example.shoparoo.data.network.ApiState
 import com.example.shoparoo.data.repository.RepositoryImpl
 import com.example.shoparoo.model.DraftOrderDetails
 import com.example.shoparoo.model.ImagesItem
+import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.model.SingleProduct
 import com.example.shoparoo.model.VariantsItem
 import com.example.shoparoo.ui.auth.viewModel.AuthState
@@ -116,6 +117,30 @@ fun ProductDetails(id: String, navController: NavHostController) {
     }
 
     var itemsIncart by remember { mutableIntStateOf(0) }
+
+    when (order.value) {
+        is ApiState.Loading -> {
+            Log.i("ProductDetails", "Loading")
+        }
+
+        is ApiState.Failure -> {
+            Log.i("ProductDetails", "Error ${(order.value as ApiState.Failure).message}")
+        }
+
+        is ApiState.Success -> {
+            val gg = order.value as ApiState.Success
+            val data = gg.data as DraftOrderDetails
+            // itemsIncart = data.line_items[0].quantity
+
+            for (item in data.line_items) {
+                if (item.product_id.toString() == id ) {
+                    itemsIncart = item.quantity
+
+                }
+            }
+        }
+    }
+
     when (ui.value) {
         is ApiState.Loading -> {
             Log.i("ProductDetails", "Loading")
@@ -140,22 +165,6 @@ fun ProductDetails(id: String, navController: NavHostController) {
         }
     }
 
-    when (order.value) {
-        is ApiState.Loading -> {
-            Log.i("ProductDetails", "Loading")
-        }
-
-        is ApiState.Failure -> {
-            Log.i("ProductDetails", "Error ${(order.value as ApiState.Failure).message}")
-        }
-
-        is ApiState.Success -> {
-            val gg = order.value as ApiState.Success
-            val data = gg.data as DraftOrderDetails
-            itemsIncart = data.line_items[0].quantity
-            Log.i("ProductDetailsUserOrderrrrrrrrr", "Success ${data.line_items.size}")
-        }
-    }
 
 }
 
@@ -185,7 +194,7 @@ private fun ProductInfo(
     Column(
         Modifier
             .fillMaxSize()
-            .padding(top= 5.dp)
+            .padding(top = 5.dp)
             .verticalScroll(state = rememberScrollState(), enabled = true),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -227,24 +236,28 @@ private fun ProductInfo(
             onClickCart = {
                 Log.i(
                     "ProductDetail",
-                    "Cartclickeddd   ${selected.value!!.inventoryQuantity}    $itemsIncart"
+                    "Cartclickeddd    items in cart = $itemsIncart || inventory=  ${selected.value!!.inventoryQuantity}   "
                 )
                 if (selected.value!!.inventoryQuantity!! < 1) {
                     Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show()
-                } /*else if (itemsIncart >= selected.value!!.inventoryQuantity!!) {
+                } else if (itemsIncart >= 5) {
                     Toast.makeText(
                         context,
-                        "you've already added $itemsIncart ",
+                        "you've already reached the maximum amount for this item",
                         Toast.LENGTH_SHORT
                     ).show()
-                } */ else {
+                } else if (itemsIncart >= selected.value!!.inventoryQuantity!!) {
+                    Toast.makeText(
+                        context,
+                        "no more stock available",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
                     if (isLoggedIn.value != AuthState.Authenticated && isLoggedIn.value != AuthState.UnVerified) { //this is bullshit but i'll change it later
-//                        Toast.makeText(context, "Please login to add to cart", Toast.LENGTH_SHORT).show()
                         showDialog = true
-//
                     } else {
                         viewModel.getDraftOrder(singleProductDetail, selected.value!!, true)
-                        Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Adding to cart", Toast.LENGTH_SHORT).show()
                     }
                 }
             },
@@ -649,51 +662,44 @@ fun BottomSection(
     isFav: Boolean
 ) {
     var isAnimatingFav by remember { mutableStateOf(false) }
-
-    // Trigger the animation when the button is clicked
+    var isAnimatingCart by remember { mutableStateOf(false) }
     val iconScale by animateFloatAsState(targetValue = if (isAnimatingFav) 1.5f else 1f)
-    val iconTint = if (isFav) Color.White else Color.White // Fill color when favorited
+    val iconOffset by animateFloatAsState(targetValue = if (isAnimatingCart) 70f else 0f)
+    val textVisibility by animateFloatAsState(targetValue = if (isAnimatingCart) 0f else 1f)
+    val buttonHeight by animateDpAsState(targetValue = if (isAnimatingCart) 40.dp else 50.dp)
 
-    // Reset the animation state after a delay when animating
     if (isAnimatingFav) {
         LaunchedEffect(Unit) {
-            delay(300) // Duration of the animation
+            delay(300) // Duration of the favorite animation
             isAnimatingFav = false
         }
     }
-    var isAnimating by remember { mutableStateOf(false) }
 
-    // Trigger the animation when the button is clicked
-    val iconOffset by animateFloatAsState(targetValue = if (isAnimating) 70f else 0f)
-    val textVisibility by animateFloatAsState(targetValue = if (isAnimating) 0f else 1f)
-    val buttonHeight by animateDpAsState(targetValue = if (isAnimating) 40.dp else 50.dp) // Change the height here
-
-    // Reset the animation state after a delay when animating
-    if (isAnimating) {
+    // Reset cart animation state
+    if (isAnimatingCart) {
         LaunchedEffect(Unit) {
-            delay(1000) // Duration of the animation
-            isAnimating = false
+            delay(1000) // Duration of the cart animation
+            isAnimatingCart = false
         }
     }
-
 
     Row(
         Modifier
             .fillMaxWidth()
-            .padding(bottom = 15.dp, top = 15.dp, start = 25.dp, end = 25.dp),
+            .padding(vertical = 15.dp, horizontal = 25.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.Bottom
     ) {
         // Add to Cart button
         Button(
             onClick = {
-                isAnimating = true
+                isAnimatingCart = true
                 onClickCart()
             },
             colors = ButtonDefaults.buttonColors(primary),
             modifier = Modifier
                 .weight(3f)
-                .height(buttonHeight) // Use the animated height here
+                .height(buttonHeight)
         ) {
             Icon(
                 imageVector = Icons.Filled.ShoppingCart,
@@ -727,27 +733,10 @@ fun BottomSection(
             Icon(
                 imageVector = if (isFav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                 contentDescription = "Add to Favorites",
-                tint = iconTint,
-                modifier = Modifier.scale(iconScale) // Apply scale animation
+                tint = Color.White, // Fill color when favorited
+                modifier = Modifier.scale(iconScale)
             )
         }
-    }
-}
-
-
-@Composable
-private fun colorSetter(variant: VariantsItem?): Color {
-    when (variant!!.option2) {
-        "black" -> return Color.Black
-        "blue" -> return Color.Blue
-        "red" -> return Color.Red
-        "white" -> return Color.White
-        "gray" -> return Color.Gray
-        "yellow" -> return Color.Yellow
-        "beige" -> return Color(0xFFF5F5DC)
-        "light_brown" -> return Color(0xFFC4A484)
-        "burgandy" -> return Color(0xFF800020)
-        else -> return Color.Transparent
     }
 }
 
@@ -778,4 +767,21 @@ fun LoginDialog(
             }
         }
     )
+}
+
+
+@Composable
+private fun colorSetter(variant: VariantsItem?): Color {
+    when (variant!!.option2) {
+        "black" -> return Color.Black
+        "blue" -> return Color.Blue
+        "red" -> return Color.Red
+        "white" -> return Color.White
+        "gray" -> return Color.Gray
+        "yellow" -> return Color.Yellow
+        "beige" -> return Color(0xFFF5F5DC)
+        "light_brown" -> return Color(0xFFC4A484)
+        "burgandy" -> return Color(0xFF800020)
+        else -> return Color.Transparent
+    }
 }

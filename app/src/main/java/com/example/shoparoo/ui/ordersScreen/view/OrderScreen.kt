@@ -11,6 +11,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.shoparoo.R
 import com.example.shoparoo.data.network.ApiState
@@ -65,6 +67,7 @@ import java.util.Locale
 @Composable
 fun OrderScreen(
     orderViewModel: OrdersViewModel,
+    navController: NavController,
 ) {
     val isNetworkAvailable = networkListener()
 
@@ -130,7 +133,7 @@ fun OrderScreen(
                             )
                         }
                     } else {
-                        OrderList(orders)
+                        OrderList(orders, navController)
                     }
                 }
 
@@ -152,7 +155,7 @@ fun OrderScreen(
 }
 
 @Composable
-fun OrderList(orders: List<Order>) {
+fun OrderList(orders: List<Order>, navController: NavController) {
     var isVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         isVisible = true
@@ -165,14 +168,14 @@ fun OrderList(orders: List<Order>) {
                 enter = scaleIn(animationSpec = tween(durationMillis = 600)),
                 exit = scaleOut(animationSpec = tween(durationMillis = 600))
             ) {
-                OrderItem(order = order)
+                OrderItem(order = order,navController)
             }
         }
     }
 }
 
 @Composable
-fun OrderItem(order: Order) {
+fun OrderItem(order: Order, navController: NavController) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Card(
@@ -280,7 +283,9 @@ fun OrderItem(order: Order) {
                                             Image(
                                                 painter = rememberAsyncImagePainter(model = property.value),
                                                 contentDescription = null,
-                                                modifier = Modifier
+                                                modifier = Modifier.clickable {
+                                                    navController.navigate("productDetails/${lineItem.product_id}")
+                                                }
                                                     .size(80.dp)
                                                     .padding(end = 8.dp)
                                             )
