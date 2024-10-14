@@ -55,6 +55,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.shoparoo.R
@@ -69,6 +71,7 @@ import com.example.shoparoo.ui.theme.grey
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
 import networkListener
+import kotlin.concurrent.thread
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -364,7 +367,7 @@ fun CheckoutButton(
 ) {
     val context = LocalContext.current
     val scale = remember { Animatable(1f) }
-    authViewModel.authState.collectAsState()
+    val authState by authViewModel.authState.collectAsState()
     val isAuthenticated by remember { mutableStateOf(authViewModel.authState.value) }
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
@@ -379,7 +382,24 @@ fun CheckoutButton(
             }
         )
     }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
 
+    LaunchedEffect(lifecycleState) {
+        // Do something with your state
+        // You may want to use DisposableEffect or other alternatives
+        // instead of LaunchedEffect
+        when (lifecycleState) {
+            Lifecycle.State.DESTROYED -> {}
+            Lifecycle.State.INITIALIZED -> {}
+            Lifecycle.State.CREATED -> {}
+            Lifecycle.State.STARTED -> {}
+            Lifecycle.State.RESUMED -> {
+                Log.i("CheckoutButton", "Lifecycle State: $lifecycleState")
+                authViewModel.refreshVerification()
+            }
+        }
+    }
     LaunchedEffect(totalItems) {
         if (totalItems > 0) {
             scale.animateTo(
@@ -399,9 +419,10 @@ fun CheckoutButton(
 
     Button(
         onClick = {
-            authViewModel.refreshVerification()
+            //authViewModel.refreshVerification()
             Log.e("xxx", "isauthuntivated ${isAuthenticated}")
-            if (isAuthenticated == AuthState.Authenticated) {
+
+            if (authState == AuthState.Authenticated) {
                 navControllerBottom.navigate("checkout")
             } else {
                 showDialog = true

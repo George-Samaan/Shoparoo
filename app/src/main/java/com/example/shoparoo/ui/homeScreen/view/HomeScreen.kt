@@ -158,7 +158,6 @@ fun HomeScreenDesign(
         val isRefreshing = remember { mutableStateOf(false) }
         isRefreshing.value =
             smartCollectionsState is ApiState.Loading || forYouProductsState is ApiState.Loading
-
         SwipeRefresh(
             state = rememberSwipeRefreshState(isRefreshing.value),
             onRefresh = {
