@@ -2,6 +2,7 @@ package com.example.shoparoo.ui.shoppingCart.view
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -52,14 +54,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.shoparoo.R
 import com.example.shoparoo.model.LineItem
 import com.example.shoparoo.ui.auth.view.ReusableLottie
+import com.example.shoparoo.ui.auth.viewModel.AuthState
+import com.example.shoparoo.ui.auth.viewModel.AuthViewModel
 import com.example.shoparoo.ui.homeScreen.view.capitalizeWords
 import com.example.shoparoo.ui.productScreen.view.LoadingIndicator
 import com.example.shoparoo.ui.shoppingCart.viewModel.ShoppingCartViewModel
+import com.example.shoparoo.ui.theme.grey
 import com.example.shoparoo.ui.theme.primary
 import kotlinx.coroutines.delay
 import networkListener
@@ -70,7 +76,8 @@ import networkListener
 fun ShoppingCartScreen(
     navControllerBottom: NavController,
     viewModel: ShoppingCartViewModel,
-    navController: NavController
+    navController: NavController,
+    authViewModel: AuthViewModel
 ) {
     val cartItems by viewModel.cartItems.collectAsState()
     val isLoading = remember { mutableStateOf(true) }
@@ -158,7 +165,13 @@ fun ShoppingCartScreen(
                     }
                     item {
                         val totalItems = cartItems.sumOf { it.quantity }
-                        CheckoutButton(navControllerBottom, totalItems, viewModel)
+                        CheckoutButton(
+                            navControllerBottom,
+                            totalItems,
+                            viewModel,
+                            authViewModel,
+                            navController
+                        )
                     }
                 }
             }
@@ -343,12 +356,29 @@ fun QuantitySelector(quantity: Int, onIncrement: () -> Unit, onDecrement: () -> 
 
 @Composable
 fun CheckoutButton(
-    navController: NavController,
+    navControllerBottom: NavController,
     totalItems: Int,
-    viewModel: ShoppingCartViewModel
+    viewModel: ShoppingCartViewModel,
+    authViewModel: AuthViewModel,
+    navController: NavController
 ) {
     val context = LocalContext.current
     val scale = remember { Animatable(1f) }
+    authViewModel.authState.collectAsState()
+    val isAuthenticated by remember { mutableStateOf(authViewModel.authState.value) }
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) {
+        UnAuthorisedUser(
+            onDismiss = { showDialog = false },
+            onLogin = {
+                val intent = Intent(Intent.ACTION_MAIN).apply {
+                    addCategory(Intent.CATEGORY_APP_EMAIL)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(context, intent, null)
+            }
+        )
+    }
 
     LaunchedEffect(totalItems) {
         if (totalItems > 0) {
@@ -369,7 +399,13 @@ fun CheckoutButton(
 
     Button(
         onClick = {
-            navController.navigate("checkout")
+            authViewModel.refreshVerification()
+            Log.e("xxx", "isauthuntivated ${isAuthenticated}")
+            if (isAuthenticated == AuthState.Authenticated) {
+                navControllerBottom.navigate("checkout")
+            } else {
+                showDialog = true
+            }
         },
         modifier = Modifier
             .fillMaxWidth()
@@ -381,4 +417,34 @@ fun CheckoutButton(
     ) {
         Text(text = "Proceed to Checkout ($totalItems items)", color = Color.White)
     }
+}
+
+
+@Composable
+fun UnAuthorisedUser(
+    onDismiss: () -> Unit,
+    onLogin: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Authentication Required") },
+        text = { Text("You must verify your mail to access this feature.") },
+        confirmButton = {
+            Button(onClick = {
+                onLogin()
+                onDismiss()
+            }, colors = ButtonDefaults.buttonColors(primary)) {
+                Text("Verify")
+            }
+        },
+        containerColor = Color.White,
+        dismissButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(grey)
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
 }

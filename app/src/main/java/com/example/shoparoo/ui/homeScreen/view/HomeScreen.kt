@@ -728,7 +728,12 @@ fun MainScreen(
 
             }
             composable(BottomNav.Cart.route) {
-                ShoppingCartScreen(navControllerBottom, shoppingCartViewModel, navController)
+                ShoppingCartScreen(
+                    navControllerBottom,
+                    shoppingCartViewModel,
+                    navController,
+                    authViewModel
+                )
             }
             composable(BottomNav.orders.route) {
                 Text(text = "Orders Screen")
